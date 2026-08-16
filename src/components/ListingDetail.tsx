@@ -10,6 +10,7 @@ import {
 } from '../lib/format';
 import { SALE_TYPE_LABELS } from './markers';
 import { IconPhone, IconPin } from './Icons';
+import { usePlaceName } from '../lib/usePlaceName';
 import type { MeasuredListing } from '../lib/types';
 
 interface ListingDetailProps {
@@ -23,8 +24,14 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   const bothPrices = listing.retailPrice !== null && listing.wholesalePrice !== null;
   const soon = isExpiringSoon(listing.expiresAt, now);
 
-  const directions =
-    `https://www.openstreetmap.org/directions?to=${listing.lat.toFixed(5)}%2C${listing.lng.toFixed(5)}`;
+  const place = usePlaceName({ lat: listing.lat, lng: listing.lng });
+
+  // Yandex and Google are what people actually navigate with in Armenia, so
+  // both are offered directly; each deep-links into the installed app on a
+  // phone and falls back to the web map on a desktop.
+  const point = `${listing.lat.toFixed(5)},${listing.lng.toFixed(5)}`;
+  const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
+  const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
   return (
     <Modal title={listing.productName} subtitle={SALE_TYPE_LABELS[listing.saleType]} onClose={onClose}>
@@ -92,12 +99,21 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
           </span>
         </div>
 
-        <div className="detail-row">
-          <span className="k">Կոորդինատներ</span>
-          <span className="v" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {listing.lat.toFixed(5)}, {listing.lng.toFixed(5)}
-          </span>
-        </div>
+        {/* Shown only once an address is known — a failed lookup leaves no row
+            rather than falling back to coordinates nobody can use. */}
+        {place.status === 'loading' ? (
+          <div className="detail-row">
+            <span className="k">Հասցե</span>
+            <span className="v" style={{ color: 'var(--ink-faint)', fontWeight: 500 }}>
+              Որոշվում է…
+            </span>
+          </div>
+        ) : place.label ? (
+          <div className="detail-row">
+            <span className="k">Հասցե</span>
+            <span className="v">{place.label}</span>
+          </div>
+        ) : null}
       </div>
 
       {listing.note ? <p className="detail-note">{listing.note}</p> : null}
@@ -107,15 +123,30 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
           <IconPhone />
           Զանգահարել՝ {formatLocalPhone(listing.phone)}
         </a>
-        <a
-          className="btn btn-ghost btn-block"
-          href={directions}
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          <IconPin />
-          Ինչպես հասնել (OpenStreetMap)
-        </a>
+
+        <div className="nav-block">
+          <span className="nav-label">
+            <IconPin /> Ինչպես հասնել
+          </span>
+          <div className="nav-links">
+            <a
+              className="btn btn-ghost"
+              href={yandexUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Yandex Maps
+            </a>
+            <a
+              className="btn btn-ghost"
+              href={googleUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Google Maps
+            </a>
+          </div>
+        </div>
       </div>
     </Modal>
   );

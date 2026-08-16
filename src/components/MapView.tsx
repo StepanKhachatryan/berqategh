@@ -6,23 +6,27 @@ import type { LatLng, MeasuredListing, SaleType } from '../lib/types';
 import { IconCrosshair, IconLayers, IconClose, IconInfo } from './Icons';
 
 /**
- * OpenStreetMap is the only data source. Two renderings of it are offered: the
- * pale CARTO "Voyager" style, which keeps the map quiet enough that the produce
- * pins carry the colour, and the standard osm.org raster for people who want
- * the familiar look.
+ * Two genuinely different views, not two renderings of the same one: the
+ * OpenStreetMap base for streets and place names, and satellite imagery for
+ * recognising the actual field or orchard a pin sits on — which is often how a
+ * buyer confirms they are looking at the right place in the countryside.
+ *
+ * The OSM layer is CARTO's "Voyager" rendering of OpenStreetMap data, chosen
+ * because it stays quiet enough that the produce colours on the pins carry.
  */
 const BASEMAPS = {
-  voyager: {
-    label: 'Պարզ',
+  osm: {
+    label: 'Քարտեզ (OSM)',
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · &copy; <a href="https://carto.com/attributions">CARTO</a>',
     maxZoom: 20,
   },
-  osm: {
-    label: 'OSM ստանդարտ',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  satellite: {
+    label: 'Արբանյակ',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution:
+      'Imagery &copy; <a href="https://www.esri.com">Esri</a>, Maxar, Earthstar Geographics',
     maxZoom: 19,
   },
 } as const;
@@ -61,7 +65,7 @@ export default function MapView({
   const selectRef = useRef(onSelect);
   const seenRef = useRef(new Set<string>());
 
-  const [basemap, setBasemap] = useState<BasemapKey>('voyager');
+  const [basemap, setBasemap] = useState<BasemapKey>('osm');
   // On a phone the legend would cover a third of the map, so it starts folded
   // into its button there and open on the roomier desktop layout.
   const [showLegend, setShowLegend] = useState(() => window.innerWidth >= 900);
@@ -246,10 +250,10 @@ export default function MapView({
       <div className="map-floats">
         <button
           type="button"
-          className="map-float-btn"
-          onClick={() => setBasemap((current) => (current === 'voyager' ? 'osm' : 'voyager'))}
-          title={`Քարտեզի ոճ՝ ${BASEMAPS[basemap].label}`}
-          aria-label="Փոխել քարտեզի ոճը"
+          className={`map-float-btn${basemap === 'satellite' ? ' is-on' : ''}`}
+          onClick={() => setBasemap((current) => (current === 'osm' ? 'satellite' : 'osm'))}
+          title={`Անցնել՝ ${BASEMAPS[basemap === 'osm' ? 'satellite' : 'osm'].label}`}
+          aria-label={`Անցնել՝ ${BASEMAPS[basemap === 'osm' ? 'satellite' : 'osm'].label}`}
         >
           <IconLayers />
         </button>

@@ -121,15 +121,11 @@ export default function LocationPicker({
       </div>
 
       <div className="locate-bar">
+        {/* The address, never the coordinates: a seller cannot tell whether
+            "40.15530, 44.03670" is their field, but they know their village. */}
         <div className={`locate-status${statusIsError ? ' is-error' : ''}`}>
           <strong>{place ?? (value ? 'Նշված կետ' : 'Կետը նշված չէ')}</strong>
-          {value ? (
-            <>
-              {value.lat.toFixed(5)}, {value.lng.toFixed(5)} — {statusMessage}
-            </>
-          ) : (
-            statusMessage
-          )}
+          {statusMessage}
         </div>
         <button
           type="button"
