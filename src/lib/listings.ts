@@ -1,17 +1,17 @@
 import { ownerToken, supabase } from './supabase';
-import type { ListingRow } from './database.types';
+import type { ListingRow, MyListingRow } from './database.types';
 import type { Listing, ListingDraft } from './types';
 import type { ProduceCategory } from '../data/produce';
 
 // One string literal, not a concatenation: supabase-js parses this at the type
 // level to infer the row shape, and only a literal survives that parse.
+// owner_token is deliberately absent — the client has no SELECT privilege on it.
 // prettier-ignore
-const COLUMNS = 'id, owner_token, product_id, product_name, category, sale_type, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at' as const;
+const COLUMNS = 'id, product_id, product_name, category, sale_type, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at' as const;
 
-function toListing(row: ListingRow): Listing {
+function toListing(row: ListingRow | MyListingRow): Listing {
   return {
     id: row.id,
-    ownerToken: row.owner_token,
     productId: row.product_id,
     productName: row.product_name,
     category: row.category as ProduceCategory,
@@ -48,17 +48,18 @@ export async function fetchActiveListings(): Promise<Listing[]> {
   return data.map(toListing);
 }
 
-/** This device's listings, live and archived, newest first. */
+/**
+ * This device's listings, live and archived, newest first.
+ *
+ * Goes through an RPC rather than a filtered table read: matching on
+ * owner_token from the client would require read access to that column, and
+ * anything the client can read off one row it can read off everybody's.
+ */
 export async function fetchMyListings(): Promise<Listing[]> {
-  const { data, error } = await supabase()
-    .from('listings')
-    .select(COLUMNS)
-    .eq('owner_token', ownerToken())
-    .order('created_at', { ascending: false })
-    .limit(200);
+  const { data, error } = await supabase().rpc('my_listings');
 
   if (error) throw new Error(error.message);
-  return data.map(toListing);
+  return (data ?? []).map(toListing);
 }
 
 export async function createListing(draft: ListingDraft): Promise<Listing> {
@@ -86,19 +87,26 @@ export async function createListing(draft: ListingDraft): Promise<Listing> {
   return toListing(data);
 }
 
-/** Pulls a listing off the map early, before its 24h are up. */
+/**
+ * Pulls a listing off the map early, before its 24h are up.
+ *
+ * Archiving is an RPC because it makes the row fail the public read policy, and
+ * Postgres enforces that policy against the updated row — a direct UPDATE would
+ * be rejected for the listing's own seller.
+ */
 export async function archiveListing(id: string): Promise<void> {
-  const { error } = await supabase()
-    .from('listings')
-    .update({ archived_at: new Date().toISOString() })
-    .eq('id', id);
+  const { data, error } = await supabase().rpc('archive_listing', { p_id: id });
 
   if (error) throw new Error(error.message);
+  if (data !== true) throw new Error('Հայտարարությունը չգտնվեց կամ արդեն արխիվացված է');
 }
 
+/** Deletion is an RPC for the same reason archiving is. */
 export async function deleteListing(id: string): Promise<void> {
-  const { error } = await supabase().from('listings').delete().eq('id', id);
+  const { data, error } = await supabase().rpc('delete_listing', { p_id: id });
+
   if (error) throw new Error(error.message);
+  if (data !== true) throw new Error('Հայտարարությունը չգտնվեց');
 }
 
 /** Puts an archived listing back on the map with a fresh 24h window. */

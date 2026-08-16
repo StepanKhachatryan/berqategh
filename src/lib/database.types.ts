@@ -1,12 +1,18 @@
 /**
- * Shape of the `listings` table, mirroring supabase/migrations.
+ * Shape of the `listings` table and the RPCs the browser is allowed to call,
+ * mirroring supabase/migrations.
  *
  * Regenerate after a schema change with:
  *   npx supabase gen types typescript --project-id <ref> --schema public
  */
+
+/**
+ * The columns a client may read. `owner_token` is intentionally missing: the
+ * anon role has no SELECT privilege on it, because knowing another device's
+ * token would be enough to archive or delete that seller's listings.
+ */
 export type ListingRow = {
   id: string;
-  owner_token: string;
   product_id: string;
   product_name: string;
   category: string;
@@ -24,10 +30,14 @@ export type ListingRow = {
   archived_at: string | null;
 };
 
-export type ListingInsert = Omit<ListingRow, 'id' | 'created_at' | 'expires_at' | 'archived_at'> &
-  Partial<Pick<ListingRow, 'id' | 'created_at' | 'expires_at' | 'archived_at'>>;
+/** What `my_listings()` returns — the same columns, own rows only. */
+export type MyListingRow = ListingRow;
 
-export type ListingUpdate = Partial<ListingRow>;
+/** Writes carry the token even though reads never return it. */
+export type ListingInsert = ListingRow extends infer R
+  ? Omit<R & { owner_token: string }, 'id' | 'created_at' | 'expires_at' | 'archived_at'> &
+      Partial<Pick<ListingRow, 'id' | 'created_at' | 'expires_at' | 'archived_at'>>
+  : never;
 
 export type Database = {
   // supabase-js reads this to pick the right PostgREST behaviour.
@@ -39,7 +49,7 @@ export type Database = {
       listings: {
         Row: ListingRow;
         Insert: ListingInsert;
-        Update: ListingUpdate;
+        Update: never;
         Relationships: [];
       };
     };
@@ -47,6 +57,9 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      my_listings: { Args: Record<string, never>; Returns: MyListingRow[] };
+      archive_listing: { Args: { p_id: string }; Returns: boolean };
+      delete_listing: { Args: { p_id: string }; Returns: boolean };
       archive_expired_listings: { Args: never; Returns: number };
     };
     Enums: {

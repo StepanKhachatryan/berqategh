@@ -11,7 +11,6 @@ export interface LatLng {
 
 export interface Listing {
   id: string;
-  ownerToken: string;
   productId: string;
   productName: string;
   category: ProduceCategory;
