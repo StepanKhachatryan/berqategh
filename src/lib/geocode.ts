@@ -1,3 +1,4 @@
+import { isInsideArmenia } from './geo';
 import type { LatLng } from './types';
 
 /**
@@ -86,4 +87,60 @@ export async function describePlace({ lat, lng }: LatLng): Promise<string | null
 
   inFlight.set(key, request);
   return request;
+}
+
+export interface PlaceResult {
+  label: string;
+  detail: string;
+  point: LatLng;
+}
+
+interface NominatimSearchResult {
+  lat: string;
+  lon: string;
+  name?: string;
+  display_name?: string;
+  addresstype?: string;
+}
+
+/**
+ * Finds a place in Armenia by name — the way to set a location when the
+ * Geolocation API is unavailable, which is the normal state of affairs inside
+ * Messenger and other in-app browsers. A farmer always knows the name of their
+ * village even when the browser cannot be told where the phone is.
+ */
+export async function searchPlaces(query: string, signal?: AbortSignal): Promise<PlaceResult[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 2) return [];
+
+  const url =
+    `${NOMINATIM}/search?format=jsonv2&countrycodes=am&accept-language=hy` +
+    `&limit=8&q=${encodeURIComponent(trimmed)}`;
+
+  try {
+    const response = await fetch(url, { signal });
+    if (!response.ok) throw new Error(`Nominatim responded ${response.status}`);
+
+    const body = (await response.json()) as NominatimSearchResult[];
+
+    return body
+      .map((entry) => {
+        const point = { lat: Number(entry.lat), lng: Number(entry.lon) };
+        const full = (entry.display_name ?? '')
+          .split(',')
+          .map((part) => part.trim())
+          // The country and postcode add nothing when every result is Armenian.
+          .filter((part) => part && part !== 'Հայաստան' && part !== 'Armenia' && !/^\d{4}$/.test(part));
+
+        return {
+          label: entry.name || full[0] || trimmed,
+          detail: full.slice(1, 4).join(', '),
+          point,
+        };
+      })
+      .filter((result) => Number.isFinite(result.point.lat) && isInsideArmenia(result.point));
+  } catch {
+    // Includes the AbortError fired when the user keeps typing.
+    return [];
+  }
 }

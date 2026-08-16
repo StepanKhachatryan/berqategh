@@ -10,8 +10,10 @@ import {
 } from '../data/produce';
 import { formatPrice } from '../lib/format';
 import { SALE_TYPE_SHORT } from './markers';
-import { DEFAULT_FILTERS, type Filters, type SaleType } from '../lib/types';
+import { DEFAULT_FILTERS, type Filters, type LatLng, type SaleType } from '../lib/types';
 import { IconChevronDown, IconRoute, IconWarn } from './Icons';
+import PlaceSearch from './PlaceSearch';
+import InAppBrowserNotice from './InAppBrowserNotice';
 
 /** Above this the price filter stops constraining anything. */
 export const PRICE_CEILING = 10000;
@@ -24,6 +26,7 @@ interface FilterSheetProps {
   matchCount: number;
   hasLocation: boolean;
   onRequestLocation: () => void;
+  onPickLocation: (point: LatLng) => void;
   locating: boolean;
 }
 
@@ -34,6 +37,7 @@ export default function FilterSheet({
   matchCount,
   hasLocation,
   onRequestLocation,
+  onPickLocation,
   locating,
 }: FilterSheetProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -121,22 +125,33 @@ export default function FilterSheet({
               </p>
             </>
           ) : (
-            <div className="detail-note" style={{ display: 'flex', gap: 10, marginBottom: 0 }}>
-              <IconWarn />
-              <div style={{ flex: 1 }}>
-                Հեռավորությամբ ֆիլտրելու համար պետք է իմանանք ձեր տեղը։
-                <button
-                  type="button"
-                  className="btn btn-green btn-sm"
-                  style={{ marginTop: 10 }}
-                  onClick={onRequestLocation}
-                  disabled={locating}
-                >
-                  {locating ? <span className="spinner" /> : null}
-                  Որոշել իմ տեղը
-                </button>
+            <>
+              <InAppBrowserNotice />
+
+              <div className="detail-note" style={{ display: 'flex', gap: 10 }}>
+                <IconWarn />
+                <div style={{ flex: 1 }}>
+                  Հեռավորությամբ ֆիլտրելու համար պետք է իմանանք, թե որտեղից եք չափում։
+                  <button
+                    type="button"
+                    className="btn btn-green btn-sm"
+                    style={{ marginTop: 10 }}
+                    onClick={onRequestLocation}
+                    disabled={locating}
+                  >
+                    {locating ? <span className="spinner" /> : null}
+                    Որոշել ավտոմատ
+                  </button>
+                </div>
               </div>
-            </div>
+
+              {/* Works without any permission, so it is the reliable path when
+                  the automatic one is blocked. */}
+              <p className="field-hint" style={{ margin: '0 0 8px' }}>
+                Կամ գրե՛ք, թե որտեղից եք փնտրում.
+              </p>
+              <PlaceSearch onPick={(point) => onPickLocation(point)} />
+            </>
           )}
         </section>
 

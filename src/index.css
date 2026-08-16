@@ -1251,6 +1251,118 @@ textarea.input {
   font-size: 14px;
 }
 
+/* ═══ place search + in-app browser notice ═══════════════════════════════ */
+
+.place-search {
+  margin-bottom: 10px;
+}
+
+.place-results {
+  list-style: none;
+  padding: 6px;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 2px;
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  max-height: 232px;
+  overflow-y: auto;
+}
+
+.place-results button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border-radius: var(--r-sm);
+  text-align: left;
+  color: var(--ink-mute);
+  transition: background 0.14s var(--ease);
+}
+
+.place-results button:hover {
+  background: var(--green-soft);
+  color: var(--green-deep);
+}
+
+.place-results button > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.place-results strong {
+  display: block;
+  font-size: 14.5px;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-results small {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-mute);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-empty {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--surface-sunk);
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-mute);
+}
+
+.inapp-notice {
+  padding: 13px 14px;
+  margin-bottom: 12px;
+  background: var(--amber-soft);
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--r-md);
+  color: #78350f;
+}
+
+.inapp-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 7px;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+
+.inapp-head svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.inapp-notice p {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.inapp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.inapp-hint {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(120, 53, 15, 0.28);
+  font-size: 12px;
+}
+
 /* ═══ location picker ════════════════════════════════════════════════════ */
 
 .locate-box {

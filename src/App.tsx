@@ -50,7 +50,7 @@ export default function App() {
   const [now, setNow] = useState(() => Date.now());
 
   const { toasts, push } = useToasts();
-  const { status: locateStatus, position, locate } = useGeolocation();
+  const { status: locateStatus, position, locate, setManualPosition } = useGeolocation();
   const locating = locateStatus === 'locating';
 
   // ─── data ────────────────────────────────────────────────────────────────
@@ -165,6 +165,14 @@ export default function App() {
     }
     return point;
   }, [locate, locateStatus, push]);
+
+  const handlePickLocation = useCallback(
+    (point: LatLng) => {
+      setManualPosition(point);
+      setFocus({ point, zoom: 12, nonce: Date.now() });
+    },
+    [setManualPosition],
+  );
 
   const handleCreate = async (draft: ListingDraft) => {
     const created = await createListing(draft);
@@ -331,6 +339,7 @@ export default function App() {
           matchCount={visible.length}
           hasLocation={position !== null}
           onRequestLocation={() => void handleLocate()}
+          onPickLocation={handlePickLocation}
           locating={locating}
         />
       ) : null}

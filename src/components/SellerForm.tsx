@@ -65,6 +65,9 @@ export default function SellerForm({
   const [sellerName, setSellerName] = useState(remembered.name);
   const [note, setNote] = useState('');
   const [location, setLocation] = useState<LatLng | null>(initialLocation);
+  // Whether the pin came from a deliberate choice rather than from the device.
+  // Once it did, the geolocation status stops being what the seller needs told.
+  const [pickedByHand, setPickedByHand] = useState(false);
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -117,7 +120,10 @@ export default function SellerForm({
     setLocating(true);
     try {
       const point = await onLocate();
-      if (point) setLocation(point);
+      if (point) {
+        setLocation(point);
+        setPickedByHand(false);
+      }
     } finally {
       setLocating(false);
     }
@@ -155,8 +161,16 @@ export default function SellerForm({
     }
   }
 
-  const locateMessage = locating ? LOCATE_MESSAGES.locating : LOCATE_MESSAGES[locateStatus];
-  const locateIsError = ['denied', 'unavailable', 'outside'].includes(locateStatus);
+  const locateMessage = pickedByHand
+    ? LOCATE_MESSAGES.manual
+    : locating
+      ? LOCATE_MESSAGES.locating
+      : LOCATE_MESSAGES[locateStatus];
+
+  // A hand-picked point is correct by definition — a failed GPS attempt behind
+  // it is no longer a problem worth colouring red.
+  const locateIsError =
+    !pickedByHand && ['denied', 'unavailable', 'outside'].includes(locateStatus);
 
   return (
     <>
@@ -331,7 +345,10 @@ export default function SellerForm({
           </label>
           <LocationPicker
             value={location}
-            onChange={setLocation}
+            onChange={(point) => {
+              setLocation(point);
+              setPickedByHand(true);
+            }}
             onLocate={handleLocate}
             locating={locating}
             statusMessage={locateMessage}
@@ -340,8 +357,9 @@ export default function SellerForm({
             productColor={product?.color ?? '#9aa79c'}
           />
           <p className="field-hint">
-            Համակարգն ինքն է գտնում ձեր տեղը։ Եթե այս պահին վաճառքի կետում չեք, շարժե՛ք
-            քարտեզը՝ ճիշտ տեղը նշելու համար։
+            Համակարգը փորձում է ինքը գտնել ձեր տեղը։ Եթե չստացվեց կամ այս պահին վաճառքի
+            կետում չեք՝ գրե՛ք գյուղի անունը վերևի դաշտում, ապա շարժե՛ք քարտեզը՝ ճիշտ
+            կետը նշելու համար։
           </p>
           {showErrors && errors.location ? (
             <p className="field-error">{errors.location}</p>

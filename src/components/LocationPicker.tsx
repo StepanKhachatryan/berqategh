@@ -4,10 +4,13 @@ import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
 import { describePlace } from '../lib/geocode';
 import { pinSvg } from './markers';
 import { IconCrosshair } from './Icons';
+import PlaceSearch from './PlaceSearch';
+import InAppBrowserNotice from './InAppBrowserNotice';
 import type { LatLng, SaleType } from '../lib/types';
 
 interface LocationPickerProps {
   value: LatLng | null;
+  /** Fires only for deliberate user gestures, never for programmatic recentring. */
   onChange: (point: LatLng) => void;
   onLocate: () => void;
   locating: boolean;
@@ -36,6 +39,9 @@ export default function LocationPicker({
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const changeRef = useRef(onChange);
+  // Recentring the map on a fresh GPS fix also fires moveend. Without this the
+  // caller could not tell an automatic move from the user dragging the map.
+  const programmaticRef = useRef(false);
   const [dragging, setDragging] = useState(false);
   const [place, setPlace] = useState<string | null>(null);
 
@@ -64,6 +70,10 @@ export default function LocationPicker({
     map.on('movestart', () => setDragging(true));
     map.on('moveend', () => {
       setDragging(false);
+      if (programmaticRef.current) {
+        programmaticRef.current = false;
+        return;
+      }
       const center = map.getCenter();
       changeRef.current({ lat: center.lat, lng: center.lng });
     });
@@ -91,6 +101,7 @@ export default function LocationPicker({
     if (Math.abs(center.lat - value.lat) < 1e-6 && Math.abs(center.lng - value.lng) < 1e-6) {
       return;
     }
+    programmaticRef.current = true;
     map.setView([value.lat, value.lng], Math.max(map.getZoom(), 15), { animate: true });
   }, [value, dragging]);
 
@@ -111,7 +122,20 @@ export default function LocationPicker({
   }, [value, dragging]);
 
   return (
-    <div className="locate-box">
+    <>
+      <InAppBrowserNotice />
+
+      {/* Always available, not just as a fallback: typing a village name is
+          often faster than waiting on a GPS fix, and it is the only route that
+          works at all inside an in-app browser. */}
+      <PlaceSearch
+        onPick={(point) => {
+          setPlace(null);
+          changeRef.current(point);
+        }}
+      />
+
+      <div className="locate-box">
       <div className={`locate-map${dragging ? ' is-dragging' : ''}`}>
         <div ref={hostRef} style={{ height: '100%' }} />
         <div
@@ -137,6 +161,7 @@ export default function LocationPicker({
           Իմ տեղը
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

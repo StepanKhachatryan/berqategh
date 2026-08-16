@@ -1,15 +1,24 @@
 import { useCallback, useState } from 'react';
+import { detectInAppBrowser } from './environment';
 import { isInsideArmenia } from './geo';
 import type { LatLng } from './types';
 
-export type LocateStatus = 'idle' | 'locating' | 'ready' | 'denied' | 'unavailable' | 'outside';
+export type LocateStatus =
+  | 'idle'
+  | 'locating'
+  | 'ready'
+  | 'manual'
+  | 'denied'
+  | 'unavailable'
+  | 'outside';
 
 export const LOCATE_MESSAGES: Record<LocateStatus, string> = {
   idle: 'Տեղադիրքը դեռ որոշված չէ',
   locating: 'Որոշում ենք ձեր տեղադիրքը…',
   ready: 'Տեղադիրքը որոշված է',
-  denied: 'Տեղադիրքի թույլտվությունը մերժված է — նշե՛ք ձեռքով քարտեզի վրա',
-  unavailable: 'Չհաջողվեց որոշել տեղադիրքը — նշե՛ք ձեռքով քարտեզի վրա',
+  manual: 'Տեղադիրքը նշված է ձեռքով',
+  denied: 'Թույլտվությունը մերժված է — գրե՛ք բնակավայրի անունը կամ շարժե՛ք քարտեզը',
+  unavailable: 'Ավտոմատ չստացվեց — գրե՛ք բնակավայրի անունը կամ շարժե՛ք քարտեզը',
   outside: 'Ձեր տեղադիրքը Հայաստանից դուրս է — նշե՛ք կետը ձեռքով',
 };
 
@@ -44,10 +53,27 @@ export function useGeolocation() {
           setStatus(error.code === error.PERMISSION_DENIED ? 'denied' : 'unavailable');
           resolve(null);
         },
-        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
+        {
+          enableHighAccuracy: true,
+          // In-app browsers usually never answer at all, so fail fast and let
+          // the user get on with typing their village instead of watching a
+          // spinner run out the full timeout.
+          timeout: detectInAppBrowser() ? 6000 : 12000,
+          maximumAge: 60000,
+        },
       );
     });
   }, []);
 
-  return { status, position, locate, setPosition };
+  /**
+   * Sets the location without asking the device — used when someone picks their
+   * settlement by name. That is the only route available inside in-app
+   * browsers, where the Geolocation API never answers.
+   */
+  const setManualPosition = useCallback((point: LatLng) => {
+    setPosition(point);
+    setStatus('manual');
+  }, []);
+
+  return { status, position, locate, setPosition, setManualPosition };
 }
