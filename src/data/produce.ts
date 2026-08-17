@@ -123,6 +123,34 @@ export const PRODUCE: Produce[] = [
   { id: 'sunflower-seed', hy: 'Արևածաղկի սերմ', aliases: ['sunflower seeds', 'arevatsaghki serm', 'semechki'], category: 'nut', color: '#6B4423', emoji: '🌻' },
 ];
 
+/**
+ * Crops that are commonly sold dried in Armenia — չիր and its relatives.
+ *
+ * Kept as a set rather than a flag on every entry: it is a property of the
+ * trade, not of the plant, and the list will shift as sellers ask for more.
+ * Dried produce is not a separate catalogue item — a dried apricot is still an
+ * apricot, same colour, same season — so a listing carries a `form` instead.
+ */
+const DRYABLE = new Set([
+  // Fruit — the classic չիր
+  'apple', 'pear', 'quince', 'peach', 'nectarine', 'apricot', 'plum',
+  'cherry-plum', 'sweet-cherry', 'sour-cherry', 'grape', 'grape-white',
+  'melon', 'fig', 'persimmon', 'mulberry', 'cornelian-cherry', 'rosehip',
+  'hawthorn', 'medlar', 'jujube', 'sea-buckthorn',
+  // Berries
+  'blackberry', 'raspberry', 'blackcurrant', 'redcurrant', 'blueberry',
+  // Vegetables strung up and dried for winter
+  'tomato', 'cherry-tomato', 'eggplant', 'pepper', 'red-pepper', 'chili',
+  'okra', 'mushroom', 'zucchini',
+  // Herbs dried for tea and cooking
+  'mint', 'basil', 'tarragon', 'thyme', 'dill', 'parsley', 'coriander',
+  'sorrel', 'nettle',
+]);
+
+export function canBeDried(id: string): boolean {
+  return DRYABLE.has(id);
+}
+
 const BY_ID = new Map(PRODUCE.map((p) => [p.id, p]));
 
 export function getProduce(id: string): Produce | undefined {

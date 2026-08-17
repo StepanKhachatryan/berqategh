@@ -1,5 +1,5 @@
 import Modal from './Modal';
-import { produceColor, produceEmoji } from '../data/produce';
+import { produceEmoji } from '../data/produce';
 import { formatDistance } from '../lib/geo';
 import {
   formatLocalPhone,
@@ -8,10 +8,10 @@ import {
   isExpiringSoon,
   timeLeft,
 } from '../lib/format';
-import { SALE_TYPE_LABELS } from './markers';
+import { listingColor, SALE_TYPE_LABELS } from './markers';
 import { IconPhone, IconPin } from './Icons';
 import { usePlaceName } from '../lib/usePlaceName';
-import type { MeasuredListing } from '../lib/types';
+import { listingTitle, type MeasuredListing } from '../lib/types';
 
 interface ListingDetailProps {
   listing: MeasuredListing;
@@ -20,7 +20,8 @@ interface ListingDetailProps {
 }
 
 export default function ListingDetail({ listing, onClose, now }: ListingDetailProps) {
-  const color = produceColor(listing.productId);
+  const color = listingColor(listing.productId, listing.form);
+  const title = listingTitle(listing);
   const bothPrices = listing.retailPrice !== null && listing.wholesalePrice !== null;
   const soon = isExpiringSoon(listing.expiresAt, now);
 
@@ -34,16 +35,21 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
   return (
-    <Modal title={listing.productName} subtitle={SALE_TYPE_LABELS[listing.saleType]} onClose={onClose}>
+    <Modal title={title} subtitle={SALE_TYPE_LABELS[listing.saleType]} onClose={onClose}>
       <div className="detail-hero" style={{ background: `${color}1f` }}>
         <div className="detail-thumb" aria-hidden="true">
-          {produceEmoji(listing.productId)}
+          {listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}
         </div>
         <div>
-          <h2>{listing.productName}</h2>
-          <span className={`chip chip-${listing.saleType}`}>
-            {SALE_TYPE_LABELS[listing.saleType]}
-          </span>
+          <h2>{title}</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {listing.form === 'dried' ? (
+              <span className="chip chip-dried">Չիր — չորացրած</span>
+            ) : null}
+            <span className={`chip chip-${listing.saleType}`}>
+              {SALE_TYPE_LABELS[listing.saleType]}
+            </span>
+          </div>
         </div>
       </div>
 

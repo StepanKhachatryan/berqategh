@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import Modal from './Modal';
-import { produceColor, produceEmoji } from '../data/produce';
+import { produceEmoji } from '../data/produce';
 import { formatPrice, timeLeft } from '../lib/format';
-import { SALE_TYPE_SHORT } from './markers';
+import { listingColor, SALE_TYPE_SHORT } from './markers';
 import { IconArchive, IconRefresh, IconTrash } from './Icons';
-import type { Listing } from '../lib/types';
+import { listingTitle, type Listing } from '../lib/types';
 
-const DAY_MS = 24 * 3600 * 1000;
+/** Matches the 48h default in supabase/migrations. */
+const WINDOW_MS = 48 * 3600 * 1000;
 
 interface MyListingsProps {
   listings: Listing[];
@@ -155,7 +156,7 @@ function MyListingCard({
   actions: React.ReactNode;
 }) {
   const remaining = new Date(listing.expiresAt).getTime() - now;
-  const percent = Math.max(0, Math.min(100, (remaining / DAY_MS) * 100));
+  const percent = Math.max(0, Math.min(100, (remaining / WINDOW_MS) * 100));
 
   return (
     <article className={`mine-card${archived ? ' is-archived' : ''}`} aria-busy={busy}>
@@ -168,14 +169,14 @@ function MyListingCard({
       <div className="mine-top">
         <span
           className="listing-thumb"
-          style={{ background: `${produceColor(listing.productId)}22` }}
+          style={{ background: `${listingColor(listing.productId, listing.form)}22` }}
           aria-hidden="true"
         >
-          {produceEmoji(listing.productId)}
+          {listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}
         </span>
         <div className="listing-main">
           <div className="listing-title">
-            <h4>{listing.productName}</h4>
+            <h4>{listingTitle(listing)}</h4>
             <span className={`chip chip-${listing.saleType}`}>
               {SALE_TYPE_SHORT[listing.saleType]}
             </span>

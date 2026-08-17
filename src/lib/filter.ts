@@ -37,6 +37,7 @@ export function applyFilters(listings: MeasuredListing[], filters: Filters): Mea
 
   return listings.filter((listing) => {
     if (!matchesSaleType(listing, filters.saleType)) return false;
+    if (filters.form !== 'any' && listing.form !== filters.form) return false;
     if (products.size > 0 && !products.has(listing.productId)) return false;
     if (categories.size > 0 && !categories.has(listing.category)) return false;
 
@@ -57,6 +58,8 @@ export function applyFilters(listings: MeasuredListing[], filters: Filters): Mea
         listing.productName,
         listing.sellerName ?? '',
         listing.note ?? '',
+        // So that typing "չիր" finds dried listings by name, not only by filter.
+        listing.form === 'dried' ? 'չիր chir' : '',
         ...(produce?.aliases ?? []),
       ]
         .join(' ')
@@ -94,6 +97,7 @@ export function countActiveFilters(filters: Filters): number {
   if (filters.productIds.length > 0) count += 1;
   if (filters.categories.length > 0) count += 1;
   if (filters.saleType !== 'any') count += 1;
+  if (filters.form !== 'any') count += 1;
   if (filters.maxPrice !== null) count += 1;
   if (filters.radiusKm !== null) count += 1;
   if (filters.query.trim()) count += 1;

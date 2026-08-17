@@ -164,6 +164,14 @@ export const IconInfo = ({ size = 15 }: IconProps) => (
   </svg>
 );
 
+export const IconHelp = ({ size = 20 }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.2 9.3a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4" />
+    <path d="M12 17.5h.01" />
+  </svg>
+);
+
 export const IconWarn = ({ size = 16 }: IconProps) => (
   <svg {...base(size)}>
     <path d="M10.3 4.3 2.6 17.6A2 2 0 0 0 4.3 20.6h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z" />

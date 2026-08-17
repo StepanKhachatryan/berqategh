@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import { listingIcon, meIcon, pinSvg, SALE_TYPE_SHORT } from './markers';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
-import type { LatLng, MeasuredListing, SaleType } from '../lib/types';
-import { IconCrosshair, IconLayers, IconClose, IconInfo } from './Icons';
+import { listingTitle, type LatLng, type MeasuredListing, type SaleType } from '../lib/types';
+import { IconCrosshair, IconLayers, IconClose, IconInfo, IconHelp } from './Icons';
 
 /**
  * Two genuinely different views, not two renderings of the same one: the
@@ -34,6 +34,7 @@ const BASEMAPS = {
 type BasemapKey = keyof typeof BASEMAPS;
 
 interface MapViewProps {
+  onOpenGuide: () => void;
   listings: MeasuredListing[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
@@ -46,6 +47,7 @@ interface MapViewProps {
 }
 
 export default function MapView({
+  onOpenGuide,
   listings,
   selectedId,
   onSelect,
@@ -137,6 +139,7 @@ export default function MapView({
       const icon = listingIcon({
         saleType: listing.saleType,
         productId: listing.productId,
+        form: listing.form,
         selected: listing.id === selectedId,
         animate: isNew,
       });
@@ -153,7 +156,7 @@ export default function MapView({
         icon,
         riseOnHover: true,
         keyboard: true,
-        alt: `${listing.productName} — ${SALE_TYPE_SHORT[listing.saleType]}`,
+        alt: `${listingTitle(listing)} — ${SALE_TYPE_SHORT[listing.saleType]}`,
       });
 
       marker.on('click', (event) => {
@@ -248,6 +251,17 @@ export default function MapView({
       <div ref={hostRef} className="map-root" role="application" aria-label="Բերքի քարտեզ" />
 
       <div className="map-floats">
+        {/* Kept at the top of the stack and always on screen — the 48h rule is
+            something people need to be able to look up at any moment. */}
+        <button
+          type="button"
+          className="map-float-btn is-guide"
+          onClick={onOpenGuide}
+          title="Ինչպես օգտվել"
+          aria-label="Ինչպես օգտվել"
+        >
+          <IconHelp />
+        </button>
         <button
           type="button"
           className={`map-float-btn${basemap === 'satellite' ? ' is-on' : ''}`}
@@ -280,7 +294,10 @@ export default function MapView({
               </li>
             ))}
           </ul>
-          <p className="legend-note">Գույնը ցույց է տալիս մրգի կամ բանջարեղենի տեսակը։</p>
+          <p className="legend-note">
+            Գույնը ցույց է տալիս մրգի կամ բանջարեղենի տեսակը։ Չիրը՝ նույն գույնի ավելի
+            մուգ երանգով։
+          </p>
           <button
             type="button"
             className="icon-btn"

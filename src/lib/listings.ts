@@ -7,7 +7,7 @@ import type { ProduceCategory } from '../data/produce';
 // level to infer the row shape, and only a literal survives that parse.
 // owner_token is deliberately absent — the client has no SELECT privilege on it.
 // prettier-ignore
-const COLUMNS = 'id, product_id, product_name, category, sale_type, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at' as const;
+const COLUMNS = 'id, product_id, product_name, category, sale_type, form, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at' as const;
 
 function toListing(row: ListingRow | MyListingRow): Listing {
   return {
@@ -16,6 +16,7 @@ function toListing(row: ListingRow | MyListingRow): Listing {
     productName: row.product_name,
     category: row.category as ProduceCategory,
     saleType: row.sale_type as Listing['saleType'],
+    form: (row.form ?? 'fresh') as Listing['form'],
     retailPrice: row.retail_price,
     wholesalePrice: row.wholesale_price,
     quantityKg: row.quantity_kg === null ? null : Number(row.quantity_kg),
@@ -31,7 +32,7 @@ function toListing(row: ListingRow | MyListingRow): Listing {
 }
 
 /**
- * Every live listing. The 24h window is enforced here as well as in the read
+ * Every live listing. The 48h window is enforced here as well as in the read
  * policy, so a listing leaves the map the moment it expires rather than when
  * the archive job next runs.
  */
@@ -71,6 +72,7 @@ export async function createListing(draft: ListingDraft): Promise<Listing> {
       product_name: draft.productName,
       category: draft.category,
       sale_type: draft.saleType,
+      form: draft.form,
       retail_price: draft.retailPrice,
       wholesale_price: draft.wholesalePrice,
       quantity_kg: draft.quantityKg,
@@ -88,7 +90,7 @@ export async function createListing(draft: ListingDraft): Promise<Listing> {
 }
 
 /**
- * Pulls a listing off the map early, before its 24h are up.
+ * Pulls a listing off the map early, before its 48h are up.
  *
  * Archiving is an RPC because it makes the row fail the public read policy, and
  * Postgres enforces that policy against the updated row — a direct UPDATE would
@@ -109,13 +111,14 @@ export async function deleteListing(id: string): Promise<void> {
   if (data !== true) throw new Error('Հայտարարությունը չգտնվեց');
 }
 
-/** Puts an archived listing back on the map with a fresh 24h window. */
+/** Puts an archived listing back on the map with a fresh 48h window. */
 export async function republishListing(listing: Listing): Promise<Listing> {
   return createListing({
     productId: listing.productId,
     productName: listing.productName,
     category: listing.category,
     saleType: listing.saleType,
+    form: listing.form,
     retailPrice: listing.retailPrice,
     wholesalePrice: listing.wholesalePrice,
     quantityKg: listing.quantityKg,

@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import Modal from './Modal';
 import ProducePicker from './ProducePicker';
 import LocationPicker from './LocationPicker';
-import { CATEGORY_LABELS, getProduce, type Produce } from '../data/produce';
+import { canBeDried, CATEGORY_LABELS, getProduce, type Produce } from '../data/produce';
 import { isValidLocalPhone, PHONE_LOCAL_LENGTH, toE164 } from '../lib/format';
 import { LOCATE_MESSAGES, type LocateStatus } from '../lib/useGeolocation';
-import type { LatLng, ListingDraft, SaleType } from '../lib/types';
+import type { LatLng, ListingDraft, ProduceForm, SaleType } from '../lib/types';
 import { IconCheck, IconChevronDown, IconWarn } from './Icons';
 
 const SALE_OPTIONS: { value: SaleType; label: string; emoji: string }[] = [
@@ -57,6 +57,7 @@ export default function SellerForm({
   const remembered = useMemo(loadRemembered, []);
 
   const [product, setProduct] = useState<Produce | null>(null);
+  const [form, setForm] = useState<ProduceForm>('fresh');
   const [saleType, setSaleType] = useState<SaleType>('retail');
   const [retailPrice, setRetailPrice] = useState('');
   const [wholesalePrice, setWholesalePrice] = useState('');
@@ -77,6 +78,7 @@ export default function SellerForm({
 
   const wantsRetail = saleType === 'retail' || saleType === 'both';
   const wantsWholesale = saleType === 'wholesale' || saleType === 'both';
+  const dryable = product ? canBeDried(product.id) : false;
 
   // Ask for the seller's position as soon as the form opens — the common case
   // is a farmer standing at the stall who should not have to do anything.
@@ -141,6 +143,7 @@ export default function SellerForm({
         productName: product.hy,
         category: product.category,
         saleType,
+        form: dryable ? form : 'fresh',
         retailPrice: wantsRetail ? Number(retailPrice) : null,
         wholesalePrice: wantsWholesale ? Number(wholesalePrice) : null,
         quantityKg: quantity.trim() ? Number(quantity) : null,
@@ -176,7 +179,7 @@ export default function SellerForm({
     <>
       <Modal
         title="Տեղադրել բերք"
-        subtitle="Հայտարարությունը քարտեզին կմնա 24 ժամ"
+        subtitle="Հայտարարությունը քարտեզին կմնա 48 ժամ"
         onClose={onClose}
         footer={
           <button
@@ -223,6 +226,41 @@ export default function SellerForm({
             <p className="field-error">{errors.product}</p>
           ) : null}
         </div>
+
+        {/* ─── fresh or dried ──────────────────────────────────────────── */}
+        {dryable ? (
+          <div className="field">
+            <label className="field-label">Թարմ է թե չիր</label>
+            <div className="segmented" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <button
+                type="button"
+                className="seg"
+                aria-pressed={form === 'fresh'}
+                onClick={() => setForm('fresh')}
+              >
+                <span style={{ fontSize: 19 }} aria-hidden="true">
+                  {product?.emoji ?? '🍎'}
+                </span>
+                <span className="seg-label">Թարմ</span>
+              </button>
+              <button
+                type="button"
+                className="seg"
+                aria-pressed={form === 'dried'}
+                onClick={() => setForm('dried')}
+              >
+                <span style={{ fontSize: 19 }} aria-hidden="true">
+                  ☀️
+                </span>
+                <span className="seg-label">Չիր</span>
+              </button>
+            </div>
+            <p className="field-hint">
+              Չիր ընտրելիս հայտարարությունը կհրապարակվի «{product?.hy} (չիր)» անունով, և
+              գնորդները կկարողանան առանձին փնտրել այն։
+            </p>
+          </div>
+        ) : null}
 
         {/* ─── sale type ───────────────────────────────────────────────── */}
         <div className="field">
@@ -406,7 +444,11 @@ export default function SellerForm({
       {pickerOpen ? (
         <ProducePicker
           selected={product ? [product.id] : []}
-          onToggle={(picked) => setProduct(getProduce(picked.id) ?? picked)}
+          onToggle={(picked) => {
+            setProduct(getProduce(picked.id) ?? picked);
+            // A crop that is never sold dried must not carry a stale "չիր".
+            if (!canBeDried(picked.id)) setForm('fresh');
+          }}
           onClose={() => setPickerOpen(false)}
         />
       ) : null}

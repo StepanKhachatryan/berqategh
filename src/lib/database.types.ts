@@ -17,6 +17,7 @@ export type ListingRow = {
   product_name: string;
   category: string;
   sale_type: string;
+  form: string;
   retail_price: number | null;
   wholesale_price: number | null;
   quantity_kg: number | null;

@@ -1,7 +1,7 @@
 import ListingCard from './ListingCard';
 import { SORT_LABELS, type SortKey } from '../lib/filter';
 import { IconChevronDown, IconChevronUp, IconFilter, IconSearch } from './Icons';
-import type { Filters, MeasuredListing } from '../lib/types';
+import { FORM_LABELS, type Filters, type MeasuredListing } from '../lib/types';
 import { getProduce } from '../data/produce';
 import { SALE_TYPE_SHORT } from './markers';
 import { formatPrice } from '../lib/format';
@@ -128,6 +128,13 @@ function FilterBar({
       key: 'sale',
       label: SALE_TYPE_SHORT[filters.saleType],
       clear: () => onChange({ ...filters, saleType: 'any' }),
+    });
+  }
+  if (filters.form !== 'any') {
+    tags.push({
+      key: 'form',
+      label: FORM_LABELS[filters.form],
+      clear: () => onChange({ ...filters, form: 'any' }),
     });
   }
   if (filters.maxPrice !== null) {

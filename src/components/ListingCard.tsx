@@ -1,9 +1,9 @@
-import { produceColor, produceEmoji } from '../data/produce';
+import { produceEmoji } from '../data/produce';
 import { formatDistance } from '../lib/geo';
 import { formatPrice, formatQuantity, isExpiringSoon, timeLeft } from '../lib/format';
-import { SALE_TYPE_SHORT } from './markers';
+import { listingColor, SALE_TYPE_SHORT } from './markers';
 import { IconClock, IconRoute } from './Icons';
-import type { MeasuredListing } from '../lib/types';
+import { listingTitle, type MeasuredListing } from '../lib/types';
 
 interface ListingCardProps {
   listing: MeasuredListing;
@@ -23,15 +23,16 @@ export default function ListingCard({ listing, selected, onSelect, now }: Listin
     >
       <span
         className="listing-thumb"
-        style={{ background: `${produceColor(listing.productId)}22` }}
+        style={{ background: `${listingColor(listing.productId, listing.form)}22` }}
         aria-hidden="true"
       >
-        {produceEmoji(listing.productId)}
+        {listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}
       </span>
 
       <span className="listing-main">
         <span className="listing-title">
-          <h4>{listing.productName}</h4>
+          <h4>{listingTitle(listing)}</h4>
+          {listing.form === 'dried' ? <span className="chip chip-dried">Չիր</span> : null}
           <span className={`chip chip-${listing.saleType}`}>
             {SALE_TYPE_SHORT[listing.saleType]}
           </span>

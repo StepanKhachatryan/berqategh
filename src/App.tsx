@@ -6,6 +6,7 @@ import FilterSheet from './components/FilterSheet';
 import SellerForm from './components/SellerForm';
 import ListingDetail from './components/ListingDetail';
 import MyListings from './components/MyListings';
+import GuideSheet from './components/GuideSheet';
 import { ToastStack, useToasts } from './components/Toasts';
 import { IconArchive, IconPlus } from './components/Icons';
 
@@ -25,10 +26,11 @@ import { DEFAULT_FILTERS } from './lib/types';
 import type { Filters, LatLng, Listing, ListingDraft, MeasuredListing, Role } from './lib/types';
 
 const ROLE_KEY = 'berqategh.role';
+const GUIDE_KEY = 'berqategh.guideSeen';
 const REFRESH_MS = 60_000;
 const TICK_MS = 30_000;
 
-type Sheet = 'none' | 'filters' | 'seller' | 'mine';
+type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide';
 
 export default function App() {
   const [role, setRole] = useState<Role | null>(
@@ -91,7 +93,7 @@ export default function App() {
     if (role === 'seller') void loadMine();
   }, [role, loadMine]);
 
-  // Countdowns and the 24h cutoff both read this clock.
+  // Countdowns and the 48h cutoff both read this clock.
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), TICK_MS);
     return () => window.clearInterval(timer);
@@ -144,6 +146,19 @@ export default function App() {
     localStorage.setItem(ROLE_KEY, picked);
     setRole(picked);
     setSelectedId(null);
+
+    // The 48h rule shapes how the whole platform behaves, so it is explained
+    // once, unprompted, the first time somebody arrives — not left behind a
+    // button they may never press.
+    if (localStorage.getItem(GUIDE_KEY)) {
+      setSheet('none');
+    } else {
+      setSheet('guide');
+    }
+  };
+
+  const closeGuide = () => {
+    localStorage.setItem(GUIDE_KEY, '1');
     setSheet('none');
   };
 
@@ -181,7 +196,7 @@ export default function App() {
     setSheet('none');
     setSelectedId(created.id);
     setFocus({ point: { lat: created.lat, lng: created.lng }, zoom: 14, nonce: Date.now() });
-    push('success', 'Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի 24 ժամ։');
+    push('success', 'Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի 48 ժամ։');
   };
 
   const handleArchive = async (listing: Listing) => {
@@ -214,7 +229,7 @@ export default function App() {
       const created = await republishListing(listing);
       setListings((current) => [created, ...current]);
       setMine((current) => [created, ...current]);
-      push('success', 'Հայտարարությունը կրկին ակտիվ է 24 ժամով։');
+      push('success', 'Հայտարարությունը կրկին ակտիվ է 48 ժամով։');
     } catch (error) {
       push('error', error instanceof Error ? error.message : 'Չհաջողվեց');
     }
@@ -286,6 +301,7 @@ export default function App() {
       <div className="app-body">
         <div className="workspace">
           <MapView
+            onOpenGuide={() => setSheet('guide')}
             listings={visible}
             selectedId={selectedId}
             onSelect={handleSelect}
@@ -353,6 +369,8 @@ export default function App() {
           onClose={() => setSheet('none')}
         />
       ) : null}
+
+      {sheet === 'guide' ? <GuideSheet role={role} onClose={closeGuide} /> : null}
 
       {sheet === 'mine' ? (
         <MyListings

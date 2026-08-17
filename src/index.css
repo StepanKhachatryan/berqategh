@@ -261,6 +261,11 @@ h4 {
   color: #b45309;
 }
 
+.chip-dried {
+  background: #f2e6d6;
+  color: #7a4a1d;
+}
+
 .spinner {
   width: 18px;
   height: 18px;
@@ -1249,6 +1254,167 @@ textarea.input {
   padding: 32px 16px;
   color: var(--ink-mute);
   font-size: 14px;
+}
+
+/* ═══ guide ══════════════════════════════════════════════════════════════ */
+
+.map-float-btn.is-guide {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.map-float-btn.is-guide:hover {
+  background: var(--green-deep);
+  border-color: var(--green-deep);
+  color: #fff;
+}
+
+/* The 48h rule leads the guide, so it gets the one coloured panel on the page. */
+.guide-hero {
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(150deg, var(--cta-soft), var(--amber-soft));
+  border: 1.5px solid rgba(245, 158, 11, 0.42);
+  margin-bottom: 20px;
+}
+
+.guide-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  border-radius: var(--r-pill);
+  background: var(--cta);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 11px;
+  box-shadow: var(--shadow-cta);
+}
+
+.guide-hero h3 {
+  font-size: 18px;
+  margin-bottom: 7px;
+  color: #7a3d09;
+}
+
+.guide-hero p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #78350f;
+}
+
+.guide-section + .guide-section {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.guide-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14.5px;
+  margin-bottom: 10px;
+}
+
+.guide-section > p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.guide-list,
+.guide-steps {
+  padding-left: 18px;
+  display: grid;
+  gap: 9px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.guide-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.guide-list > li {
+  position: relative;
+  padding-left: 16px;
+}
+
+.guide-list > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.guide-list b,
+.guide-steps b {
+  color: var(--ink);
+}
+
+.guide-steps > li {
+  padding-left: 4px;
+}
+
+.guide-steps > li::marker {
+  font-weight: 700;
+  color: var(--green-deep);
+}
+
+.guide-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  background: var(--surface-sunk);
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-mute);
+}
+
+.guide-note svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.guide-legend {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+}
+
+.guide-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.guide-legend svg {
+  flex: none;
+}
+
+.guide-section code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: var(--bg-tint);
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
 /* ═══ place search + in-app browser notice ═══════════════════════════════ */

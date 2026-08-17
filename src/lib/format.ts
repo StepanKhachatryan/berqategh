@@ -8,7 +8,7 @@ export function formatQuantity(kg: number): string {
   return kg >= 1000 ? `${(kg / 1000).toLocaleString('hy-AM')} տ` : `${kg} կգ`;
 }
 
-/** "Դեռ 7 ժ 20 ր" — how much of the 24h window is left. */
+/** "Դեռ 7 ժ 20 ր" — how much of the 48h window is left. */
 export function timeLeft(expiresAt: string, now: number = Date.now()): string {
   const ms = new Date(expiresAt).getTime() - now;
   if (ms <= 0) return 'Ժամկետը լրացել է';

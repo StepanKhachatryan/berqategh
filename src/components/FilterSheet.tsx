@@ -10,7 +10,13 @@ import {
 } from '../data/produce';
 import { formatPrice } from '../lib/format';
 import { SALE_TYPE_SHORT } from './markers';
-import { DEFAULT_FILTERS, type Filters, type LatLng, type SaleType } from '../lib/types';
+import {
+  DEFAULT_FILTERS,
+  FORM_LABELS,
+  type Filters,
+  type LatLng,
+  type SaleType,
+} from '../lib/types';
 import { IconChevronDown, IconRoute, IconWarn } from './Icons';
 import PlaceSearch from './PlaceSearch';
 import InAppBrowserNotice from './InAppBrowserNotice';
@@ -173,6 +179,27 @@ export default function FilterSheet({
           </div>
           <p className="field-hint">
             «Մանրածախ»-ը ցույց է տալիս նաև այն վաճառողներին, ովքեր վաճառում են երկու ձևով։
+          </p>
+        </section>
+
+        {/* ─── fresh or dried ──────────────────────────────────────────── */}
+        <section className="filter-section">
+          <h3>Թարմ թե չիր</h3>
+          <div className="cat-row">
+            {(['any', 'fresh', 'dried'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                className="cat-pill"
+                aria-pressed={filters.form === value}
+                onClick={() => patch({ form: value })}
+              >
+                {value === 'any' ? 'Բոլորը' : FORM_LABELS[value]}
+              </button>
+            ))}
+          </div>
+          <p className="field-hint">
+            Չիրը առանձին ապրանք չէ՝ նույն մրգի կամ բանջարեղենի չորացրած տեսակն է։
           </p>
         </section>
 

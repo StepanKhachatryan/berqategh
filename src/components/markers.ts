@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import { produceColor, produceEmoji } from '../data/produce';
-import type { SaleType } from '../lib/types';
+import type { ProduceForm, SaleType } from '../lib/types';
 
 /**
  * Map symbols carry two independent facts at once:
@@ -49,6 +49,16 @@ function darken(hex: string, amount: number): string {
   return `#${channels.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
 }
 
+/**
+ * The colour a listing is drawn in. Dried produce keeps its crop's hue but
+ * comes out deeper and duller — which is what actually happens when fruit
+ * dries, so the map reads right without needing a fourth symbol shape.
+ */
+export function listingColor(productId: string, form: ProduceForm = 'fresh'): string {
+  const base = produceColor(productId);
+  return form === 'dried' ? darken(base, 0.3) : base;
+}
+
 export function pinSvg(saleType: SaleType, color: string, scale = 1): string {
   const shape = SHAPES[saleType];
   const cy = BODY_CY[saleType];
@@ -64,6 +74,7 @@ export function pinSvg(saleType: SaleType, color: string, scale = 1): string {
 interface PinOptions {
   saleType: SaleType;
   productId: string;
+  form?: ProduceForm;
   selected?: boolean;
   animate?: boolean;
 }
@@ -71,11 +82,12 @@ interface PinOptions {
 export function listingIcon({
   saleType,
   productId,
+  form = 'fresh',
   selected = false,
   animate = false,
 }: PinOptions): L.DivIcon {
   const scale = selected ? 1.22 : 1;
-  const color = produceColor(productId);
+  const color = listingColor(productId, form);
   const cy = BODY_CY[saleType];
 
   const classes = ['pin'];

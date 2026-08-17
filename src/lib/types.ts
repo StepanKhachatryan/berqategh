@@ -4,6 +4,9 @@ export type Role = 'buyer' | 'seller';
 
 export type SaleType = 'retail' | 'wholesale' | 'both';
 
+/** Fresh produce, or the same crop dried — չիր. */
+export type ProduceForm = 'fresh' | 'dried';
+
 export interface LatLng {
   lat: number;
   lng: number;
@@ -15,6 +18,7 @@ export interface Listing {
   productName: string;
   category: ProduceCategory;
   saleType: SaleType;
+  form: ProduceForm;
   retailPrice: number | null;
   wholesalePrice: number | null;
   quantityKg: number | null;
@@ -33,6 +37,7 @@ export interface ListingDraft {
   productName: string;
   category: ProduceCategory;
   saleType: SaleType;
+  form: ProduceForm;
   retailPrice: number | null;
   wholesalePrice: number | null;
   quantityKg: number | null;
@@ -56,6 +61,7 @@ export interface Filters {
   productIds: string[];
   categories: ProduceCategory[];
   saleType: SaleType | 'any';
+  form: ProduceForm | 'any';
   maxPrice: number | null;
   /** Road-distance ceiling from the buyer's location, in km. */
   radiusKm: number | null;
@@ -66,7 +72,18 @@ export const DEFAULT_FILTERS: Filters = {
   productIds: [],
   categories: [],
   saleType: 'any',
+  form: 'any',
   maxPrice: null,
   radiusKm: null,
   query: '',
 };
+
+export const FORM_LABELS: Record<ProduceForm, string> = {
+  fresh: 'Թարմ',
+  dried: 'Չիր',
+};
+
+/** "Ծիրան (չիր)" — the crop name, marked when it is the dried form. */
+export function listingTitle(listing: Pick<Listing, 'productName' | 'form'>): string {
+  return listing.form === 'dried' ? `${listing.productName} (չիր)` : listing.productName;
+}
