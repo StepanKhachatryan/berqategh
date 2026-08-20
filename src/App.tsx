@@ -93,7 +93,7 @@ export default function App() {
     if (role === 'seller') void loadMine();
   }, [role, loadMine]);
 
-  // Countdowns and the 48h cutoff both read this clock.
+  // Countdowns and the five-day cutoff both read this clock.
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), TICK_MS);
     return () => window.clearInterval(timer);
@@ -147,7 +147,7 @@ export default function App() {
     setRole(picked);
     setSelectedId(null);
 
-    // The 48h rule shapes how the whole platform behaves, so it is explained
+    // The five-day rule shapes how the whole platform behaves, so it is explained
     // once, unprompted, the first time somebody arrives — not left behind a
     // button they may never press.
     if (localStorage.getItem(GUIDE_KEY)) {
@@ -196,7 +196,7 @@ export default function App() {
     setSheet('none');
     setSelectedId(created.id);
     setFocus({ point: { lat: created.lat, lng: created.lng }, zoom: 14, nonce: Date.now() });
-    push('success', 'Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի 48 ժամ։');
+    push('success', 'Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի 5 օր։');
   };
 
   const handleArchive = async (listing: Listing) => {
@@ -229,7 +229,7 @@ export default function App() {
       const created = await republishListing(listing);
       setListings((current) => [created, ...current]);
       setMine((current) => [created, ...current]);
-      push('success', 'Հայտարարությունը կրկին ակտիվ է 48 ժամով։');
+      push('success', 'Հայտարարությունը կրկին ակտիվ է 5 օրով։');
     } catch (error) {
       push('error', error instanceof Error ? error.message : 'Չհաջողվեց');
     }

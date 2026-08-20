@@ -9,7 +9,7 @@ interface GuideSheetProps {
 }
 
 /**
- * The user guide. Its first and largest section is the 48-hour rule, because
+ * The user guide. Its first and largest section is the five-day rule, because
  * that is the one thing about this platform people have to understand before
  * they use it — a seller needs to know their listing will vanish, and a buyer
  * needs to know that everything they see is genuinely current.
@@ -31,11 +31,11 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
       <section className="guide-hero">
         <div className="guide-hero-badge">
           <IconClock size={20} />
-          48 ժամ
+          5 օր
         </div>
-        <h3>Ամեն հայտարարություն ապրում է 48 ժամ</h3>
+        <h3>Ամեն հայտարարություն ապրում է 5 օր</h3>
         <p>
-          Հրապարակելուց 48 ժամ հետո հայտարարությունն ինքնաշխատ հեռանում է քարտեզից և
+          Հրապարակելուց 5 օր հետո հայտարարությունն ինքնաշխատ հեռանում է քարտեզից և
           անցնում ձեր արխիվ։ Ոչինչ չի կորչում — արխիվից մեկ հպումով նորից հրապարակում եք։
         </p>
       </section>
@@ -58,7 +58,7 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
           </li>
           <li>
             <b>Դրա փոխարեն դուք ստանում եք երաշխիք։</b> Քարտեզի վրա ամեն ինչ թարմ է — ոչ
-            մի հայտարարություն 48 ժամից հին չէ։
+            մի հայտարարություն 5 օրից հին չէ։
           </li>
         </ul>
       </section>

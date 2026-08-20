@@ -4,6 +4,7 @@ import ProducePicker from './ProducePicker';
 import LocationPicker from './LocationPicker';
 import { canBeDried, CATEGORY_LABELS, getProduce, type Produce } from '../data/produce';
 import { isValidLocalPhone, PHONE_LOCAL_LENGTH, toE164 } from '../lib/format';
+import { isInsideArmenia } from '../lib/geo';
 import { LOCATE_MESSAGES, type LocateStatus } from '../lib/useGeolocation';
 import type { LatLng, ListingDraft, ProduceForm, SaleType } from '../lib/types';
 import { IconCheck, IconChevronDown, IconWarn } from './Icons';
@@ -111,7 +112,13 @@ export default function SellerForm({
     if (!isValidLocalPhone(phone)) {
       found.phone = `Հեռախոսահամարը պետք է լինի ${PHONE_LOCAL_LENGTH} նիշ, առանց առջևի զրոյի`;
     }
-    if (!location) found.location = 'Նշե՛ք վաճառքի կետը քարտեզի վրա';
+    if (!location) {
+      found.location = 'Նշե՛ք վաճառքի կետը քարտեզի վրա';
+    } else if (!isInsideArmenia(location)) {
+      // The database refuses these too; catching it here means the seller can
+      // still fix the pin instead of meeting an error on submit.
+      found.location = 'Կետը Հայաստանից դուրս է — նշե՛ք վաճառքի կետը Հայաստանի ներսում';
+    }
 
     return found;
   }, [product, wantsRetail, wantsWholesale, retailPrice, wholesalePrice, phone, location]);
@@ -179,7 +186,7 @@ export default function SellerForm({
     <>
       <Modal
         title="Տեղադրել բերք"
-        subtitle="Հայտարարությունը քարտեզին կմնա 48 ժամ"
+        subtitle="Հայտարարությունը քարտեզին կմնա 5 օր"
         onClose={onClose}
         footer={
           <button

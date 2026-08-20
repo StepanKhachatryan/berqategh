@@ -3,7 +3,7 @@ import type { LatLng } from './types';
 /** Roughly the centre of Armenia — the map's home view before we know better. */
 export const ARMENIA_CENTER: LatLng = { lat: 40.2, lng: 44.9 };
 
-/** Bounds the map is clamped to, matching the DB's lat/lng check constraints. */
+/** Camera clamp for the map view only — not a validity test for a listing. */
 export const ARMENIA_BOUNDS: [[number, number], [number, number]] = [
   [38.5, 43.0],
   [41.5, 47.0],
@@ -26,10 +26,11 @@ function toRad(deg: number): number {
   return (deg * Math.PI) / 180;
 }
 
-export function isInsideArmenia({ lat, lng }: LatLng): boolean {
-  const [[minLat, minLng], [maxLat, maxLng]] = ARMENIA_BOUNDS;
-  return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
-}
+/**
+ * Containment is tested against the real national outline, not ARMENIA_BOUNDS —
+ * that rectangle also covers parts of four neighbouring countries.
+ */
+export { isInsideArmenia } from '../data/armeniaBoundary';
 
 /**
  * Road distance is always longer than the straight line, so a straight-line

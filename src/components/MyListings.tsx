@@ -6,8 +6,8 @@ import { listingColor, SALE_TYPE_SHORT } from './markers';
 import { IconArchive, IconRefresh, IconTrash } from './Icons';
 import { listingTitle, type Listing } from '../lib/types';
 
-/** Matches the 48h default in supabase/migrations. */
-const WINDOW_MS = 48 * 3600 * 1000;
+/** Matches the five-day default in supabase/migrations. */
+const WINDOW_MS = 5 * 24 * 3600 * 1000;
 
 interface MyListingsProps {
   listings: Listing[];

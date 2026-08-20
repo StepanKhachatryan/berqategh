@@ -8,22 +8,28 @@ export function formatQuantity(kg: number): string {
   return kg >= 1000 ? `${(kg / 1000).toLocaleString('hy-AM')} տ` : `${kg} կգ`;
 }
 
-/** "Դեռ 7 ժ 20 ր" — how much of the 48h window is left. */
+/** How long a listing has left, coarsening as the window widens. */
 export function timeLeft(expiresAt: string, now: number = Date.now()): string {
   const ms = new Date(expiresAt).getTime() - now;
   if (ms <= 0) return 'Ժամկետը լրացել է';
 
   const totalMinutes = Math.floor(ms / 60000);
-  const hours = Math.floor(totalMinutes / 60);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
   const minutes = totalMinutes % 60;
 
-  if (hours === 0) return `Դեռ ${minutes} ր`;
-  return `Դեռ ${hours} ժ ${minutes} ր`;
+  // "Դեռ 118 ժ" would be true and useless; days are what a five-day window
+  // reads as, and minutes only start mattering in the last hour.
+  if (days > 0) return `Դեռ ${days} օր ${hours} ժ`;
+  if (totalHours === 0) return `Դեռ ${minutes} ր`;
+  return `Դեռ ${totalHours} ժ ${minutes} ր`;
 }
 
+/** Last few hours of a five-day window — worth flagging to the seller. */
 export function isExpiringSoon(expiresAt: string, now: number = Date.now()): boolean {
   const ms = new Date(expiresAt).getTime() - now;
-  return ms > 0 && ms < 3 * 3600 * 1000;
+  return ms > 0 && ms < 6 * 3600 * 1000;
 }
 
 /** Turns the 8 local digits into the +374XXXXXXXX the database stores. */

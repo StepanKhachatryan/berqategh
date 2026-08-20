@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
+import { ARMENIA_BOUNDS, ARMENIA_CENTER, isInsideArmenia } from '../lib/geo';
 import { describePlace } from '../lib/geocode';
 import { pinSvg } from './markers';
 import { IconCrosshair } from './Icons';
@@ -121,6 +121,8 @@ export default function LocationPicker({
     };
   }, [value, dragging]);
 
+  const outsideArmenia = value !== null && !isInsideArmenia(value);
+
   return (
     <>
       <InAppBrowserNotice />
@@ -147,9 +149,13 @@ export default function LocationPicker({
       <div className="locate-bar">
         {/* The address, never the coordinates: a seller cannot tell whether
             "40.15530, 44.03670" is their field, but they know their village. */}
-        <div className={`locate-status${statusIsError ? ' is-error' : ''}`}>
-          <strong>{place ?? (value ? 'Նշված կետ' : 'Կետը նշված չէ')}</strong>
-          {statusMessage}
+        <div className={`locate-status${statusIsError || outsideArmenia ? ' is-error' : ''}`}>
+          <strong>
+            {outsideArmenia
+              ? 'Կետը Հայաստանից դուրս է'
+              : (place ?? (value ? 'Նշված կետ' : 'Կետը նշված չէ'))}
+          </strong>
+          {outsideArmenia ? 'Շարժե՛ք քարտեզը Հայաստանի ներսում' : statusMessage}
         </div>
         <button
           type="button"

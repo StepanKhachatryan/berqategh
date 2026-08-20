@@ -32,7 +32,7 @@ function toListing(row: ListingRow | MyListingRow): Listing {
 }
 
 /**
- * Every live listing. The 48h window is enforced here as well as in the read
+ * Every live listing. The five-day window is enforced here as well as in the read
  * policy, so a listing leaves the map the moment it expires rather than when
  * the archive job next runs.
  */
@@ -90,7 +90,7 @@ export async function createListing(draft: ListingDraft): Promise<Listing> {
 }
 
 /**
- * Pulls a listing off the map early, before its 48h are up.
+ * Pulls a listing off the map early, before its five days are up.
  *
  * Archiving is an RPC because it makes the row fail the public read policy, and
  * Postgres enforces that policy against the updated row — a direct UPDATE would
@@ -111,7 +111,7 @@ export async function deleteListing(id: string): Promise<void> {
   if (data !== true) throw new Error('Հայտարարությունը չգտնվեց');
 }
 
-/** Puts an archived listing back on the map with a fresh 48h window. */
+/** Puts an archived listing back on the map with a fresh five-day window. */
 export async function republishListing(listing: Listing): Promise<Listing> {
   return createListing({
     productId: listing.productId,

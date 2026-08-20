@@ -251,7 +251,7 @@ export default function MapView({
       <div ref={hostRef} className="map-root" role="application" aria-label="Բերքի քարտեզ" />
 
       <div className="map-floats">
-        {/* Kept at the top of the stack and always on screen — the 48h rule is
+        {/* Kept at the top of the stack and always on screen — the five-day rule is
             something people need to be able to look up at any moment. */}
         <button
           type="button"

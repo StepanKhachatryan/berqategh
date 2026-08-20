@@ -1270,7 +1270,7 @@ textarea.input {
   color: #fff;
 }
 
-/* The 48h rule leads the guide, so it gets the one coloured panel on the page. */
+/* The five-day rule leads the guide, so it gets the one coloured panel on the page. */
 .guide-hero {
   padding: 18px;
   border-radius: var(--r-lg);
