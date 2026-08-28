@@ -1,4 +1,4 @@
-export type ProduceCategory = 'fruit' | 'berry' | 'vegetable' | 'green' | 'nut';
+export type ProduceCategory = 'fruit' | 'berry' | 'vegetable' | 'green' | 'nut' | 'honey';
 
 export interface Produce {
   id: string;
@@ -17,10 +17,18 @@ export const CATEGORY_LABELS: Record<ProduceCategory, string> = {
   berry: 'Հատապտուղներ',
   vegetable: 'Բանջարեղեն',
   green: 'Կանաչի և համեմունք',
-  nut: 'Ընկուզեղեն',
+  nut: 'Ընդեղեն',
+  honey: 'Մեղր և մեղվամթերք',
 };
 
-export const CATEGORY_ORDER: ProduceCategory[] = ['fruit', 'berry', 'vegetable', 'green', 'nut'];
+export const CATEGORY_ORDER: ProduceCategory[] = [
+  'fruit',
+  'berry',
+  'vegetable',
+  'green',
+  'nut',
+  'honey',
+];
 
 export const PRODUCE: Produce[] = [
   // ─── Մրգեր ────────────────────────────────────────────────────────────────
@@ -121,6 +129,13 @@ export const PRODUCE: Produce[] = [
   { id: 'chestnut', hy: 'Շագանակ', aliases: ['chestnut', 'shaganak', 'kashtan'], category: 'nut', color: '#7B4A2D', emoji: '🌰' },
   { id: 'pistachio', hy: 'Պիստակ', aliases: ['pistachio', 'pistak', 'fistashka'], category: 'nut', color: '#93C572', emoji: '🥜' },
   { id: 'sunflower-seed', hy: 'Արևածաղկի սերմ', aliases: ['sunflower seeds', 'arevatsaghki serm', 'semechki'], category: 'nut', color: '#6B4423', emoji: '🌻' },
+
+  // ─── Մեղր և մեղվամթերք ────────────────────────────────────────────────────
+  { id: 'honey-flower', hy: 'Մեղր (ծաղկային)', aliases: ['honey', 'meghr', 'med', 'myod'], category: 'honey', color: '#E8A33D', emoji: '🍯' },
+  { id: 'honey-mountain', hy: 'Լեռնային մեղր', aliases: ['mountain honey', 'lernayin meghr'], category: 'honey', color: '#B07D22', emoji: '🍯' },
+  { id: 'honey-acacia', hy: 'Ակացիայի մեղր', aliases: ['acacia honey', 'akaciayi meghr'], category: 'honey', color: '#F2CE6B', emoji: '🍯' },
+  { id: 'honeycomb', hy: 'Մեղրախորիսխ', aliases: ['honeycomb', 'meghrakhoriskh', 'sotoviy med'], category: 'honey', color: '#D99A2B', emoji: '🍯' },
+  { id: 'bee-pollen', hy: 'Ծաղկափոշի', aliases: ['bee pollen', 'tsaghkaposhi', 'pylca'], category: 'honey', color: '#E8C33D', emoji: '🌼' },
 ];
 
 /**

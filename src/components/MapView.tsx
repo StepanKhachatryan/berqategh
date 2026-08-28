@@ -11,16 +11,20 @@ import { IconCrosshair, IconLayers, IconClose, IconInfo, IconHelp } from './Icon
  * recognising the actual field or orchard a pin sits on — which is often how a
  * buyer confirms they are looking at the right place in the countryside.
  *
- * The OSM layer is CARTO's "Voyager" rendering of OpenStreetMap data, chosen
- * because it stays quiet enough that the produce colours on the pins carry.
+ * Tiles come straight from openstreetmap.org. CARTO's prettier "Voyager"
+ * rendering was used until they began requiring an API key and stamping
+ * unkeyed tiles with "API KEY REQUIRED" across the whole map. These need no
+ * key at all. The standard OSM style is busier than Voyager, so the tile pane
+ * is gently desaturated in CSS to keep the produce colours on the pins reading
+ * as the loudest thing on screen.
  */
 const BASEMAPS = {
   osm: {
     label: 'Քարտեզ (OSM)',
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    maxZoom: 20,
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
   },
   satellite: {
     label: 'Արբանյակ',
@@ -248,7 +252,12 @@ export default function MapView({
 
   return (
     <div className="map-pane">
-      <div ref={hostRef} className="map-root" role="application" aria-label="Բերքի քարտեզ" />
+      <div
+        ref={hostRef}
+        className={`map-root${basemap === 'osm' ? ' is-osm' : ''}`}
+        role="application"
+        aria-label="Բերքի քարտեզ"
+      />
 
       <div className="map-floats">
         {/* Kept at the top of the stack and always on screen — the five-day rule is

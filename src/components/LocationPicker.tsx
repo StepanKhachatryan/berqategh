@@ -61,8 +61,10 @@ export default function LocationPicker({
       minZoom: 7,
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 20,
+    // Same keyless OSM tiles as the main map — CARTO now watermarks unkeyed
+    // requests, which would sit right under the seller's pin.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
     }).addTo(map);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -138,7 +140,7 @@ export default function LocationPicker({
       />
 
       <div className="locate-box">
-      <div className={`locate-map${dragging ? ' is-dragging' : ''}`}>
+      <div className={`locate-map is-osm${dragging ? ' is-dragging' : ''}`}>
         <div ref={hostRef} style={{ height: '100%' }} />
         <div
           className="locate-crosshair"

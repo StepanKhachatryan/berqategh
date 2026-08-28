@@ -445,6 +445,14 @@ h4 {
   background: #eaf0e4;
 }
 
+/* The standard OSM style is more colourful than the CARTO one it replaced, and
+   it competed with the produce colours on the pins. Desaturating just the tile
+   pane pulls it back without touching markers, which live in their own pane. */
+.map-root.is-osm .leaflet-tile-pane,
+.locate-map.is-osm .leaflet-tile-pane {
+  filter: saturate(0.78) brightness(1.04);
+}
+
 .leaflet-control-attribution {
   font-size: 10px;
   background: rgba(255, 255, 255, 0.82) !important;
