@@ -9,7 +9,7 @@ import {
   type ProduceCategory,
 } from '../data/produce';
 import { formatPrice } from '../lib/format';
-import { SALE_TYPE_SHORT } from './markers';
+import { SALE_TYPE_SHORT, swatchStyle } from './markers';
 import {
   DEFAULT_FILTERS,
   FORM_LABELS,
@@ -247,8 +247,12 @@ export default function FilterSheet({
         <section className="filter-section">
           <h3>Կոնկրետ ապրանքներ</h3>
           <button type="button" className="picker-trigger" onClick={() => setPickerOpen(true)}>
-            <span className="picker-swatch" style={{ background: 'var(--bg-tint)' }} aria-hidden="true">
-              🧺
+            <span
+              className="produce-swatch picker-swatch"
+              style={swatchStyle('#9aa79c')}
+              aria-hidden="true"
+            >
+              <span>🧺</span>
             </span>
             <span className="picker-text">
               <span className="picker-name">

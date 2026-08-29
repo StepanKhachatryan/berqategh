@@ -39,7 +39,6 @@ export const PRODUCE: Produce[] = [
   { id: 'nectarine', hy: 'Նեկտարին', aliases: ['nectarine', 'nektarin'], category: 'fruit', color: '#E8615C', emoji: '🍑' },
   { id: 'apricot', hy: 'Ծիրան', aliases: ['apricot', 'tsiran', 'abrikos'], category: 'fruit', color: '#F2A03D', emoji: '🍑' },
   { id: 'plum', hy: 'Սալոր', aliases: ['plum', 'salor', 'sliva'], category: 'fruit', color: '#6D4C8C', emoji: '🫐' },
-  { id: 'cherry-plum', hy: 'Բխի', aliases: ['cherry plum', 'bkhi', 'tkemali', 'alycha'], category: 'fruit', color: '#8FA33E', emoji: '🫒' },
   { id: 'sweet-cherry', hy: 'Կեռաս', aliases: ['sweet cherry', 'keras', 'chereshnya'], category: 'fruit', color: '#C21F3A', emoji: '🍒' },
   { id: 'sour-cherry', hy: 'Բալ', aliases: ['sour cherry', 'bal', 'vishnya'], category: 'fruit', color: '#9E1029', emoji: '🍒' },
   { id: 'grape', hy: 'Խաղող (կարմիր)', aliases: ['grape', 'khaghogh', 'vinograd'], category: 'fruit', color: '#7A3E9D', emoji: '🍇' },
@@ -48,14 +47,14 @@ export const PRODUCE: Produce[] = [
   { id: 'melon', hy: 'Սեխ', aliases: ['melon', 'sekh', 'dynya'], category: 'fruit', color: '#EFCB68', emoji: '🍈' },
   { id: 'fig', hy: 'Թուզ', aliases: ['fig', 'tuz', 'inzhir'], category: 'fruit', color: '#7A4E7E', emoji: '🫒' },
   { id: 'pomegranate', hy: 'Նուռ', aliases: ['pomegranate', 'nur', 'granat'], category: 'fruit', color: '#C42B3A', emoji: '🍎' },
-  { id: 'persimmon', hy: 'Խուրմա', aliases: ['persimmon', 'khurma'], category: 'fruit', color: '#F07B22', emoji: '🟠' },
+  { id: 'persimmon', hy: 'Խուրմա', aliases: ['persimmon', 'khurma'], category: 'fruit', color: '#F07B22', emoji: '🍊' },
   { id: 'mulberry', hy: 'Թութ', aliases: ['mulberry', 'tut', 'shelkovica'], category: 'fruit', color: '#5B2C6F', emoji: '🫐' },
-  { id: 'cornelian-cherry', hy: 'Հոն', aliases: ['cornelian cherry', 'hon', 'kizil'], category: 'fruit', color: '#B01A33', emoji: '🔴' },
+  { id: 'cornelian-cherry', hy: 'Հոն', aliases: ['cornelian cherry', 'hon', 'kizil'], category: 'fruit', color: '#B01A33', emoji: '🍒' },
   { id: 'rosehip', hy: 'Մասուր', aliases: ['rosehip', 'masur', 'shipovnik'], category: 'fruit', color: '#C0392B', emoji: '🌹' },
-  { id: 'hawthorn', hy: 'Ալոճ', aliases: ['hawthorn', 'aloch', 'boyarishnik'], category: 'fruit', color: '#B5452F', emoji: '🔴' },
-  { id: 'medlar', hy: 'Զկեռ', aliases: ['medlar', 'zker'], category: 'fruit', color: '#A9613C', emoji: '🟤' },
-  { id: 'jujube', hy: 'Ունաբ', aliases: ['jujube', 'unab'], category: 'fruit', color: '#9C3B2E', emoji: '🟤' },
-  { id: 'sea-buckthorn', hy: 'Չիչխան', aliases: ['sea buckthorn', 'chichkhan', 'oblepikha'], category: 'fruit', color: '#F2A007', emoji: '🟡' },
+  { id: 'hawthorn', hy: 'Ալոճ', aliases: ['hawthorn', 'aloch', 'boyarishnik'], category: 'fruit', color: '#B5452F', emoji: '🍎' },
+  { id: 'medlar', hy: 'Զկեռ', aliases: ['medlar', 'zker'], category: 'fruit', color: '#A9613C', emoji: '🌰' },
+  { id: 'jujube', hy: 'Ունաբ', aliases: ['jujube', 'unab'], category: 'fruit', color: '#9C3B2E', emoji: '🌰' },
+  { id: 'sea-buckthorn', hy: 'Չիչխան', aliases: ['sea buckthorn', 'chichkhan', 'oblepikha'], category: 'fruit', color: '#F2A007', emoji: '🍊' },
   { id: 'lemon', hy: 'Կիտրոն', aliases: ['lemon', 'kitron', 'limon'], category: 'fruit', color: '#F5D411', emoji: '🍋' },
 
   // ─── Հատապտուղներ ─────────────────────────────────────────────────────────
@@ -63,8 +62,8 @@ export const PRODUCE: Produce[] = [
   { id: 'raspberry', hy: 'Ազնվամորի', aliases: ['raspberry', 'aznvamori', 'malina'], category: 'berry', color: '#C42B5A', emoji: '🍇' },
   { id: 'blackberry', hy: 'Մոշ', aliases: ['blackberry', 'mosh', 'ezhevika'], category: 'berry', color: '#3D2352', emoji: '🫐' },
   { id: 'blackcurrant', hy: 'Սև հաղարջ', aliases: ['blackcurrant', 'sev hagharj', 'smorodina'], category: 'berry', color: '#4A2545', emoji: '🫐' },
-  { id: 'redcurrant', hy: 'Կարմիր հաղարջ', aliases: ['redcurrant', 'karmir hagharj'], category: 'berry', color: '#C8102E', emoji: '🔴' },
-  { id: 'gooseberry', hy: 'Կոկռոշ', aliases: ['gooseberry', 'kokrosh', 'kryzhovnik'], category: 'berry', color: '#9BBF4A', emoji: '🟢' },
+  { id: 'redcurrant', hy: 'Կարմիր հաղարջ', aliases: ['redcurrant', 'karmir hagharj'], category: 'berry', color: '#C8102E', emoji: '🍒' },
+  { id: 'gooseberry', hy: 'Կոկռոշ', aliases: ['gooseberry', 'kokrosh', 'kryzhovnik'], category: 'berry', color: '#9BBF4A', emoji: '🍏' },
   { id: 'blueberry', hy: 'Հապալաս', aliases: ['blueberry', 'hapalas', 'chernika'], category: 'berry', color: '#4059AD', emoji: '🫐' },
 
   // ─── Բանջարեղեն ───────────────────────────────────────────────────────────
@@ -81,9 +80,9 @@ export const PRODUCE: Produce[] = [
   { id: 'red-cabbage', hy: 'Կարմիր կաղամբ', aliases: ['red cabbage', 'karmir kaghamb'], category: 'vegetable', color: '#7E3F8F', emoji: '🥬' },
   { id: 'cauliflower', hy: 'Ծաղկակաղամբ', aliases: ['cauliflower', 'tsaghkakaghamb'], category: 'vegetable', color: '#E5D9BE', emoji: '🥦' },
   { id: 'broccoli', hy: 'Բրոկոլի', aliases: ['broccoli', 'brokoli'], category: 'vegetable', color: '#3E7C36', emoji: '🥦' },
-  { id: 'beetroot', hy: 'Բազուկ', aliases: ['beetroot', 'bazuk', 'svekla'], category: 'vegetable', color: '#8E1B4A', emoji: '🟣' },
-  { id: 'radish', hy: 'Բողկ', aliases: ['radish', 'boghk', 'redis'], category: 'vegetable', color: '#E03B48', emoji: '🔴' },
-  { id: 'white-radish', hy: 'Սպիտակ բողկ', aliases: ['white radish', 'spitak boghk', 'daikon'], category: 'vegetable', color: '#E8E0D0', emoji: '⚪' },
+  { id: 'beetroot', hy: 'Բազուկ', aliases: ['beetroot', 'bazuk', 'svekla'], category: 'vegetable', color: '#8E1B4A', emoji: '🍠' },
+  { id: 'radish', hy: 'Բողկ', aliases: ['radish', 'boghk', 'redis'], category: 'vegetable', color: '#E03B48', emoji: '🧅' },
+  { id: 'white-radish', hy: 'Սպիտակ բողկ', aliases: ['white radish', 'spitak boghk', 'daikon'], category: 'vegetable', color: '#E8E0D0', emoji: '🧄' },
   { id: 'turnip', hy: 'Շաղգամ', aliases: ['turnip', 'shaghgam', 'repa'], category: 'vegetable', color: '#DCC7A8', emoji: '🥔' },
   { id: 'eggplant', hy: 'Բադրիջան', aliases: ['eggplant', 'badrijan', 'baklazhan'], category: 'vegetable', color: '#6A4C93', emoji: '🍆' },
   { id: 'pepper', hy: 'Պղպեղ (կանաչ)', aliases: ['bell pepper', 'peghpegh', 'perec'], category: 'vegetable', color: '#3FA34D', emoji: '🫑' },
@@ -149,7 +148,7 @@ export const PRODUCE: Produce[] = [
 const DRYABLE = new Set([
   // Fruit — the classic չիր
   'apple', 'pear', 'quince', 'peach', 'nectarine', 'apricot', 'plum',
-  'cherry-plum', 'sweet-cherry', 'sour-cherry', 'grape', 'grape-white',
+  'sweet-cherry', 'sour-cherry', 'grape', 'grape-white',
   'melon', 'fig', 'persimmon', 'mulberry', 'cornelian-cherry', 'rosehip',
   'hawthorn', 'medlar', 'jujube', 'sea-buckthorn',
   // Berries

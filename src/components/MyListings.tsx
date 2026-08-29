@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Modal from './Modal';
 import { produceEmoji } from '../data/produce';
 import { formatPrice, timeLeft } from '../lib/format';
-import { listingColor, SALE_TYPE_SHORT } from './markers';
+import { listingColor, SALE_TYPE_SHORT, swatchStyle } from './markers';
 import { IconArchive, IconRefresh, IconTrash } from './Icons';
 import { listingTitle, type Listing } from '../lib/types';
 
@@ -167,11 +167,11 @@ function MyListingCard({
 
       <div className="mine-top">
         <span
-          className="listing-thumb"
-          style={{ background: `${listingColor(listing.productId, listing.form)}22` }}
+          className="produce-swatch listing-thumb"
+          style={swatchStyle(listingColor(listing.productId, listing.form))}
           aria-hidden="true"
         >
-          {listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}
+          <span>{listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}</span>
         </span>
         <div className="listing-main">
           <div className="listing-title">

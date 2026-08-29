@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import Modal from './Modal';
 import { IconSearch } from './Icons';
+import { swatchStyle } from './markers';
 import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
@@ -114,11 +115,11 @@ function ProduceGroup({
             onClick={() => onToggle(produce)}
           >
             <span
-              className="produce-dot"
-              style={{ background: produce.color }}
+              className="produce-swatch produce-dot"
+              style={swatchStyle(produce.color)}
               aria-hidden="true"
             >
-              {produce.emoji}
+              <span>{produce.emoji}</span>
             </span>
             <span>{produce.hy}</span>
           </button>

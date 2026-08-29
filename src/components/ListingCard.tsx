@@ -1,7 +1,7 @@
 import { produceEmoji } from '../data/produce';
 import { formatDistance } from '../lib/geo';
 import { formatPrice, formatQuantity, isExpiringSoon, timeLeft } from '../lib/format';
-import { listingColor, SALE_TYPE_SHORT } from './markers';
+import { listingColor, SALE_TYPE_SHORT, swatchStyle } from './markers';
 import { IconClock, IconRoute } from './Icons';
 import { listingTitle, type MeasuredListing } from '../lib/types';
 
@@ -22,11 +22,11 @@ export default function ListingCard({ listing, selected, onSelect, now }: Listin
       onClick={onSelect}
     >
       <span
-        className="listing-thumb"
-        style={{ background: `${listingColor(listing.productId, listing.form)}22` }}
+        className="produce-swatch listing-thumb"
+        style={swatchStyle(listingColor(listing.productId, listing.form))}
         aria-hidden="true"
       >
-        {listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}
+        <span>{listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}</span>
       </span>
 
       <span className="listing-main">

@@ -1,5 +1,6 @@
 import L from 'leaflet';
 import { produceColor, produceEmoji } from '../data/produce';
+import type { CSSProperties } from 'react';
 import type { ProduceForm, SaleType } from '../lib/types';
 
 /**
@@ -134,3 +135,23 @@ export const SALE_TYPE_SHORT: Record<SaleType, string> = {
   wholesale: 'Մեծածախ',
   both: 'Երկուսն էլ',
 };
+
+/**
+ * Inline custom properties for the round produce swatches.
+ *
+ * A swatch used to be a disc filled with the crop's own colour with the emoji
+ * laid on top, which hid every crop whose colour matched its own fruit — an
+ * olive on olive green, a cherry on cherry red. The fill is now white and the
+ * colour has moved to the ring and the glow around it, so the produce reads
+ * against a clean ground while the hue still identifies it at a glance.
+ *
+ * Alpha is baked into 8-digit hex rather than color-mix(), which Safari only
+ * learned in 16.2 — a good share of the phones reaching this site are older.
+ */
+export function swatchStyle(color: string): CSSProperties {
+  return {
+    '--fruit': color,
+    '--fruit-soft': `${color}1f`,
+    '--fruit-glow': `${color}55`,
+  } as CSSProperties;
+}

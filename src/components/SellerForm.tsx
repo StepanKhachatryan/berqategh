@@ -8,6 +8,7 @@ import { isInsideArmenia } from '../lib/geo';
 import { LOCATE_MESSAGES, type LocateStatus } from '../lib/useGeolocation';
 import type { LatLng, ListingDraft, ProduceForm, SaleType } from '../lib/types';
 import { IconCheck, IconChevronDown, IconWarn } from './Icons';
+import { swatchStyle } from './markers';
 
 const SALE_OPTIONS: { value: SaleType; label: string; emoji: string }[] = [
   { value: 'retail', label: 'Միայն մանրածախ', emoji: '🛍️' },
@@ -238,11 +239,11 @@ export default function SellerForm({
             onClick={() => setPickerOpen(true)}
           >
             <span
-              className="picker-swatch"
-              style={{ background: product?.color ?? 'var(--bg-tint)' }}
+              className="produce-swatch picker-swatch"
+              style={swatchStyle(product?.color ?? '#9aa79c')}
               aria-hidden="true"
             >
-              {product?.emoji ?? '🧺'}
+              <span>{product?.emoji ?? '🧺'}</span>
             </span>
             <span className="picker-text">
               {product ? (

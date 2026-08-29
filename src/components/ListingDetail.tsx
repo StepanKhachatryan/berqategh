@@ -8,7 +8,7 @@ import {
   isExpiringSoon,
   timeLeft,
 } from '../lib/format';
-import { listingColor, SALE_TYPE_LABELS } from './markers';
+import { listingColor, SALE_TYPE_LABELS, swatchStyle } from './markers';
 import { IconPhone, IconPin } from './Icons';
 import { usePlaceName } from '../lib/usePlaceName';
 import { listingTitle, type MeasuredListing } from '../lib/types';
@@ -37,8 +37,12 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   return (
     <Modal title={title} subtitle={SALE_TYPE_LABELS[listing.saleType]} onClose={onClose}>
       <div className="detail-hero" style={{ background: `${color}1f` }}>
-        <div className="detail-thumb" aria-hidden="true">
-          {listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}
+        <div
+          className="produce-swatch detail-thumb"
+          style={swatchStyle(color)}
+          aria-hidden="true"
+        >
+          <span>{listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}</span>
         </div>
         <div>
           <h2>{title}</h2>
