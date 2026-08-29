@@ -19,14 +19,14 @@ export function timeLeft(expiresAt: string, now: number = Date.now()): string {
   const hours = totalHours % 24;
   const minutes = totalMinutes % 60;
 
-  // "Դեռ 118 ժ" would be true and useless; days are what a five-day window
-  // reads as, and minutes only start mattering in the last hour.
+  // "Դեռ 118 ժ" would be true and useless; days are the main unit
+  // sellers track, and minutes only start mattering in the last hour.
   if (days > 0) return `Դեռ ${days} օր ${hours} ժ`;
   if (totalHours === 0) return `Դեռ ${minutes} ր`;
   return `Դեռ ${totalHours} ժ ${minutes} ր`;
 }
 
-/** Last few hours of a five-day window — worth flagging to the seller. */
+/** Last few hours before expiration — worth flagging to the seller. */
 export function isExpiringSoon(expiresAt: string, now: number = Date.now()): boolean {
   const ms = new Date(expiresAt).getTime() - now;
   return ms > 0 && ms < 6 * 3600 * 1000;

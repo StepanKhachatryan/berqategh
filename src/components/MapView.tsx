@@ -260,7 +260,7 @@ export default function MapView({
       />
 
       <div className="map-floats">
-        {/* Kept at the top of the stack and always on screen — the five-day rule is
+        {/* Kept at the top of the stack and always on screen — the guide is
             something people need to be able to look up at any moment. */}
         <button
           type="button"

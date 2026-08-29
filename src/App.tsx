@@ -93,7 +93,7 @@ export default function App() {
     if (role === 'seller') void loadMine();
   }, [role, loadMine]);
 
-  // Countdowns and the five-day cutoff both read this clock.
+  // Countdowns and listing expiration both read this clock.
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), TICK_MS);
     return () => window.clearInterval(timer);
@@ -147,7 +147,7 @@ export default function App() {
     setRole(picked);
     setSelectedId(null);
 
-    // The five-day rule shapes how the whole platform behaves, so it is explained
+    // The listing duration is core to how the platform works, so it is explained
     // once, unprompted, the first time somebody arrives — not left behind a
     // button they may never press.
     if (localStorage.getItem(GUIDE_KEY)) {

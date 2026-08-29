@@ -46,6 +46,7 @@ export interface ListingDraft {
   note: string | null;
   lat: number;
   lng: number;
+  durationDays?: number;
 }
 
 export type DistanceMode = 'road' | 'straight';

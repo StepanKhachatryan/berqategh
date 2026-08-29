@@ -6,7 +6,7 @@
 ուղիղ։
 
 > A GIS marketplace connecting Armenian smallholder farmers directly with buyers.
-> Sellers post a five-day offer pinned to their location; buyers browse a live map
+> Sellers post time-limited offers pinned to their location; buyers browse a live map
 > and filter by road distance, price, product, fresh-or-dried and wholesale/retail
 > channel.
 
@@ -29,9 +29,9 @@
 | Հեռախոս | Դաշտն արդեն ունի ամրակայված `+374`, լրացվում է միայն 8 նիշը՝ առանց առջևի զրոյի |
 | Տեղադիրք | Որոշվում է ավտոմատ (GPS)։ Եթե վաճառողն այս պահին վաճառքի կետում չէ, քարտեզը շարժելով նշում է ճիշտ կետը։ Կետը պետք է լինի Հայաստանի սահմաններում |
 
-Հայտարարությունը քարտեզին մնում է **5 օր**, ապա անհետանում է և արխիվացվում։
+Հայտարարությունը քարտեզին մնում է ընտրված ժամկետով՝ **5 օր, 10 օր, 1 ամիս կամ 3 ամիս**, ապա անհետանում է և արխիվացվում։
 Վաճառողը «Իմ հայտարարությունները» բաժնում տեսնում է մնացած ժամանակը, կարող է
-վաղաժամ հանել քարտեզից, ջնջել կամ արխիվից **կրկին հրապարակել** նոր 5 օրով։
+վաղաժամ հանել քարտեզից, ջնջել կամ արխիվից **կրկին հրապարակել**։
 
 ### Messenger-ի և նման հավելվածների ներսում
 

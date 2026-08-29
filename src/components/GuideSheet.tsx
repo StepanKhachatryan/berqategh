@@ -9,10 +9,10 @@ interface GuideSheetProps {
 }
 
 /**
- * The user guide. Its first and largest section is the five-day rule, because
- * that is the one thing about this platform people have to understand before
- * they use it — a seller needs to know their listing will vanish, and a buyer
- * needs to know that everything they see is genuinely current.
+ * The user guide. Its first and largest section is the listing expiration rule,
+ * because that is the one thing about this platform people have to understand
+ * before they use it — a seller needs to know their listing will vanish, and a
+ * buyer needs to know that everything they see is genuinely current.
  */
 export default function GuideSheet({ role, onClose }: GuideSheetProps) {
   return (
@@ -31,12 +31,12 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
       <section className="guide-hero">
         <div className="guide-hero-badge">
           <IconClock size={20} />
-          5 օր
+          Ժամկետ
         </div>
-        <h3>Ամեն հայտարարություն ապրում է 5 օր</h3>
+        <h3>Ամեն հայտարարություն ունի ժամկետ</h3>
         <p>
-          Հրապարակելուց 5 օր հետո հայտարարությունն ինքնաշխատ հեռանում է քարտեզից և
-          անցնում ձեր արխիվ։ Ոչինչ չի կորչում — արխիվից մեկ հպումով նորից հրապարակում եք։
+          Հրապարակելուց պես հայտարարությունն ինքնաշխատ հեռանում է քարտեզից և
+          անցնում ձեր արխիվ։ Դուք ընտրում եք ժամկետը՝ 5 օր, 10 օր, 1 ամիս կամ 3 ամիս։ Ոչինչ չի կորչում — արխիվից մեկ հպումով նորից հրապարակում եք։
         </p>
       </section>
 
@@ -57,8 +57,8 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
             դադարում են վստահել քարտեզին։
           </li>
           <li>
-            <b>Դրա փոխարեն դուք ստանում եք երաշխիք։</b> Քարտեզի վրա ամեն ինչ թարմ է — ոչ
-            մի հայտարարություն 5 օրից հին չէ։
+            <b>Դրա փոխարեն դուք ստանում եք երաշխիք։</b> Քարտեզի վրա ամեն ինչ թարմ է — ամեն
+            հայտարարություն ունի սահմանված ժամկետ, որից հետո ինքնաշխատ հանվում է։
           </li>
         </ul>
       </section>
@@ -80,6 +80,9 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
             <li>
               Նշե՛ք վաճառքի կետը։ Համակարգը փորձում է ինքը գտնել, բայց կարող եք գրել
               գյուղի անունը կամ շարժել քարտեզը։
+            </li>
+            <li>
+              Ընտրե՛ք հայտարարության ժամկետը՝ 5 օր, 10 օր, 1 ամիս կամ 3 ամիս։ Հետո կարող եք ցանկացած պահի վերհրապարակել։
             </li>
           </ol>
           <p className="guide-note">

@@ -32,7 +32,7 @@ function toListing(row: ListingRow | MyListingRow): Listing {
 }
 
 /**
- * Every live listing. The five-day window is enforced here as well as in the read
+ * Every live listing. The expiration is enforced here as well as in the read
  * policy, so a listing leaves the map the moment it expires rather than when
  * the archive job next runs.
  */
@@ -64,6 +64,10 @@ export async function fetchMyListings(): Promise<Listing[]> {
 }
 
 export async function createListing(draft: ListingDraft): Promise<Listing> {
+  const duration = draft.durationDays ?? 30;
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + duration);
+
   const { data, error } = await supabase()
     .from('listings')
     .insert({
@@ -81,6 +85,7 @@ export async function createListing(draft: ListingDraft): Promise<Listing> {
       note: draft.note,
       lat: draft.lat,
       lng: draft.lng,
+      expires_at: expiresAt.toISOString(),
     })
     .select(COLUMNS)
     .single();
@@ -90,7 +95,7 @@ export async function createListing(draft: ListingDraft): Promise<Listing> {
 }
 
 /**
- * Pulls a listing off the map early, before its five days are up.
+ * Pulls a listing off the map early, before its expiration.
  *
  * Archiving is an RPC because it makes the row fail the public read policy, and
  * Postgres enforces that policy against the updated row — a direct UPDATE would
@@ -111,7 +116,7 @@ export async function deleteListing(id: string): Promise<void> {
   if (data !== true) throw new Error('Հայտարարությունը չգտնվեց');
 }
 
-/** Puts an archived listing back on the map with a fresh five-day window. */
+/** Puts an archived listing back on the map with a fresh 30-day window. */
 export async function republishListing(listing: Listing): Promise<Listing> {
   return createListing({
     productId: listing.productId,

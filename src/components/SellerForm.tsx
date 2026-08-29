@@ -15,6 +15,13 @@ const SALE_OPTIONS: { value: SaleType; label: string; emoji: string }[] = [
   { value: 'both', label: 'Երկուսն էլ', emoji: '💎' },
 ];
 
+const DURATION_OPTIONS: { value: number; label: string }[] = [
+  { value: 5, label: '5 օր' },
+  { value: 10, label: '10 օր' },
+  { value: 30, label: '1 ամիս' },
+  { value: 90, label: '3 ամիս' },
+];
+
 const REMEMBERED_KEY = 'berqategh.seller';
 
 interface Remembered {
@@ -70,6 +77,7 @@ export default function SellerForm({
   // Whether the pin came from a deliberate choice rather than from the device.
   // Once it did, the geolocation status stops being what the seller needs told.
   const [pickedByHand, setPickedByHand] = useState(false);
+  const [durationDays, setDurationDays] = useState(30);
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -159,6 +167,7 @@ export default function SellerForm({
         note: note.trim() || null,
         lat: location.lat,
         lng: location.lng,
+        durationDays,
       });
 
       localStorage.setItem(
@@ -186,7 +195,9 @@ export default function SellerForm({
     <>
       <Modal
         title="Տեղադրել բերք"
-        subtitle="Հայտարարությունը քարտեզին կմնա 5 օր"
+        subtitle={`Հայտարարությունը քարտեզին կմնա ${
+          durationDays === 30 ? '1 ամիս' : durationDays === 90 ? '3 ամիս' : `${durationDays} օր`
+        }`}
         onClose={onClose}
         footer={
           <button
@@ -409,6 +420,30 @@ export default function SellerForm({
           {showErrors && errors.location ? (
             <p className="field-error">{errors.location}</p>
           ) : null}
+        </div>
+
+        {/* ─── duration ────────────────────────────────────────────────── */}
+        <div className="field">
+          <label className="field-label">
+            Հայտարարության տեւողությունը <span className="req">*</span>
+          </label>
+          <div className="segmented">
+            {DURATION_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className="seg"
+                aria-pressed={durationDays === option.value}
+                onClick={() => setDurationDays(option.value)}
+              >
+                <span className="seg-label">{option.label}</span>
+              </button>
+            ))}
+          </div>
+          <p className="field-hint">
+            Ընտրե՛ք, թե քանի օր հայտարարությունը պետք է քարտեզին մնա։ Կարող եք նաև ավելի ուշ
+            վերհրապարակել այն։
+          </p>
         </div>
 
         {/* ─── optional extras ─────────────────────────────────────────── */}

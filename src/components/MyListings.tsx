@@ -6,8 +6,6 @@ import { listingColor, SALE_TYPE_SHORT } from './markers';
 import { IconArchive, IconRefresh, IconTrash } from './Icons';
 import { listingTitle, type Listing } from '../lib/types';
 
-/** Matches the five-day default in supabase/migrations. */
-const WINDOW_MS = 5 * 24 * 3600 * 1000;
 
 interface MyListingsProps {
   listings: Listing[];
@@ -156,7 +154,8 @@ function MyListingCard({
   actions: React.ReactNode;
 }) {
   const remaining = new Date(listing.expiresAt).getTime() - now;
-  const percent = Math.max(0, Math.min(100, (remaining / WINDOW_MS) * 100));
+  const total = new Date(listing.expiresAt).getTime() - new Date(listing.createdAt).getTime();
+  const percent = Math.max(0, Math.min(100, (remaining / total) * 100));
 
   return (
     <article className={`mine-card${archived ? ' is-archived' : ''}`} aria-busy={busy}>
