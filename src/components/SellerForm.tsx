@@ -200,15 +200,31 @@ export default function SellerForm({
         }`}
         onClose={onClose}
         footer={
-          <button
-            type="button"
-            className="btn btn-cta btn-lg btn-block"
-            onClick={handleSubmit}
-            disabled={submitting}
-          >
-            {submitting ? <span className="spinner" /> : <IconCheck />}
-            {submitting ? 'Պահպանվում է…' : 'Հրապարակել քարտեզին'}
-          </button>
+          <>
+            {/* Kept beside the button, not at the foot of the form. Down there it
+                sat below the fold of a long scrolling sheet, so a rejected
+                publish looked to the seller like the button did nothing. */}
+            {failure ? (
+              <div className="detail-note" style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                <IconWarn />
+                <span>Չհաջողվեց հրապարակել՝ {failure}</span>
+              </div>
+            ) : showErrors && !isValid ? (
+              <div className="detail-note" style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                <IconWarn />
+                <span>Ձևը լրացված չէ․ վերևում կարմիրով նշված են լրացնելու դաշտերը։</span>
+              </div>
+            ) : null}
+            <button
+              type="button"
+              className="btn btn-cta btn-lg btn-block"
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
+              {submitting ? <span className="spinner" /> : <IconCheck />}
+              {submitting ? 'Պահպանվում է…' : 'Հրապարակել քարտեզին'}
+            </button>
+          </>
         }
       >
         {/* ─── product ─────────────────────────────────────────────────── */}
@@ -475,12 +491,6 @@ export default function SellerForm({
           />
         </div>
 
-        {failure ? (
-          <div className="detail-note" style={{ display: 'flex', gap: 10 }}>
-            <IconWarn />
-            <span>Չհաջողվեց հրապարակել՝ {failure}</span>
-          </div>
-        ) : null}
       </Modal>
 
       {pickerOpen ? (
