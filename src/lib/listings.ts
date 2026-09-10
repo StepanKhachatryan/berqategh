@@ -116,21 +116,36 @@ export async function deleteListing(id: string): Promise<void> {
   if (data !== true) throw new Error('Հայտարարությունը չգտնվեց');
 }
 
-/** Puts an archived listing back on the map with a fresh 30-day window. */
-export async function republishListing(listing: Listing): Promise<Listing> {
-  return createListing({
-    productId: listing.productId,
-    productName: listing.productName,
-    category: listing.category,
-    saleType: listing.saleType,
-    form: listing.form,
-    retailPrice: listing.retailPrice,
-    wholesalePrice: listing.wholesalePrice,
-    quantityKg: listing.quantityKg,
-    phone: listing.phone,
-    sellerName: listing.sellerName,
-    note: listing.note,
-    lat: listing.lat,
-    lng: listing.lng,
+/**
+ * The seller's three-digit recovery code, minted on first use and then stable
+ * until they have nothing left on the map.
+ *
+ * The listing's phone number is the other half of the pair, and the server
+ * reads it from the caller's own live listings rather than taking it as an
+ * argument — otherwise anyone could point somebody else's number at their own
+ * device. Returns null when this device has published nothing.
+ */
+export async function issueRecoveryCode(): Promise<string | null> {
+  const { data, error } = await supabase().rpc('issue_recovery_code');
+
+  if (error) throw new Error(error.message);
+  return data ?? null;
+}
+
+/**
+ * Re-files every listing published from `phone` onto this device.
+ *
+ * Nothing secret comes back: the server moves the rows to the token this
+ * device is already sending, so a seller whose browser storage was wiped picks
+ * up exactly where they left off. Returns how many listings were claimed, and
+ * zero when the code is wrong.
+ */
+export async function claimListings(phone: string, code: string): Promise<number> {
+  const { data, error } = await supabase().rpc('claim_listings', {
+    p_phone: phone,
+    p_code: code,
   });
+
+  if (error) throw new Error(error.message);
+  return data ?? 0;
 }

@@ -6,6 +6,7 @@ import FilterSheet from './components/FilterSheet';
 import SellerForm from './components/SellerForm';
 import ListingDetail from './components/ListingDetail';
 import MyListings from './components/MyListings';
+import RecoverySheet from './components/RecoverySheet';
 import GuideSheet from './components/GuideSheet';
 import { ToastStack, useToasts } from './components/Toasts';
 import { IconArchive, IconPlus } from './components/Icons';
@@ -16,7 +17,8 @@ import {
   deleteListing,
   fetchActiveListings,
   fetchMyListings,
-  republishListing,
+  issueRecoveryCode,
+  claimListings,
 } from './lib/listings';
 import { isConfigured } from './lib/supabase';
 import { applyFilters, countActiveFilters, sortListings, type SortKey } from './lib/filter';
@@ -30,7 +32,7 @@ const GUIDE_KEY = 'berqategh.guideSeen';
 const REFRESH_MS = 60_000;
 const TICK_MS = 30_000;
 
-type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide';
+type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide' | 'recover';
 
 export default function App() {
   const [role, setRole] = useState<Role | null>(
@@ -41,6 +43,8 @@ export default function App() {
   const [mine, setMine] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMine, setLoadingMine] = useState(false);
+  // Issued by the server on first publish and stable while anything is live.
+  const [recoveryCode, setRecoveryCode] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -76,6 +80,8 @@ export default function App() {
     setLoadingMine(true);
     try {
       setMine(await fetchMyListings());
+      // Best effort: a seller with nothing live has no code, which is fine.
+      setRecoveryCode(await issueRecoveryCode().catch(() => null));
     } catch (error) {
       push('error', error instanceof Error ? error.message : 'Չհաջողվեց բեռնել');
     } finally {
@@ -196,7 +202,10 @@ export default function App() {
     setSheet('none');
     setSelectedId(created.id);
     setFocus({ point: { lat: created.lat, lng: created.lng }, zoom: 14, nonce: Date.now() });
-    push('success', 'Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի 5 օր։');
+    const days = draft.durationDays ?? 30;
+    const span = days === 30 ? '1 ամիս' : days === 90 ? '3 ամիս' : `${days} օր`;
+    push('success', `Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի ${span}։`);
+    void loadMine();
   };
 
   const handleArchive = async (listing: Listing) => {
@@ -224,15 +233,14 @@ export default function App() {
     }
   };
 
-  const handleRepublish = async (listing: Listing) => {
-    try {
-      const created = await republishListing(listing);
-      setListings((current) => [created, ...current]);
-      setMine((current) => [created, ...current]);
-      push('success', 'Հայտարարությունը կրկին ակտիվ է 5 օրով։');
-    } catch (error) {
-      push('error', error instanceof Error ? error.message : 'Չհաջողվեց');
+  const handleRecover = async (phone: string, code: string): Promise<number> => {
+    const claimed = await claimListings(phone, code);
+    if (claimed > 0) {
+      await Promise.all([loadMine(), loadListings()]);
+      setSheet('mine');
+      push('success', `Վերականգնվեց ${claimed} հայտարարություն։`);
     }
+    return claimed;
   };
 
   if (!role) return <RoleGate onPick={handlePickRole} />;
@@ -379,9 +387,14 @@ export default function App() {
           now={now}
           onArchive={handleArchive}
           onDelete={handleDelete}
-          onRepublish={handleRepublish}
+          recoveryCode={recoveryCode}
+          onRecover={() => setSheet('recover')}
           onClose={() => setSheet('none')}
         />
+      ) : null}
+
+      {sheet === 'recover' ? (
+        <RecoverySheet onRecover={handleRecover} onClose={() => setSheet('mine')} />
       ) : null}
 
       {selected && sheet === 'none' ? (

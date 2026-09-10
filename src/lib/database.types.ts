@@ -62,6 +62,8 @@ export type Database = {
       archive_listing: { Args: { p_id: string }; Returns: boolean };
       delete_listing: { Args: { p_id: string }; Returns: boolean };
       archive_expired_listings: { Args: never; Returns: number };
+      issue_recovery_code: { Args: Record<string, never>; Returns: string | null };
+      claim_listings: { Args: { p_phone: string; p_code: string }; Returns: number };
     };
     Enums: {
       [_ in never]: never;

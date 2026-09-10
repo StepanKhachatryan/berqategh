@@ -3,7 +3,7 @@ import Modal from './Modal';
 import { produceEmoji } from '../data/produce';
 import { formatPrice, timeLeft } from '../lib/format';
 import { listingColor, SALE_TYPE_SHORT, swatchStyle } from './markers';
-import { IconArchive, IconRefresh, IconTrash } from './Icons';
+import { IconArchive, IconTrash } from './Icons';
 import { listingTitle, type Listing } from '../lib/types';
 
 
@@ -13,7 +13,9 @@ interface MyListingsProps {
   now: number;
   onArchive: (listing: Listing) => Promise<void>;
   onDelete: (listing: Listing) => Promise<void>;
-  onRepublish: (listing: Listing) => Promise<void>;
+  /** The seller's recovery code, once the server has issued one. */
+  recoveryCode: string | null;
+  onRecover: () => void;
   onClose: () => void;
 }
 
@@ -23,7 +25,8 @@ export default function MyListings({
   now,
   onArchive,
   onDelete,
-  onRepublish,
+  recoveryCode,
+  onRecover,
   onClose,
 }: MyListingsProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -48,14 +51,32 @@ export default function MyListings({
       subtitle={`${live.length} ակտիվ · ${past.length} արխիվում`}
       onClose={onClose}
     >
+      {recoveryCode ? (
+        <div className="code-card">
+          <div className="code-card-text">
+            <b>Ձեր վերականգնման կոդը</b>
+            <span>
+              Պահե՛ք այս կոդը։ Հեռախոսահամարի հետ միասին այն վերադարձնում է ձեր
+              հայտարարությունները ցանկացած սարքի վրա, եթե բրաուզերի հիշողությունը մաքրվի։
+            </span>
+          </div>
+          <div className="code-card-code">{recoveryCode}</div>
+        </div>
+      ) : null}
+
       {loading ? (
         <p className="empty-note">Բեռնվում է…</p>
       ) : listings.length === 0 ? (
-        <p className="empty-note">
-          Դուք դեռ հայտարարություն չեք տեղադրել։
-          <br />
-          Սեղմե՛ք «Տեղադրել բերք»՝ սկսելու համար։
-        </p>
+        <>
+          <p className="empty-note">
+            Դուք դեռ հայտարարություն չեք տեղադրել։
+            <br />
+            Սեղմե՛ք «Տեղադրել բերք»՝ սկսելու համար։
+          </p>
+          <button type="button" className="btn btn-ghost btn-block" onClick={onRecover}>
+            Արդեն տեղադրե՞լ եք ուրիշ սարքից
+          </button>
+        </>
       ) : (
         <div className="mine-list">
           {live.map((listing) => (
@@ -111,31 +132,29 @@ export default function MyListings({
               archived
               busy={busyId === listing.id}
               actions={
-                <>
-                  <button
-                    type="button"
-                    className="btn btn-green btn-sm"
-                    onClick={() => run(listing, onRepublish)}
-                    disabled={busyId === listing.id}
-                  >
-                    <IconRefresh />
-                    Կրկին հրապարակել
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-sm"
-                    onClick={() => run(listing, onDelete)}
-                    disabled={busyId === listing.id}
-                  >
-                    <IconTrash />
-                    Ջնջել
-                  </button>
-                </>
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  onClick={() => run(listing, onDelete)}
+                  disabled={busyId === listing.id}
+                >
+                  <IconTrash />
+                  Ջնջել
+                </button>
               }
             />
           ))}
         </div>
       )}
+
+      <button
+        type="button"
+        className="btn btn-ghost btn-block"
+        style={{ marginTop: 14 }}
+        onClick={onRecover}
+      >
+        Վերականգնել այլ սարքից
+      </button>
     </Modal>
   );
 }
