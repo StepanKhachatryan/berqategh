@@ -21,6 +21,7 @@ import {
   claimListings,
 } from './lib/listings';
 import { isConfigured } from './lib/supabase';
+import { record, recordVisit } from './lib/analytics';
 import { applyFilters, countActiveFilters, sortListings, type SortKey } from './lib/filter';
 import { useDistances } from './lib/useDistances';
 import { useGeolocation } from './lib/useGeolocation';
@@ -99,6 +100,18 @@ export default function App() {
     if (role === 'seller') void loadMine();
   }, [role, loadMine]);
 
+  // One visit per browser session. It waits a few seconds for a position so the
+  // region can be filled in when the visitor let the app find them, then
+  // records regardless — recordVisit ignores every call after the first.
+  useEffect(() => {
+    if (position) {
+      recordVisit(position);
+      return;
+    }
+    const timer = window.setTimeout(() => recordVisit(null), 6000);
+    return () => window.clearTimeout(timer);
+  }, [position]);
+
   // Countdowns and listing expiration both read this clock.
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), TICK_MS);
@@ -152,6 +165,7 @@ export default function App() {
     localStorage.setItem(ROLE_KEY, picked);
     setRole(picked);
     setSelectedId(null);
+    record({ kind: 'role', role: picked, origin: position });
 
     // The listing duration is core to how the platform works, so it is explained
     // once, unprompted, the first time somebody arrives — not left behind a
@@ -174,6 +188,12 @@ export default function App() {
     const listing = liveListings.find((entry) => entry.id === id);
     if (listing) {
       setFocus({ point: { lat: listing.lat, lng: listing.lng }, zoom: 14, nonce: Date.now() });
+      record({
+        kind: 'listing_open',
+        origin: position,
+        listingAt: { lat: listing.lat, lng: listing.lng },
+        productId: listing.productId,
+      });
     }
   };
 

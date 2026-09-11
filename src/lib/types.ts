@@ -22,7 +22,8 @@ export interface Listing {
   retailPrice: number | null;
   wholesalePrice: number | null;
   quantityKg: number | null;
-  phone: string;
+  /** Null once the listing has left the map: personal fields are cleared then. */
+  phone: string | null;
   sellerName: string | null;
   note: string | null;
   lat: number;

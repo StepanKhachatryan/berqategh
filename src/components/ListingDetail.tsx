@@ -1,5 +1,6 @@
 import Modal from './Modal';
 import { produceEmoji } from '../data/produce';
+import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
 import {
   formatLocalPhone,
@@ -129,10 +130,24 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
       {listing.note ? <p className="detail-note">{listing.note}</p> : null}
 
       <div style={{ display: 'grid', gap: 10 }}>
-        <a className="btn btn-cta btn-lg btn-block call-btn" href={`tel:${listing.phone}`}>
-          <IconPhone />
-          Զանգահարել՝ {formatLocalPhone(listing.phone)}
-        </a>
+        {/* The number is cleared once a listing leaves the map, so the call
+            button only exists while there is somebody to call. */}
+        {listing.phone ? (
+          <a
+            className="btn btn-cta btn-lg btn-block call-btn"
+            href={`tel:${listing.phone}`}
+            onClick={() =>
+              record({
+                kind: 'call_click',
+                listingAt: { lat: listing.lat, lng: listing.lng },
+                productId: listing.productId,
+              })
+            }
+          >
+            <IconPhone />
+            Զանգահարել՝ {formatLocalPhone(listing.phone)}
+          </a>
+        ) : null}
 
         <div className="nav-block">
           <span className="nav-label">

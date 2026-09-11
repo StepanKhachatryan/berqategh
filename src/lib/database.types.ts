@@ -21,7 +21,8 @@ export type ListingRow = {
   retail_price: number | null;
   wholesale_price: number | null;
   quantity_kg: number | null;
-  phone: string;
+  // Cleared the moment the listing leaves the map — see migration 0012.
+  phone: string | null;
   seller_name: string | null;
   note: string | null;
   lat: number;
@@ -29,6 +30,21 @@ export type ListingRow = {
   created_at: string;
   expires_at: string;
   archived_at: string | null;
+};
+
+/**
+ * Insert-only. The anon role has no SELECT privilege on this table at all, so
+ * there is no Row type worth writing — the browser records events and can
+ * never read back how the platform is doing.
+ */
+export type EventInsert = {
+  session_id: string;
+  kind: 'visit' | 'role' | 'listing_open' | 'call_click';
+  role?: 'buyer' | 'seller' | null;
+  device?: 'phone' | 'computer' | null;
+  visitor_marz?: string | null;
+  listing_marz?: string | null;
+  product_id?: string | null;
 };
 
 /** What `my_listings()` returns — the same columns, own rows only. */
@@ -50,6 +66,12 @@ export type Database = {
       listings: {
         Row: ListingRow;
         Insert: ListingInsert;
+        Update: never;
+        Relationships: [];
+      };
+      events: {
+        Row: EventInsert & { id: number; at: string };
+        Insert: EventInsert;
         Update: never;
         Relationships: [];
       };
