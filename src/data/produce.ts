@@ -1,4 +1,11 @@
-export type ProduceCategory = 'fruit' | 'berry' | 'vegetable' | 'green' | 'nut' | 'honey';
+export type ProduceCategory =
+  | 'fruit'
+  | 'berry'
+  | 'vegetable'
+  | 'green'
+  | 'nut'
+  | 'tropical'
+  | 'honey';
 
 export interface Produce {
   id: string;
@@ -18,6 +25,7 @@ export const CATEGORY_LABELS: Record<ProduceCategory, string> = {
   vegetable: 'Բանջարեղեն',
   green: 'Կանաչի և համեմունք',
   nut: 'Ընդեղեն',
+  tropical: 'Արևադարձային մրգեր',
   honey: 'Մեղր և մեղվամթերք',
 };
 
@@ -27,6 +35,9 @@ export const CATEGORY_ORDER: ProduceCategory[] = [
   'vegetable',
   'green',
   'nut',
+  // Not grown here — this group is for traders reselling imported fruit, so it
+  // sits after everything the country actually produces.
+  'tropical',
   'honey',
 ];
 
@@ -128,6 +139,14 @@ export const PRODUCE: Produce[] = [
   { id: 'chestnut', hy: 'Շագանակ', aliases: ['chestnut', 'shaganak', 'kashtan'], category: 'nut', color: '#7B4A2D', emoji: '🌰' },
   { id: 'pistachio', hy: 'Պիստակ', aliases: ['pistachio', 'pistak', 'fistashka'], category: 'nut', color: '#93C572', emoji: '🥜' },
   { id: 'sunflower-seed', hy: 'Արևածաղկի սերմ', aliases: ['sunflower seeds', 'arevatsaghki serm', 'semechki'], category: 'nut', color: '#6B4423', emoji: '🌻' },
+
+  // ─── Արևադարձային մրգեր ───────────────────────────────────────────────────
+  // Imported rather than harvested locally, so these carry no "չիր" form: the
+  // dried-fruit option here is an Armenian tradition about local orchards.
+  { id: 'banana', hy: 'Բանան', aliases: ['banana', 'banan'], category: 'tropical', color: '#F2C53D', emoji: '🍌' },
+  { id: 'mandarin', hy: 'Մանդարին', aliases: ['mandarin', 'mandarina', 'tangerine'], category: 'tropical', color: '#F58220', emoji: '🍊' },
+  { id: 'orange', hy: 'Նարինջ', aliases: ['orange', 'narinj', 'apelsin'], category: 'tropical', color: '#E8620C', emoji: '🍊' },
+  { id: 'pineapple', hy: 'Արքայախնձոր', aliases: ['pineapple', 'ananas', 'arqayakhndzor'], category: 'tropical', color: '#D9A441', emoji: '🍍' },
 
   // ─── Մեղր և մեղվամթերք ────────────────────────────────────────────────────
   { id: 'honey-flower', hy: 'Մեղր (ծաղկային)', aliases: ['honey', 'meghr', 'med', 'myod'], category: 'honey', color: '#E8A33D', emoji: '🍯' },
