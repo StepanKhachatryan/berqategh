@@ -1,5 +1,5 @@
-import { produceEmoji } from '../data/produce';
 import { formatDistance } from '../lib/geo';
+import ProduceMark from './ProduceMark';
 import { formatPrice, formatQuantity, isExpiringSoon, timeLeft } from '../lib/format';
 import { listingColor, SALE_TYPE_SHORT, swatchStyle } from './markers';
 import { IconClock, IconRoute } from './Icons';
@@ -26,7 +26,7 @@ export default function ListingCard({ listing, selected, onSelect, now }: Listin
         style={swatchStyle(listingColor(listing.productId, listing.form))}
         aria-hidden="true"
       >
-        <span>{listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}</span>
+        <ProduceMark productId={listing.productId} form={listing.form} />
       </span>
 
       <span className="listing-main">

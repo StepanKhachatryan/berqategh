@@ -1,5 +1,5 @@
 import Modal from './Modal';
-import { produceEmoji } from '../data/produce';
+import ProduceMark from './ProduceMark';
 import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
 import {
@@ -43,7 +43,7 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
           style={swatchStyle(color)}
           aria-hidden="true"
         >
-          <span>{listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}</span>
+          <ProduceMark productId={listing.productId} form={listing.form} />
         </div>
         <div>
           <h2>{title}</h2>

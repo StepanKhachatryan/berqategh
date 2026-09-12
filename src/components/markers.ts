@@ -1,5 +1,6 @@
 import L from 'leaflet';
 import { produceColor, produceEmoji } from '../data/produce';
+import { produceImage } from '../data/produceImages';
 import type { CSSProperties } from 'react';
 import type { ProduceForm, SaleType } from '../lib/types';
 
@@ -80,6 +81,26 @@ interface PinOptions {
   animate?: boolean;
 }
 
+/**
+ * What goes in the head of the pin: the crop's photograph when the catalogue
+ * has one, its emoji otherwise.
+ *
+ * Leaflet builds markers from an HTML string rather than from React, so this
+ * cannot be the shared ProduceMark component — but the two must agree, or the
+ * same tomato would be a picture in the list and a drawing on the map.
+ *
+ * Dried fruit keeps its emoji here, as it always has: the pin's colour already
+ * carries the չիր distinction, and the listing it opens shows the sun.
+ */
+function pinMark(productId: string, form: ProduceForm): string {
+  if (form === 'fresh') {
+    const src = produceImage(productId);
+    // The URL is emitted by the bundler, not by anything a seller typed.
+    if (src) return `<img class="pin-photo" src="${src}" alt="">`;
+  }
+  return produceEmoji(productId);
+}
+
 export function listingIcon({
   saleType,
   productId,
@@ -102,7 +123,7 @@ export function listingIcon({
 
   const html = `<div class="${body}" style="width:${W * scale}px;height:${H * scale}px">
     ${pinSvg(saleType, color, scale)}
-    <div class="pin-emoji" style="top:${(cy - 8) * scale}px;font-size:${16 * scale}px">${produceEmoji(productId)}</div>
+    <div class="pin-emoji" style="top:${(cy - 8) * scale}px;font-size:${16 * scale}px">${pinMark(productId, form)}</div>
   </div>`;
 
   return L.divIcon({

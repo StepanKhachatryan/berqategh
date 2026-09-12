@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Modal from './Modal';
-import { produceEmoji } from '../data/produce';
+import ProduceMark from './ProduceMark';
 import { formatPrice, timeLeft } from '../lib/format';
 import { listingColor, SALE_TYPE_SHORT, swatchStyle } from './markers';
 import { IconArchive, IconTrash } from './Icons';
@@ -190,7 +190,7 @@ function MyListingCard({
           style={swatchStyle(listingColor(listing.productId, listing.form))}
           aria-hidden="true"
         >
-          <span>{listing.form === 'dried' ? '☀️' : produceEmoji(listing.productId)}</span>
+          <ProduceMark productId={listing.productId} form={listing.form} />
         </span>
         <div className="listing-main">
           <div className="listing-title">

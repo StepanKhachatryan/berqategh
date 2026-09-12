@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import Modal from './Modal';
+import ProduceMark from './ProduceMark';
 import { IconSearch } from './Icons';
 import { swatchStyle } from './markers';
 import {
@@ -119,7 +120,7 @@ function ProduceGroup({
               style={swatchStyle(produce.color)}
               aria-hidden="true"
             >
-              <span>{produce.emoji}</span>
+              <ProduceMark productId={produce.id} />
             </span>
             <span>{produce.hy}</span>
           </button>

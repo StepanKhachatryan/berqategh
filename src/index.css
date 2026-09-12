@@ -507,6 +507,16 @@ h4 {
   pointer-events: none;
 }
 
+/* Same picture inside the map pin. Sized by the inline font-size the marker
+   sets for the emoji, so photograph and emoji land at identical scale. */
+.pin-photo {
+  width: 1.15em;
+  height: 1.15em;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .pin-selected svg {
   filter: drop-shadow(0 6px 12px rgba(16, 37, 26, 0.4));
 }
@@ -1283,6 +1293,16 @@ textarea.input {
     rgba(255, 255, 255, 0) 100%
   );
   pointer-events: none;
+}
+
+/* A photograph, where the catalogue has one. Held a little inside the ring so
+   the crop's own colour and the circle around it stay distinguishable, and
+   fitted rather than cropped so a long pepper is not sliced at both ends. */
+.produce-photo {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  display: block;
 }
 
 /* The crop itself sits above the gloss. */

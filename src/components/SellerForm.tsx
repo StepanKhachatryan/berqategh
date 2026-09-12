@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Modal from './Modal';
 import ProducePicker from './ProducePicker';
+import ProduceMark from './ProduceMark';
 import LocationPicker from './LocationPicker';
 import { canBeDried, CATEGORY_LABELS, getProduce, type Produce } from '../data/produce';
 import { isValidLocalPhone, PHONE_LOCAL_LENGTH, toE164 } from '../lib/format';
@@ -243,7 +244,7 @@ export default function SellerForm({
               style={swatchStyle(product?.color ?? '#9aa79c')}
               aria-hidden="true"
             >
-              <span>{product?.emoji ?? '🧺'}</span>
+              <ProduceMark productId={product?.id ?? ''} fallback="🧺" />
             </span>
             <span className="picker-text">
               {product ? (
