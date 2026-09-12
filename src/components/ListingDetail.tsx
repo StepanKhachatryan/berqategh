@@ -2,13 +2,7 @@ import Modal from './Modal';
 import ProduceMark from './ProduceMark';
 import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
-import {
-  formatLocalPhone,
-  formatPrice,
-  formatQuantity,
-  isExpiringSoon,
-  timeLeft,
-} from '../lib/format';
+import { formatLocalPhone, formatPrice, formatQuantity, postedAge } from '../lib/format';
 import { listingColor, SALE_TYPE_LABELS, swatchStyle } from './markers';
 import { IconPhone, IconPin } from './Icons';
 import { usePlaceName } from '../lib/usePlaceName';
@@ -24,7 +18,7 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   const color = listingColor(listing.productId, listing.form);
   const title = listingTitle(listing);
   const bothPrices = listing.retailPrice !== null && listing.wholesalePrice !== null;
-  const soon = isExpiringSoon(listing.expiresAt, now);
+  const posted = postedAge(listing.createdAt, now);
 
   const place = usePlaceName({ lat: listing.lat, lng: listing.lng });
 
@@ -103,10 +97,17 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
           </div>
         ) : null}
 
+        {/* Deliberately the age and not the time left. See postedAge. */}
         <div className="detail-row">
-          <span className="k">Հասանելի է</span>
-          <span className="v" style={soon ? { color: 'var(--cta-deep)' } : undefined}>
-            {timeLeft(listing.expiresAt, now)}
+          <span className="k">Հրապարակվել է</span>
+          <span className="v">
+            {posted.relative}
+            {posted.exact ? (
+              <span style={{ color: 'var(--ink-faint)', fontWeight: 500, fontSize: 12 }}>
+                {' '}
+                ({posted.exact})
+              </span>
+            ) : null}
           </span>
         </div>
 

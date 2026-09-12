@@ -1,6 +1,6 @@
 import { formatDistance } from '../lib/geo';
 import ProduceMark from './ProduceMark';
-import { formatPrice, formatQuantity, isExpiringSoon, timeLeft } from '../lib/format';
+import { formatPrice, formatQuantity, postedAge } from '../lib/format';
 import { listingColor, SALE_TYPE_SHORT, swatchStyle } from './markers';
 import { IconClock, IconRoute } from './Icons';
 import { listingTitle, type MeasuredListing } from '../lib/types';
@@ -13,7 +13,7 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing, selected, onSelect, now }: ListingCardProps) {
-  const soon = isExpiringSoon(listing.expiresAt, now);
+  const posted = postedAge(listing.createdAt, now);
 
   return (
     <button
@@ -69,9 +69,9 @@ export default function ListingCard({ listing, selected, onSelect, now }: Listin
             </span>
           ) : null}
 
-          <span className={soon ? 'meta-soon' : undefined}>
+          <span title="Երբ է հրապարակվել">
             <IconClock />
-            {timeLeft(listing.expiresAt, now)}
+            {posted.relative}
           </span>
 
           {listing.quantityKg !== null ? <span>{formatQuantity(listing.quantityKg)}</span> : null}

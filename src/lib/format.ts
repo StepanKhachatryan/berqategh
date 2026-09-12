@@ -26,10 +26,58 @@ export function timeLeft(expiresAt: string, now: number = Date.now()): string {
   return `Դեռ ${totalHours} ժ ${minutes} ր`;
 }
 
-/** Last few hours before expiration — worth flagging to the seller. */
-export function isExpiringSoon(expiresAt: string, now: number = Date.now()): boolean {
-  const ms = new Date(expiresAt).getTime() - now;
-  return ms > 0 && ms < 6 * 3600 * 1000;
+const dayMonth = new Intl.DateTimeFormat('hy-AM', { day: 'numeric', month: 'long' });
+const dayMonthYear = new Intl.DateTimeFormat('hy-AM', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+export interface PostedAge {
+  /** "Այսօր", "3 օր առաջ" — what the buyer reads first. */
+  relative: string;
+  /** The calendar date, but only once it adds something. */
+  exact: string | null;
+}
+
+/**
+ * How long a listing has been standing, for the buyer.
+ *
+ * Buyers used to be shown how long it had left, which sounds useful and is
+ * quietly misleading: a farmer who posts for three months and sells out in five
+ * days leaves behind a listing still promising eighty-five days of fruit that
+ * no longer exists. Nothing about the remaining window tells a buyer whether
+ * the produce is still there.
+ *
+ * Age does. This morning is worth a call; six weeks ago is a gamble; and the
+ * buyer is the one who should get to weigh that. The seller still sees the
+ * expiry on their own listings, where it is the number that matters.
+ *
+ * Days are counted between calendar dates rather than in 24-hour blocks, so
+ * something posted late last night reads as "Երեկ" and not as "Այսօր".
+ */
+export function postedAge(createdAt: string, now: number = Date.now()): PostedAge {
+  const created = new Date(createdAt);
+
+  // A clock skewed a few minutes ahead should not produce "in 1 day".
+  if (created.getTime() > now - 3600 * 1000) return { relative: 'Հենց նոր', exact: null };
+
+  const midnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const days = Math.round((midnight(new Date(now)) - midnight(created)) / 86400000);
+
+  if (days <= 0) return { relative: 'Այսօր', exact: null };
+  if (days === 1) return { relative: 'Երեկ', exact: null };
+
+  // Inside a week the date is just arithmetic the reader has to do; past that
+  // "23 օր առաջ" stops landing as a date and the real one starts helping.
+  const exact =
+    days < 7
+      ? null
+      : created.getFullYear() === new Date(now).getFullYear()
+        ? dayMonth.format(created)
+        : dayMonthYear.format(created);
+
+  return { relative: `${days} օր առաջ`, exact };
 }
 
 /** Turns the 8 local digits into the +374XXXXXXXX the database stores. */

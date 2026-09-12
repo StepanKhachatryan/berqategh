@@ -2055,11 +2055,6 @@ input[type='range']::-moz-range-thumb {
   gap: 4px;
 }
 
-.meta-soon {
-  color: var(--cta-deep);
-  font-weight: 700;
-}
-
 .meta-dist {
   font-weight: 700;
   color: var(--ink-soft);
