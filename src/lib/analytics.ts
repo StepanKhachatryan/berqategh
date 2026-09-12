@@ -61,7 +61,14 @@ function device(): 'phone' | 'computer' {
 }
 
 interface EventInput {
-  kind: 'visit' | 'role' | 'listing_open' | 'call_click';
+  kind:
+    | 'visit'
+    | 'role'
+    | 'listing_open'
+    | 'call_click'
+    | 'install_shown'
+    | 'install_accepted'
+    | 'install_dismissed';
   role?: Role;
   /** The visitor's own position, if the app already has one. */
   origin?: LatLng | null;

@@ -39,7 +39,14 @@ export type ListingRow = {
  */
 export type EventInsert = {
   session_id: string;
-  kind: 'visit' | 'role' | 'listing_open' | 'call_click';
+  kind:
+    | 'visit'
+    | 'role'
+    | 'listing_open'
+    | 'call_click'
+    | 'install_shown'
+    | 'install_accepted'
+    | 'install_dismissed';
   role?: 'buyer' | 'seller' | null;
   device?: 'phone' | 'computer' | null;
   visitor_marz?: string | null;

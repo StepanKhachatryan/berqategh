@@ -8,6 +8,7 @@ import ListingDetail from './components/ListingDetail';
 import MyListings from './components/MyListings';
 import RecoverySheet from './components/RecoverySheet';
 import GuideSheet from './components/GuideSheet';
+import InstallPrompt from './components/InstallPrompt';
 import { ToastStack, useToasts } from './components/Toasts';
 import { IconArchive, IconPlus } from './components/Icons';
 
@@ -420,6 +421,8 @@ export default function App() {
       {selected && sheet === 'none' ? (
         <ListingDetail listing={selected} onClose={() => setSelectedId(null)} now={now} />
       ) : null}
+
+      <InstallPrompt />
 
       <ToastStack toasts={toasts} />
     </div>
