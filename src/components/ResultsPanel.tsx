@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import ListingCard from './ListingCard';
 import { SORT_LABELS, type SortKey } from '../lib/filter';
 import { IconChevronDown, IconChevronUp, IconFilter, IconSearch } from './Icons';
@@ -21,6 +22,8 @@ interface ResultsPanelProps {
   activeFilterCount: number;
   now: number;
   measuring: boolean;
+  /** How much of the map this pane is covering, in pixels. */
+  onHeightChange: (height: number) => void;
 }
 
 export default function ResultsPanel({
@@ -38,9 +41,28 @@ export default function ResultsPanel({
   activeFilterCount,
   now,
   measuring,
+  onHeightChange,
 }: ResultsPanelProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // The map has to know what this pane is hiding, and only the pane itself
+  // knows: its height is a share of the viewport when open and whatever its
+  // chrome adds up to when folded. Measuring beats duplicating the arithmetic.
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+
+    const report = () => onHeightChange(node.offsetHeight);
+    report();
+
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(report);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [onHeightChange]);
+
   return (
-    <div className={`results${collapsed ? ' is-collapsed' : ''}`}>
+    <div ref={rootRef} className={`results${collapsed ? ' is-collapsed' : ''}`}>
       <button
         type="button"
         className="results-toggle"

@@ -54,6 +54,9 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheet, setSheet] = useState<Sheet>('none');
   const [collapsed, setCollapsed] = useState(false);
+  // How much of the map the results pane is covering. The pane reports it; the
+  // map uses it to keep every pin out from behind the glass.
+  const [sheetHeight, setSheetHeight] = useState(0);
   const [focus, setFocus] = useState<{ point: LatLng; zoom?: number; nonce: number } | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
@@ -343,6 +346,7 @@ export default function App() {
             onLocate={() => void handleLocate()}
             locating={locating}
             focus={focus}
+            bottomInset={isSeller ? 0 : sheetHeight}
           />
 
           {isSeller ? (
@@ -375,6 +379,7 @@ export default function App() {
               activeFilterCount={activeFilterCount}
               now={now}
               measuring={measuring}
+              onHeightChange={setSheetHeight}
             />
           ) : null}
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { listingIcon, meIcon, SALE_TYPE_SHORT } from './markers';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
@@ -18,9 +18,6 @@ import { IconCrosshair, IconLayers, IconHelp } from './Icons';
  * is gently desaturated in CSS to keep the produce colours on the pins reading
  * as the loudest thing on screen.
  */
-/** Share of the map the results pane covers on a phone. Mirrors --sheet-h. */
-const SHEET_SHARE = 0.42;
-
 const BASEMAPS = {
   osm: {
     label: 'Քարտեզ (OSM)',
@@ -51,6 +48,8 @@ interface MapViewProps {
   locating: boolean;
   /** Set to pan the map somewhere; the same value never pans twice. */
   focus: { point: LatLng; zoom?: number; nonce: number } | null;
+  /** Pixels of map hidden behind the results pane, 0 when nothing covers it. */
+  bottomInset: number;
 }
 
 export default function MapView({
@@ -63,6 +62,7 @@ export default function MapView({
   onLocate,
   locating,
   focus,
+  bottomInset,
 }: MapViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -76,6 +76,7 @@ export default function MapView({
 
   const [basemap, setBasemap] = useState<BasemapKey>('osm');
   const fittedRef = useRef(false);
+  const fittedInsetRef = useRef(0);
 
   selectRef.current = onSelect;
 
@@ -87,7 +88,12 @@ export default function MapView({
       center: [ARMENIA_CENTER.lat, ARMENIA_CENTER.lng],
       zoom: 8,
       zoomControl: false,
-      maxBounds: L.latLngBounds(ARMENIA_BOUNDS).pad(0.4),
+      // Generous on purpose. This is a guard against panning to another
+      // continent, not a frame: padded tightly it came out smaller than a tall
+      // phone's viewport, and Leaflet responds to that by pinning the map to
+      // the middle of it — which silently undid the offset that keeps the pins
+      // clear of the results pane.
+      maxBounds: L.latLngBounds(ARMENIA_BOUNDS).pad(1.1),
       maxBoundsViscosity: 0.7,
       minZoom: 7,
       preferCanvas: false,
@@ -208,30 +214,56 @@ export default function MapView({
     }
   }, [origin, radiusKm]);
 
-  // The default Armenia-wide view leaves most pins outside the short map strip
-  // a phone has room for, so the first batch of listings sets the camera.
+  /**
+   * Frame every pin in the part of the map that is actually visible.
+   *
+   * On a phone the results pane floats over the bottom of the map, so the
+   * camera has to treat that strip as off-screen — otherwise the frame looks
+   * correct and the lowest pins sit behind the glass where nobody finds them.
+   * The pane measures itself and hands the number down, because its height is
+   * a share of the viewport when open and the sum of its chrome when folded,
+   * and neither is worth reproducing here.
+   */
+  const fitToListings = useCallback(
+    (animate: boolean) => {
+      const map = mapRef.current;
+      if (!map || listings.length === 0) return;
+
+      // The pane sits beside the map rather than over it on a wide screen.
+      const covered = window.innerWidth < 900 ? bottomInset : 0;
+
+      map.fitBounds(
+        L.latLngBounds(listings.map((listing) => [listing.lat, listing.lng] as [number, number])),
+        {
+          paddingTopLeft: [44, 44],
+          paddingBottomRight: [44, 44 + covered],
+          maxZoom: 12,
+          animate,
+        },
+      );
+    },
+    [listings, bottomInset],
+  );
+
+  // The default Armenia-wide view leaves most pins outside the strip a phone
+  // has room for, so the first batch of listings sets the camera. Later batches
+  // must not: by then the map is where the person put it.
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || fittedRef.current || listings.length === 0) return;
-
+    if (fittedRef.current || listings.length === 0 || bottomInset === 0) return;
     fittedRef.current = true;
+    fittedInsetRef.current = bottomInset;
+    fitToListings(false);
+  }, [listings, bottomInset, fitToListings]);
 
-    // On a phone the results pane floats over the lower part of the map, so the
-    // camera has to treat that strip as if it were off-screen — otherwise the
-    // frame looks right and half the pins sit behind the glass.
-    const covered =
-      window.innerWidth < 900 ? Math.round(map.getSize().y * SHEET_SHARE) : 0;
-
-    map.fitBounds(
-      L.latLngBounds(listings.map((listing) => [listing.lat, listing.lng] as [number, number])),
-      {
-        paddingTopLeft: [44, 44],
-        paddingBottomRight: [44, 44 + covered],
-        maxZoom: 12,
-        animate: false,
-      },
-    );
-  }, [listings]);
+  // Folding the pane away uncovers half the map, and raising it hides that half
+  // again; either way the pins belong in whatever is left. Small changes are
+  // ignored, because a phone's address bar sliding in and out resizes the pane
+  // by a few pixels and should not move the map.
+  useEffect(() => {
+    if (!fittedRef.current || Math.abs(bottomInset - fittedInsetRef.current) < 40) return;
+    fittedInsetRef.current = bottomInset;
+    fitToListings(true);
+  }, [bottomInset, fitToListings]);
 
   // ─── imperative pan requests ─────────────────────────────────────────────
   useEffect(() => {
