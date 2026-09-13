@@ -18,6 +18,9 @@ import { IconCrosshair, IconLayers, IconHelp } from './Icons';
  * is gently desaturated in CSS to keep the produce colours on the pins reading
  * as the loudest thing on screen.
  */
+/** Share of the map the results pane covers on a phone. Mirrors --sheet-h. */
+const SHEET_SHARE = 0.42;
+
 const BASEMAPS = {
   osm: {
     label: 'Քարտեզ (OSM)',
@@ -212,9 +215,21 @@ export default function MapView({
     if (!map || fittedRef.current || listings.length === 0) return;
 
     fittedRef.current = true;
+
+    // On a phone the results pane floats over the lower part of the map, so the
+    // camera has to treat that strip as if it were off-screen — otherwise the
+    // frame looks right and half the pins sit behind the glass.
+    const covered =
+      window.innerWidth < 900 ? Math.round(map.getSize().y * SHEET_SHARE) : 0;
+
     map.fitBounds(
       L.latLngBounds(listings.map((listing) => [listing.lat, listing.lng] as [number, number])),
-      { padding: [44, 44], maxZoom: 12, animate: false },
+      {
+        paddingTopLeft: [44, 44],
+        paddingBottomRight: [44, 44 + covered],
+        maxZoom: 12,
+        animate: false,
+      },
     );
   }, [listings]);
 

@@ -328,7 +328,11 @@ export default function App() {
       ) : null}
 
       <div className="app-body">
-        <div className="workspace">
+        {/* The pane floats over the map, so the layout has to know how much of
+            it is covered — for the attribution, and for the camera. */}
+        <div
+          className={`workspace${isSeller ? '' : collapsed ? ' sheet-collapsed' : ' sheet-open'}`}
+        >
           <MapView
             onOpenGuide={() => setSheet('guide')}
             listings={visible}

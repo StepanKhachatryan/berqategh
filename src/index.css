@@ -11,6 +11,14 @@
   --bg: #f4f8f0;
   --bg-tint: #eaf2e3;
   --surface: #ffffff;
+
+  /* Frosted white, in the manner of iOS materials: not a flat fill but a pane
+     you can see through, so whatever it covers bleeds up as blurred colour.
+     Saturation is pushed because blur drains it, and without that the map
+     underneath reads as grey smear rather than as land and water. */
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.65);
+  --glass-blur: saturate(190%) blur(24px);
   --surface-sunk: #f7faf4;
   --line: #e2ebda;
   --line-strong: #cfdcc4;
@@ -364,10 +372,15 @@ h4 {
   flex: none;
   display: flex;
   padding: 3px;
-  background: var(--bg-tint);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--r-pill);
   gap: 2px;
 }
+
+/* With a white track the chosen side can no longer be a white pill against a
+   tinted one, so it carries the weight in ink and edge instead: green type on
+   a raised, outlined pill, against muted grey on nothing. */
 
 .role-switch button {
   padding: 7px 14px;
@@ -381,7 +394,12 @@ h4 {
 .role-switch button[aria-pressed='true'] {
   background: var(--surface);
   color: var(--green-deep);
-  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.role-switch button[aria-pressed='false'] {
+  border: 1px solid transparent;
 }
 
 /* On a phone the header has room for the wordmark, one icon action and the role
@@ -558,10 +576,11 @@ h4 {
 }
 
 /* Clear of the results sheet, which overlaps the bottom of the map on phones. */
+/* Clear of the results pane, whatever height it is currently at. */
 .map-floats {
   position: absolute;
   right: 12px;
-  bottom: 34px;
+  bottom: calc(var(--sheet-h, 0px) + 34px);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1859,7 +1878,24 @@ input[type='range']::-moz-range-thumb {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: var(--bg);
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* Without the blur the pane would be 74% white over a sharp map — unreadable.
+   Browsers that cannot frost get plain white instead. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .results {
+    background: var(--surface);
+  }
+}
+
+/* The row of chrome inside the pane used to be painted white to separate it
+   from the tinted list behind. Both are the same glass now, so any fill here
+   would show as a pale band across it. */
+.filter-row {
+  background: transparent;
 }
 
 .results-head {
@@ -2428,23 +2464,41 @@ input[type='range']::-moz-range-thumb {
 
 /* ═══ responsive layout ══════════════════════════════════════════════════ */
 
-/* Phone: map on top, results sheet docked below at a fixed share of height. */
+/* Phone: the map fills the pane and the results float over its lower part, so
+   the frosted pane has something to be frosted over. The map keeps its full
+   height rather than being cut short above the pane — see the fit in MapView,
+   which reserves the covered strip so no pin ever lands behind the glass. */
 .workspace {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   width: 100%;
+
+  /* How much of the map the pane covers. Read by the pane and by Leaflet's
+     attribution, which has to stay clear of it. */
+  --sheet-h: 0px;
+}
+
+.workspace.sheet-open {
+  --sheet-h: 42%;
+}
+
+/* Folded down to its handle, filter row and count. */
+.workspace.sheet-collapsed {
+  --sheet-h: 148px;
 }
 
 .results {
-  flex: none;
-  height: 42%;
-  border-top: 1px solid var(--line);
-  box-shadow: 0 -6px 20px rgba(16, 37, 26, 0.07);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--sheet-h);
+  border-top: 1px solid var(--glass-edge);
+  box-shadow: 0 -8px 28px rgba(16, 37, 26, 0.13);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
-  margin-top: -18px;
-  position: relative;
   z-index: 610;
 }
 
@@ -2466,14 +2520,17 @@ input[type='range']::-moz-range-thumb {
   color: var(--ink-faint);
 }
 
-/* The results sheet overlaps the map, so lift Leaflet's bottom controls clear
-   of its rounded edge rather than letting the attribution slide underneath. */
+/* The pane now covers the bottom of the map, so the attribution — which has to
+   stay readable, not merely present — sits on top of it. A percentage works
+   here because `bottom` resolves against the container's height. */
 .leaflet-bottom {
-  margin-bottom: 20px;
+  bottom: var(--sheet-h, 0px);
+  margin-bottom: 8px;
 }
 
 @media (min-width: 900px) {
   .leaflet-bottom {
+    bottom: 0;
     margin-bottom: 0;
   }
 
@@ -2481,15 +2538,19 @@ input[type='range']::-moz-range-thumb {
     flex-direction: row-reverse;
   }
 
+  /* Beside the map rather than over it, so there is nothing to see through. */
   .results {
+    position: static;
     flex: none;
     width: 380px;
     height: auto;
     border-top: none;
     border-left: 1px solid var(--line);
     border-radius: 0;
-    margin-top: 0;
     box-shadow: none;
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .results.is-collapsed {
