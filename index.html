@@ -10,7 +10,15 @@
     <title>ԲերքաՏեղ</title>
     <meta
       name="description"
-      content="ԲերքաՏեղ — քարտեզային հարթակ, որտեղ գյուղի փոքր ֆերմերային տնտեսությունները վաճառում են իրենց բերքը ուղիղ գնորդին, առանց միջնորդի։"
+      content="ԲերքաՏեղ — քարտեզային հարթակ, որտեղ Հայաստանի փոքր ֆերմերները վաճառում են իրենց բերքը՝ միրգ, բանջարեղեն, մեղր, չիր — ուղիղ գնորդին, առանց միջնորդի։"
+    />
+    <link rel="canonical" href="https://berqategh.am/" />
+
+    <!-- Google-ը keywords-ը անտեսում է 2009-ից. Yandex-ը դեռ թեթևակի հաշվի է
+         առնում, իսկ Հայաստանում նա էական մաս ունի։ -->
+    <meta
+      name="keywords"
+      content="ԲերքաՏեղ, berqategh, Բերքատեղ, բերք, գյուղատնտեսություն, ֆերմեր, գյուղմթերք, Հայաստանի մթերք, թարմ միրգ, բանջարեղեն, մեղր, չիր, ուղիղ ֆերմերից, առանց միջնորդի, բերքի քարտեզ"
     />
 
     <link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96" />
@@ -31,14 +39,113 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="hy_AM" />
+    <meta property="og:site_name" content="ԲերքաՏեղ" />
+    <meta property="og:url" content="https://berqategh.am/" />
     <!-- Most people meet the site through a link pasted into Messenger. -->
     <meta property="og:image" content="https://berqategh.am/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="ԲերքաՏեղ — կանաչ քարտեզի նշիչ ծիրանով" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <!--
+      What the site is, in a form a search engine reads without guessing.
+      alternateName matters most here: people look for this place by typing
+      "berqategh" in Latin letters as often as they type it in Armenian.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://berqategh.am/#website",
+            "url": "https://berqategh.am/",
+            "name": "ԲերքաՏեղ",
+            "alternateName": ["Berqategh", "Բերքատեղ", "berqategh.am"],
+            "inLanguage": "hy-AM",
+            "description": "Քարտեզային հարթակ, որտեղ Հայաստանի փոքր ֆերմերները վաճառում են իրենց բերքը ուղիղ գնորդին։",
+            "publisher": { "@id": "https://berqategh.am/#organization" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://berqategh.am/#organization",
+            "name": "ԲերքաՏեղ",
+            "url": "https://berqategh.am/",
+            "logo": "https://berqategh.am/icon-512.png",
+            "image": "https://berqategh.am/og-image.png",
+            "areaServed": { "@type": "Country", "name": "Հայաստան" },
+            "knowsLanguage": "hy"
+          }
+        ]
+      }
+    </script>
+
+    <style>
+      /*
+        The first paint, before the bundle arrives. React replaces all of it the
+        moment it mounts, so it costs nothing after that — but until then it is
+        what a visitor on a slow connection sees, and what a search engine reads
+        if it does not run the script. Which is why it says what the place is
+        instead of spinning.
+      */
+      .boot {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 14vh 24px 40px;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        color: #3d5245;
+        line-height: 1.55;
+        text-align: center;
+      }
+      .boot img {
+        width: 72px;
+        height: 72px;
+      }
+      .boot h1 {
+        margin: 14px 0 4px;
+        font-size: 30px;
+        color: #10251a;
+      }
+      .boot-lead {
+        margin: 0 0 18px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #0d6f31;
+      }
+      .boot p {
+        margin: 0 0 12px;
+        font-size: 14.5px;
+      }
+      .boot-wait {
+        color: #94a69a;
+        font-size: 13px;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot">
+        <img src="/logo.webp" alt="ԲերքաՏեղ" width="72" height="72" />
+        <h1>ԲերքաՏեղ</h1>
+        <p class="boot-lead">Թարմ բերք ուղիղ ֆերմերից՝ առանց միջնորդի։</p>
+        <p>
+          ԲերքաՏեղը Հայաստանի բերքի քարտեզն է։ Փոքր ֆերմերային տնտեսությունները
+          հրապարակում են իրենց գյուղմթերքը՝ միրգ, բանջարեղեն, մեղր, չիր, ընկույզ
+          և կանաչի, նշելով գինը, քանակը և վաճառքի վայրը։
+        </p>
+        <p>
+          Գնորդը քարտեզի վրա տեսնում է իրեն ամենամոտ առաջարկները և զանգում ուղիղ
+          վաճառողին։ Հարթակը միջնորդ չէ, տոկոս չի վերցնում և գործարքին չի
+          մասնակցում։ Աշխատում է Հայաստանի բոլոր մարզերում։
+        </p>
+        <p class="boot-wait">Քարտեզը բեռնվում է…</p>
+        <noscript>
+          Քարտեզը աշխատելու համար անհրաժեշտ է JavaScript։ Միացրե՛ք այն բրաուզերի
+          կարգավորումներում։
+        </noscript>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
