@@ -10,7 +10,7 @@ export default function RoleGate({ onPick }: { onPick: (role: Role) => void }) {
   return (
     <div className="gate">
       <div className="gate-inner">
-        <img src="/favicon.svg" alt="" className="gate-logo" />
+        <img src="/logo.webp" alt="" className="gate-logo" />
 
         <h1>
           Բարի գալուստ <em>ԲերքաՏեղ</em>

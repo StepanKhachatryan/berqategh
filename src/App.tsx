@@ -275,7 +275,7 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="brand">
-          <img src="/favicon.svg" alt="" className="brand-mark" />
+          <img src="/logo.webp" alt="" className="brand-mark" />
           <span>
             ԲերքաՏեղ
             <span className="brand-sub" style={{ display: 'block' }}>
