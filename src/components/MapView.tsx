@@ -18,6 +18,25 @@ import { IconCrosshair, IconLayers, IconHelp } from './Icons';
  * is gently desaturated in CSS to keep the produce colours on the pins reading
  * as the loudest thing on screen.
  */
+/** Breathing room between the outermost pin and the edge of what is visible. */
+const EDGE = 26;
+
+/**
+ * The right edge is not free map: the zoom buttons sit at the top of it and the
+ * guide, layers and locate buttons at the bottom, so a pin in the far east of
+ * the country lands underneath one of them.
+ */
+const CONTROL_COLUMN = 58;
+
+/**
+ * A pin is drawn from its point upwards, so the shape reaches well above the
+ * coordinate it marks and half its width to either side. Leaflet fits the
+ * coordinates, not the shapes, and the difference is the whole marker — enough
+ * to push the northernmost pin off the top of the screen.
+ */
+const PIN_UP = 53;
+const PIN_SIDE = 21;
+
 const BASEMAPS = {
   osm: {
     label: 'Քարտեզ (OSM)',
@@ -96,6 +115,11 @@ export default function MapView({
       maxBounds: L.latLngBounds(ARMENIA_BOUNDS).pad(1.1),
       maxBoundsViscosity: 0.7,
       minZoom: 7,
+      // Continuous zoom rather than whole steps. Fitting the pins into a band
+      // that is much wider than it is tall lands between two integer levels
+      // almost every time, and rounding down threw away up to half the scale —
+      // which is what made the map look stuck one step too far out.
+      zoomSnap: 0,
       preferCanvas: false,
     });
 
@@ -235,9 +259,9 @@ export default function MapView({
       map.fitBounds(
         L.latLngBounds(listings.map((listing) => [listing.lat, listing.lng] as [number, number])),
         {
-          paddingTopLeft: [44, 44],
-          paddingBottomRight: [44, 44 + covered],
-          maxZoom: 12,
+          paddingTopLeft: [EDGE + PIN_SIDE, EDGE + PIN_UP],
+          paddingBottomRight: [CONTROL_COLUMN + PIN_SIDE, EDGE + covered],
+          maxZoom: 13,
           animate,
         },
       );
