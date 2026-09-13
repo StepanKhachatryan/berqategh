@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { listingIcon, meIcon, pinSvg, SALE_TYPE_SHORT } from './markers';
+import { listingIcon, meIcon, SALE_TYPE_SHORT } from './markers';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
-import { listingTitle, type LatLng, type MeasuredListing, type SaleType } from '../lib/types';
-import { IconCrosshair, IconLayers, IconClose, IconInfo, IconHelp } from './Icons';
+import { listingTitle, type LatLng, type MeasuredListing } from '../lib/types';
+import { IconCrosshair, IconLayers, IconHelp } from './Icons';
 
 /**
  * Two genuinely different views, not two renderings of the same one: the
@@ -72,9 +72,6 @@ export default function MapView({
   const seenRef = useRef(new Set<string>());
 
   const [basemap, setBasemap] = useState<BasemapKey>('osm');
-  // On a phone the legend would cover a third of the map, so it starts folded
-  // into its button there and open on the roomier desktop layout.
-  const [showLegend, setShowLegend] = useState(() => window.innerWidth >= 900);
   const fittedRef = useRef(false);
 
   selectRef.current = onSelect;
@@ -241,15 +238,6 @@ export default function MapView({
     return () => observer.disconnect();
   }, []);
 
-  const legendItems = useMemo(
-    () => (['retail', 'wholesale', 'both'] as SaleType[]).map((type) => ({
-      type,
-      label: SALE_TYPE_SHORT[type],
-      svg: pinSvg(type, '#9aa79c', 0.5),
-    })),
-    [],
-  );
-
   return (
     <div className="map-pane">
       <div
@@ -291,42 +279,6 @@ export default function MapView({
           {locating ? <span className="spinner spinner-dark" /> : <IconCrosshair />}
         </button>
       </div>
-
-      {showLegend ? (
-        <div className="map-legend">
-          <h4>Նշանների բացատրություն</h4>
-          <ul>
-            {legendItems.map((item) => (
-              <li key={item.type}>
-                <span dangerouslySetInnerHTML={{ __html: item.svg }} />
-                {item.label}
-              </li>
-            ))}
-          </ul>
-          <p className="legend-note">
-            Գույնը ցույց է տալիս մրգի կամ բանջարեղենի տեսակը։ Չիրը՝ նույն գույնի ավելի
-            մուգ երանգով։
-          </p>
-          <button
-            type="button"
-            className="icon-btn"
-            style={{ position: 'absolute', top: 4, right: 4, width: 26, height: 26 }}
-            onClick={() => setShowLegend(false)}
-            aria-label="Փակել բացատրությունը"
-          >
-            <IconClose size={14} />
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="map-float-btn legend-toggle"
-          onClick={() => setShowLegend(true)}
-          aria-label="Ցույց տալ նշանների բացատրությունը"
-        >
-          <IconInfo size={19} />
-        </button>
-      )}
     </div>
   );
 }

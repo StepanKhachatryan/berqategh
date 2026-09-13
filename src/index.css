@@ -596,64 +596,6 @@ h4 {
   color: #fff;
 }
 
-.map-legend {
-  position: absolute;
-  left: 12px;
-  bottom: 34px;
-  z-index: 600;
-  background: rgba(255, 255, 255, 0.93);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-md);
-  padding: 10px 12px;
-  max-width: 200px;
-}
-
-.map-legend h4 {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
-  margin-bottom: 8px;
-}
-
-.map-legend ul {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  gap: 7px;
-}
-
-.map-legend li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-
-.map-legend svg {
-  flex: none;
-}
-
-.legend-note {
-  margin-top: 9px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--line-strong);
-  font-size: 11px;
-  line-height: 1.4;
-  color: var(--ink-faint);
-}
-
-.legend-toggle {
-  position: absolute;
-  left: 12px;
-  bottom: 34px;
-  z-index: 600;
-}
-
 /* ═══ modal / sheet ══════════════════════════════════════════════════════ */
 
 .scrim {
