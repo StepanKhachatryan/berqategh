@@ -637,27 +637,32 @@ h4 {
 /* ═══ agricultural services ══════════════════════════════════════════════ */
 
 /*
- * Sellers only. It sits above the guide button and is the one control on the
- * map wide enough to say what it does, because nobody would guess a toolbox
- * icon means "where to buy pesticide".
+ * Sellers only, and shaped like the buttons it stands with: the same 46px
+ * square, the same radius, the same shadow. A control that is a different size
+ * from its neighbours reads as something bolted on.
+ *
+ * It widens to carry its name only while nobody has used it — nobody would
+ * guess a toolbox means "where to buy seed" — and collapses to the icon for
+ * good the first time it is pressed. The guide keeps the full name after that.
  */
 .map-service-btn {
   align-self: flex-end;
   display: flex;
   align-items: center;
-  gap: 7px;
-  max-width: 184px;
-  padding: 9px 12px;
-  border-radius: var(--r-pill);
+  justify-content: center;
+  gap: 0;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: var(--r-md);
   background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-md);
-  color: var(--ink);
-  font-size: 11.5px;
+  color: var(--ink-soft);
+  font-size: 12px;
   font-weight: 700;
-  line-height: 1.15;
-  text-align: left;
-  transition: all 0.18s var(--ease);
+  line-height: 1;
+  transition: all 0.28s var(--ease);
 }
 
 .map-service-btn svg {
@@ -665,8 +670,18 @@ h4 {
   color: var(--green-deep);
 }
 
+.map-service-btn span {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    max-width 0.3s var(--ease),
+    opacity 0.2s var(--ease);
+}
+
 .map-service-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.94);
 }
 
 .map-service-btn.is-on {
@@ -680,14 +695,22 @@ h4 {
 }
 
 /*
- * The announcement. A ring that swells and fades out of the button rather than
- * the button itself flashing — a blinking control in the corner of a map reads
- * as a fault, and this has to read as an invitation. It stops for good the
- * first time the button is pressed.
+ * The one-time announcement: the button carries its own name and a ring swells
+ * out of it. A ring rather than a flash, because a blinking control in the
+ * corner of a map reads as a fault and this has to read as an invitation.
  */
 .map-service-btn.is-unseen {
   position: relative;
+  width: auto;
+  gap: 8px;
+  padding: 0 14px 0 13px;
   border-color: var(--cta);
+  color: var(--ink);
+}
+
+.map-service-btn.is-unseen span {
+  max-width: 230px;
+  opacity: 1;
 }
 
 .map-service-btn.is-unseen::after {
@@ -708,7 +731,7 @@ h4 {
   70%,
   100% {
     opacity: 0;
-    transform: scale(1.14);
+    transform: scale(1.12);
   }
 }
 
