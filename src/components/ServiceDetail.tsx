@@ -26,17 +26,18 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
   return (
-    <Modal title={service.name} hideTitle onClose={onClose}>
-      {/* The same white, thinly outlined mark that was tapped on the map. */}
-      <div className="detail-hero">
-        <div className="detail-thumb service-mark" aria-hidden="true">
+    /* The same white, thinly outlined mark that was tapped on the map, on one
+       line with the name and the close button. Who provides it is a row below,
+       so it is not repeated here. */
+    <Modal
+      title={service.name}
+      headerMedia={
+        <div className="header-thumb service-mark" aria-hidden="true">
           {SERVICE_EMOJI[service.category]}
         </div>
-        <div>
-          <h2>{service.name}</h2>
-          <span className="chip">{PROVIDER_LABELS[service.provider]}</span>
-        </div>
-      </div>
+      }
+      onClose={onClose}
+    >
 
       {/* The badge is the point of the whole entry while the data is trial. */}
       {service.trial ? (

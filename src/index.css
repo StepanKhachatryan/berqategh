@@ -785,14 +785,6 @@ h4 {
   line-height: 1;
 }
 
-.detail-thumb.service-mark {
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  border-width: 1.8px;
-  font-size: 30px;
-}
-
 /* Trial entries say so, in the sheet and nowhere else it could be missed. */
 .trial-note {
   display: flex;
@@ -854,14 +846,6 @@ h4 {
   gap: 12px;
   padding: 16px 18px 12px;
   border-bottom: 1px solid var(--line);
-}
-
-/* Nothing in it but the close button, so it stops taking a header's worth of
-   room — and loses the rule underneath, which was separating a title from the
-   content when there is no title. */
-.modal-header.is-bare {
-  padding: 2px 14px 0;
-  border-bottom: none;
 }
 
 .modal-header h2 {
@@ -2253,27 +2237,6 @@ input[type='range']::-moz-range-thumb {
 
 /* ═══ listing detail ═════════════════════════════════════════════════════ */
 
-/* No tint behind it any more, so no padding to hold it off one either: the
-   picture and the name now line up with the rows underneath. */
-.detail-hero {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  padding: 2px 2px 6px;
-  margin-bottom: 14px;
-}
-
-.detail-thumb {
-  width: 62px;
-  height: 62px;
-  font-size: 33px;
-}
-
-.detail-hero h2 {
-  font-size: 22px;
-  margin-bottom: 5px;
-}
-
 .price-grid {
   display: grid;
   gap: 10px;
@@ -2325,6 +2288,19 @@ input[type='range']::-moz-range-thumb {
 }
 .price-box.wholesale .value {
   color: #1d4ed8;
+}
+
+/* The crop's picture, or a service's mark, on the header line beside the name.
+   Sized against the 18px title rather than against the sheet. */
+.header-thumb {
+  flex: none;
+  width: 42px;
+  height: 42px;
+}
+
+.header-thumb.service-mark {
+  border-radius: 13px;
+  font-size: 21px;
 }
 
 .detail-rows {

@@ -29,27 +29,22 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
-  // The hero below is the heading: the crop's picture, its name, and the one
-  // thing about it the prices do not already say.
   return (
-    <Modal title={title} hideTitle onClose={onClose}>
-      <div className="detail-hero">
-        <div
-          className="produce-swatch detail-thumb"
-          style={swatchStyle(color)}
-          aria-hidden="true"
-        >
+    /*
+     * Picture, name and close button share the one line the header was going to
+     * occupy regardless. Retail or wholesale is what the price boxes are for;
+     * dried is written nowhere else, so it rides along under the name.
+     */
+    <Modal
+      title={title}
+      subtitle={listing.form === 'dried' ? 'Չիր — չորացրած' : undefined}
+      headerMedia={
+        <div className="produce-swatch header-thumb" style={swatchStyle(color)} aria-hidden="true">
           <ProduceMark productId={listing.productId} form={listing.form} />
         </div>
-        <div>
-          <h2>{title}</h2>
-          {/* Retail or wholesale is what the price boxes are for. Dried is not
-              written anywhere else, so it stays. */}
-          {listing.form === 'dried' ? (
-            <span className="chip chip-dried">Չիր — չորացրած</span>
-          ) : null}
-        </div>
-      </div>
+      }
+      onClose={onClose}
+    >
 
       <div className={`price-grid${bothPrices ? ' two' : ''}`}>
         {listing.retailPrice !== null ? (

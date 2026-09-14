@@ -5,12 +5,12 @@ interface ModalProps {
   title: string;
   subtitle?: string;
   /**
-   * Leave the header bar to the close button. For sheets whose first block
-   * already names the thing — repeating it two centimetres higher is not a
-   * heading, it is the same words twice. The title still reaches screen
-   * readers through aria-label.
+   * Shown to the left of the title in the header bar. It puts a sheet's whole
+   * heading — picture, name and close button — on the one line that was going
+   * to exist anyway, instead of leaving that line empty and repeating the
+   * heading underneath it.
    */
-  hideTitle?: boolean;
+  headerMedia?: ReactNode;
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
@@ -20,7 +20,7 @@ interface ModalProps {
 export default function Modal({
   title,
   subtitle,
-  hideTitle = false,
+  headerMedia,
   onClose,
   children,
   footer,
@@ -56,14 +56,11 @@ export default function Modal({
         tabIndex={-1}
       >
         <div className="sheet-grab" />
-        <div className={`modal-header${hideTitle ? ' is-bare' : ''}`}>
+        <div className="modal-header">
+          {headerMedia}
           <div style={{ flex: 1, minWidth: 0 }}>
-            {hideTitle ? null : (
-              <>
-                <h2>{title}</h2>
-                {subtitle ? <div className="modal-sub">{subtitle}</div> : null}
-              </>
-            )}
+            <h2>{title}</h2>
+            {subtitle ? <div className="modal-sub">{subtitle}</div> : null}
           </div>
           {headerExtra}
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Փակել">
