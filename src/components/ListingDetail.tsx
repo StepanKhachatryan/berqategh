@@ -1,5 +1,6 @@
 import Modal from './Modal';
 import ProduceMark from './ProduceMark';
+import { produceImage } from '../data/produceImages';
 import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
 import { formatLocalPhone, formatPrice, formatQuantity, postedAge } from '../lib/format';
@@ -17,7 +18,6 @@ interface ListingDetailProps {
 export default function ListingDetail({ listing, onClose, now }: ListingDetailProps) {
   const color = listingColor(listing.productId, listing.form);
   const title = listingTitle(listing);
-  const bothPrices = listing.retailPrice !== null && listing.wholesalePrice !== null;
   const posted = postedAge(listing.createdAt, now);
 
   const place = usePlaceName({ lat: listing.lat, lng: listing.lng });
@@ -29,38 +29,51 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
+  /*
+   * A photograph needs no frame around it. The ring exists so a bare emoji has
+   * somewhere to sit and so a 23px dot on the map reads as a thing rather than
+   * a smudge; at this size, with a real apricot in hand, it is just a circle
+   * drawn around a picture. Dried fruit keeps the ring, because what it holds
+   * is the sun rather than a crop.
+   */
+  const photo = listing.form === 'fresh' ? produceImage(listing.productId) : null;
+
   return (
-    /*
-     * Picture, name and close button share the one line the header was going to
-     * occupy regardless. Retail or wholesale is what the price boxes are for;
-     * dried is written nowhere else, so it rides along under the name.
-     */
     <Modal
       title={title}
       subtitle={listing.form === 'dried' ? 'Չիր — չորացրած' : undefined}
-      headerMedia={
-        <div className="produce-swatch header-thumb" style={swatchStyle(color)} aria-hidden="true">
-          <ProduceMark productId={listing.productId} form={listing.form} />
-        </div>
-      }
       onClose={onClose}
     >
+      {/* The picture and what the crop costs, side by side. Prices used to run
+          the full width of the sheet and take a third of it to say two
+          numbers. */}
+      <div className="detail-media">
+        {photo ? (
+          <img className="detail-photo" src={photo} alt="" />
+        ) : (
+          <div className="produce-swatch detail-mark" style={swatchStyle(color)} aria-hidden="true">
+            <ProduceMark productId={listing.productId} form={listing.form} />
+          </div>
+        )}
 
-      <div className={`price-grid${bothPrices ? ' two' : ''}`}>
-        {listing.retailPrice !== null ? (
-          <div className="price-box retail">
-            <div className="label">Մանրածախ</div>
-            <div className="value">{formatPrice(listing.retailPrice)}</div>
-            <div className="per">1 կիլոգրամ</div>
-          </div>
-        ) : null}
-        {listing.wholesalePrice !== null ? (
-          <div className="price-box wholesale">
-            <div className="label">Մեծածախ</div>
-            <div className="value">{formatPrice(listing.wholesalePrice)}</div>
-            <div className="per">1 կիլոգրամ</div>
-          </div>
-        ) : null}
+        <div className="price-grid">
+          {listing.retailPrice !== null ? (
+            <div className="price-box retail">
+              <div className="label">Մանրածախ</div>
+              <div className="value">
+                {formatPrice(listing.retailPrice)} <span className="per">/ կգ</span>
+              </div>
+            </div>
+          ) : null}
+          {listing.wholesalePrice !== null ? (
+            <div className="price-box wholesale">
+              <div className="label">Մեծածախ</div>
+              <div className="value">
+                {formatPrice(listing.wholesalePrice)} <span className="per">/ կգ</span>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="detail-rows">

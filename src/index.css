@@ -2237,33 +2237,64 @@ input[type='range']::-moz-range-thumb {
 
 /* ═══ listing detail ═════════════════════════════════════════════════════ */
 
+/*
+ * The crop and its price, side by side.
+ *
+ * The prices used to run the full width of the sheet in boxes tall enough for
+ * three lines each, which is an enormous amount of room for two numbers. Beside
+ * the picture they are a column, and the picture gets the space instead.
+ */
+.detail-media {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+/* No ring, no plate, no shadow — a photograph of an apricot is already an
+   object and does not need to be presented as one. */
+.detail-photo {
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  display: block;
+}
+
+/* An emoji, or the sun on dried fruit, still wants its circle. */
+.detail-mark {
+  width: 76px;
+  height: 76px;
+  font-size: 40px;
+}
+
 .price-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: 1fr;
-  margin-bottom: 16px;
+  gap: 8px;
+  align-content: start;
 }
 
-.price-grid.two {
-  grid-template-columns: 1fr 1fr;
-}
-
+/*
+ * White inside, with the edge doing the telling. Filled panels put two solid
+ * blocks of colour next to a photograph that is carrying colour of its own, and
+ * the crop lost every time.
+ */
 .price-box {
-  padding: 14px;
+  padding: 9px 12px 10px;
   border-radius: var(--r-md);
   border: 1.5px solid var(--line);
-  background: var(--surface-sunk);
+  background: var(--surface);
 }
 
 .price-box .label {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--ink-mute);
-  margin-bottom: 3px;
+  margin-bottom: 1px;
 }
 
 .price-box .value {
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
@@ -2272,19 +2303,18 @@ input[type='range']::-moz-range-thumb {
   font-size: 12px;
   color: var(--ink-mute);
   font-weight: 600;
+  letter-spacing: 0;
 }
 
 .price-box.retail {
-  background: var(--green-soft);
-  border-color: rgba(23, 163, 74, 0.3);
+  border-color: rgba(23, 163, 74, 0.55);
 }
 .price-box.retail .value {
   color: var(--green-deep);
 }
 
 .price-box.wholesale {
-  background: var(--blue-soft);
-  border-color: rgba(37, 99, 235, 0.26);
+  border-color: rgba(37, 99, 235, 0.45);
 }
 .price-box.wholesale .value {
   color: #1d4ed8;
