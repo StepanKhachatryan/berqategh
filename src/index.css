@@ -12,6 +12,22 @@
   --bg-tint: #eaf2e3;
   --surface: #ffffff;
 
+  /*
+   * How the map tiles are washed before anything is drawn on them.
+   *
+   * The standard OSM style paints Armenia's forests in solid green across
+   * whole marzes, and a page whose entire point is telling an apricot from a
+   * plum by colour cannot afford a loud background. Draining almost all the
+   * colour leaves the roads, the settlements and the Armenian place names —
+   * which is everything a buyer reads — and turns the land into paper.
+   *
+   * A trace of saturation is kept on purpose: at zero, Sevan and a forest are
+   * the same shade of grey.
+   *
+   * This is the one line to change if the map wants more or less colour.
+   */
+  --tile-wash: saturate(0.2) brightness(1.08) contrast(0.95);
+
   /* Frosted white, in the manner of iOS materials: not a flat fill but a pane
      you can see through, so whatever it covers bleeds up as blurred colour.
      Saturation is pushed because blur drains it, and without that the map
@@ -463,12 +479,12 @@ h4 {
   background: #eaf0e4;
 }
 
-/* The standard OSM style is more colourful than the CARTO one it replaced, and
-   it competed with the produce colours on the pins. Desaturating just the tile
-   pane pulls it back without touching markers, which live in their own pane. */
+/* Only the tile pane. Markers live in a pane of their own, so the pins keep
+   every bit of their colour while the ground underneath loses nearly all of
+   its. That contrast is the whole point — see --tile-wash. */
 .map-root.is-osm .leaflet-tile-pane,
 .locate-map.is-osm .leaflet-tile-pane {
-  filter: saturate(0.78) brightness(1.04);
+  filter: var(--tile-wash);
 }
 
 .leaflet-control-attribution {
