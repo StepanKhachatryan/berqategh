@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "icons": "node scripts/build-produce-icons.mjs",
-    "brand": "node scripts/build-brand.mjs"
+    "brand": "node scripts/build-brand.mjs",
+    "qr": "node scripts/build-qr.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -23,6 +24,7 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^6.0.5",
+    "qrcode": "^1.5.4",
     "typescript": "^5.6.3",
     "vite": "^8.2.1"
   }

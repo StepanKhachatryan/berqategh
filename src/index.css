@@ -634,6 +634,81 @@ h4 {
   color: #fff;
 }
 
+/* ═══ the QR code ════════════════════════════════════════════════════════ */
+
+/*
+ * A plain white plate, because that is what a scanner wants: the quiet zone
+ * around the code is part of the code, and a tinted card eats into it.
+ */
+.qr-card {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 12px auto 0;
+  padding: 14px 14px 12px;
+  border-radius: var(--r-lg);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.16s var(--ease);
+}
+
+.qr-card:active {
+  transform: scale(0.98);
+}
+
+.qr-card img {
+  display: block;
+  width: 168px;
+  height: 168px;
+  /* Pixels, not photographs: no smoothing between the squares. */
+  image-rendering: pixelated;
+}
+
+.qr-url {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+}
+
+/*
+ * Held up in front of a room. White to the edges and as large as the shorter
+ * side of the screen allows, above everything including the guide it opened
+ * from.
+ */
+.qr-full {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  background: #fff;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 24px;
+  animation: fade-in 0.18s var(--ease);
+}
+
+/* As large as the screen allows. It is going to be read from the back of a
+   room, or from a photograph somebody takes of the screen. */
+.qr-full img {
+  width: min(88vw, 72vh);
+  height: min(88vw, 72vh);
+  image-rendering: pixelated;
+}
+
+.qr-full .qr-url {
+  font-size: clamp(16px, 4.5vw, 26px);
+  color: var(--ink);
+}
+
+.qr-close {
+  position: absolute;
+  top: calc(12px + var(--safe-t));
+  right: 12px;
+}
+
 /* ═══ agricultural services ══════════════════════════════════════════════ */
 
 /*

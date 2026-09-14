@@ -1,4 +1,5 @@
 import Modal from './Modal';
+import QrPoster from './QrPoster';
 import { pinSvg, SALE_TYPE_SHORT } from './markers';
 import {
   IconCheck,
@@ -200,6 +201,9 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
           </li>
         </ul>
       </section>
+
+      {/* Last, so it is what is on screen when the guide is scrolled through. */}
+      <QrPoster />
     </Modal>
   );
 }
