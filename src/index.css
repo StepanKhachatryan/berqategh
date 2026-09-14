@@ -687,40 +687,43 @@ h4 {
 }
 
 /*
- * A ring that swells out of the button on a first visit and stops for good once
- * it has been pressed. It is a nudge towards something already legible, not the
- * thing that makes it legible — that is the label's job.
+ * The first-visit cue: the button breathes.
+ *
+ * A warm glow swells out of it and settles back, with a scale change small
+ * enough that you register the movement without being able to point at it. The
+ * earlier version was a hard ring snapping outwards on a two-second loop, which
+ * is what an alarm looks like. This is what a lamp looks like.
+ *
+ * It stops for good after the first press. The label carries the meaning; this
+ * only says "over here".
  */
 .map-service-btn.is-unseen {
-  border-color: var(--cta);
+  animation: service-breathe 3.4s ease-in-out infinite;
 }
 
-.map-service-btn.is-unseen::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  border: 2px solid var(--cta);
-  animation: service-ping 2.1s var(--ease) infinite;
-  pointer-events: none;
-}
-
-@keyframes service-ping {
-  0% {
-    opacity: 0.85;
+@keyframes service-breathe {
+  0%,
+  100% {
+    box-shadow:
+      var(--shadow-md),
+      0 0 0 0 rgba(255, 107, 26, 0);
     transform: scale(1);
   }
-  70%,
-  100% {
-    opacity: 0;
-    transform: scale(1.1);
+  50% {
+    box-shadow:
+      var(--shadow-md),
+      0 0 18px 3px rgba(255, 107, 26, 0.3);
+    transform: scale(1.025);
   }
 }
 
+/* No movement, but the cue should not disappear entirely. */
 @media (prefers-reduced-motion: reduce) {
-  .map-service-btn.is-unseen::after {
+  .map-service-btn.is-unseen {
     animation: none;
-    opacity: 0.85;
+    box-shadow:
+      var(--shadow-md),
+      0 0 14px 2px rgba(255, 107, 26, 0.26);
   }
 }
 
