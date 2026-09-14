@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { listingIcon, meIcon, SALE_TYPE_SHORT } from './markers';
+import { listingIcon, meIcon, serviceIcon, SALE_TYPE_SHORT } from './markers';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
 import { listingTitle, type LatLng, type MeasuredListing } from '../lib/types';
-import { IconCrosshair, IconLayers, IconHelp } from './Icons';
+import { IconCrosshair, IconLayers, IconHelp, IconService } from './Icons';
+import { SERVICE_LABELS, type AgriService } from '../data/services';
 
 /**
  * Two genuinely different views, not two renderings of the same one: the
@@ -69,6 +70,22 @@ interface MapViewProps {
   focus: { point: LatLng; zoom?: number; nonce: number } | null;
   /** Pixels of map hidden behind the results pane, 0 when nothing covers it. */
   bottomInset: number;
+  /**
+   * The agricultural-services layer. Null on the buyer side, where the control
+   * does not exist at all — a buyer looking for apricots has no use for a
+   * pesticide shop, and the map is worse for carrying both.
+   */
+  services: ServicesLayer | null;
+}
+
+export interface ServicesLayer {
+  items: AgriService[];
+  active: boolean;
+  onToggle: () => void;
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+  /** The control draws attention to itself until it has been used once. */
+  unseen: boolean;
 }
 
 export default function MapView({
@@ -82,12 +99,19 @@ export default function MapView({
   locating,
   focus,
   bottomInset,
+  services,
 }: MapViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileRef = useRef<L.TileLayer | null>(null);
   const markersRef = useRef(new Map<string, L.Marker>());
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const serviceLayerRef = useRef<L.LayerGroup | null>(null);
+  const serviceMarkersRef = useRef(new Map<string, L.Marker>());
+  const selectServiceRef = useRef<(id: string | null) => void>(() => undefined);
+  // Where the map was before the services layer took over, so leaving it puts
+  // the seller back where they were rather than somewhere across the country.
+  const beforeServicesRef = useRef<{ center: L.LatLng; zoom: number } | null>(null);
   const meRef = useRef<L.Marker | null>(null);
   const ringRef = useRef<L.Circle | null>(null);
   const selectRef = useRef(onSelect);
@@ -98,6 +122,7 @@ export default function MapView({
   const fittedInsetRef = useRef(0);
 
   selectRef.current = onSelect;
+  if (services) selectServiceRef.current = services.onSelect;
 
   // ─── map lifecycle ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -125,6 +150,13 @@ export default function MapView({
 
     L.control.zoom({ position: 'topright' }).addTo(map);
     layerRef.current = L.layerGroup().addTo(map);
+
+    // Services get a pane of their own, above the markers. It is what lets the
+    // produce pins be dimmed as a group without dimming the services drawn on
+    // top of them — one CSS filter on one pane, and nothing else touched.
+    const servicePane = map.createPane('services');
+    servicePane.style.zIndex = '620';
+    serviceLayerRef.current = L.layerGroup();
 
     // A tap on empty map closes whatever card is open.
     map.on('click', () => selectRef.current(null));
@@ -289,6 +321,88 @@ export default function MapView({
     fitToListings(true);
   }, [bottomInset, fitToListings]);
 
+  // ─── the services layer ──────────────────────────────────────────────────
+  const items = services?.items;
+  const servicesActive = services?.active ?? false;
+  const serviceSelected = services?.selectedId ?? null;
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const layer = serviceLayerRef.current;
+    if (!map || !layer || !items) return;
+
+    const live = serviceMarkersRef.current;
+
+    for (const service of items) {
+      const icon = serviceIcon(service.category, service.id === serviceSelected);
+      const existing = live.get(service.id);
+
+      if (existing) {
+        existing.setIcon(icon);
+        continue;
+      }
+
+      const marker = L.marker([service.lat, service.lng], {
+        icon,
+        pane: 'services',
+        riseOnHover: true,
+        keyboard: true,
+        alt: `${service.name} — ${SERVICE_LABELS[service.category]}`,
+      });
+
+      marker.on('click', (event) => {
+        L.DomEvent.stopPropagation(event);
+        selectServiceRef.current(service.id);
+      });
+
+      marker.addTo(layer);
+      live.set(service.id, marker);
+    }
+
+    for (const [id, marker] of live) {
+      if (items.some((service) => service.id === id)) continue;
+      layer.removeLayer(marker);
+      live.delete(id);
+    }
+  }, [items, serviceSelected]);
+
+  /*
+   * Turning the layer on hands the map over to the services and frames them;
+   * turning it off gives the seller back the view they had. Without the second
+   * half, coming back from a shop in Armavir leaves someone in Tavush looking
+   * at the wrong end of the country.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+    const layer = serviceLayerRef.current;
+    if (!map || !layer) return;
+
+    if (servicesActive) {
+      beforeServicesRef.current = { center: map.getCenter(), zoom: map.getZoom() };
+      layer.addTo(map);
+
+      if (items && items.length > 0) {
+        map.fitBounds(
+          L.latLngBounds(items.map((s) => [s.lat, s.lng] as [number, number])),
+          {
+            paddingTopLeft: [EDGE + PIN_SIDE, EDGE + PIN_UP],
+            paddingBottomRight: [CONTROL_COLUMN + PIN_SIDE, EDGE],
+            maxZoom: 12,
+            animate: true,
+          },
+        );
+      }
+      return;
+    }
+
+    map.removeLayer(layer);
+    const previous = beforeServicesRef.current;
+    if (previous) {
+      map.setView(previous.center, previous.zoom, { animate: true });
+      beforeServicesRef.current = null;
+    }
+  }, [servicesActive, items]);
+
   // ─── imperative pan requests ─────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
@@ -313,12 +427,33 @@ export default function MapView({
     <div className="map-pane">
       <div
         ref={hostRef}
-        className={`map-root${basemap === 'osm' ? ' is-osm' : ''}`}
+        className={`map-root${basemap === 'osm' ? ' is-osm' : ''}${
+          servicesActive ? ' is-services' : ''
+        }`}
         role="application"
         aria-label="Բերքի քարտեզ"
       />
 
       <div className="map-floats">
+        {/*
+          Sellers only, and first in the stack so it sits above the guide. It
+          announces itself until it has been used once: a control nobody knows
+          exists is a feature nobody has.
+        */}
+        {services ? (
+          <button
+            type="button"
+            className={`map-service-btn${servicesActive ? ' is-on' : ''}${
+              services.unseen && !servicesActive ? ' is-unseen' : ''
+            }`}
+            onClick={services.onToggle}
+            aria-pressed={servicesActive}
+          >
+            <IconService size={16} />
+            <span>Գյուղատնտեսական ծառայություններ</span>
+          </button>
+        ) : null}
+
         {/* Kept at the top of the stack and always on screen — the guide is
             something people need to be able to look up at any moment. */}
         <button

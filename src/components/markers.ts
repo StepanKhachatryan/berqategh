@@ -3,6 +3,11 @@ import { produceColor, produceEmoji } from '../data/produce';
 import { produceImage } from '../data/produceImages';
 import type { CSSProperties } from 'react';
 import type { ProduceForm, SaleType } from '../lib/types';
+import {
+  serviceColor,
+  SERVICE_EMOJI,
+  type ServiceCategory,
+} from '../data/services';
 
 /**
  * Map symbols carry two independent facts at once:
@@ -175,4 +180,47 @@ export function swatchStyle(color: string): CSSProperties {
     '--fruit-soft': `${color}1f`,
     '--fruit-glow': `${color}55`,
   } as CSSProperties;
+}
+
+/*
+ * Service markers: a rounded square, where produce is a teardrop or a hexagon.
+ *
+ * The shape carries the difference, not the colour. Somebody glancing at the
+ * map while driving should be able to tell a pesticide shop from a crate of
+ * apricots without reading anything, and the two sets never appear together
+ * anyway — the produce fades out when services come on.
+ */
+const SW = 40;
+const SH = 48;
+
+// A squircle with a short stem, so it still points at a place rather than
+// hovering over one.
+const SERVICE_SHAPE =
+  'M11 3h18a8 8 0 0 1 8 8v14a8 8 0 0 1-8 8h-4.5L20 45l-4.5-12H11a8 8 0 0 1-8-8V11a8 8 0 0 1 8-8z';
+
+export function serviceSvg(color: string, scale = 1): string {
+  const edge = darken(color, 0.32);
+
+  return `<svg width="${SW * scale}" height="${SH * scale}" viewBox="0 0 ${SW} ${SH}" xmlns="http://www.w3.org/2000/svg">
+    <path d="${SERVICE_SHAPE}" fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+    <path d="${SERVICE_SHAPE}" fill="${color}" stroke="${edge}" stroke-width="1.6" stroke-linejoin="round"/>
+    <rect x="8" y="8" width="24" height="20" rx="7" fill="#fff" fill-opacity="0.94"/>
+  </svg>`;
+}
+
+export function serviceIcon(category: ServiceCategory, selected = false): L.DivIcon {
+  const scale = selected ? 1.18 : 1;
+  const color = serviceColor(category);
+
+  const html = `<div class="pin-body" style="width:${SW * scale}px;height:${SH * scale}px">
+    ${serviceSvg(color, scale)}
+    <div class="pin-emoji" style="top:${11 * scale}px;font-size:${15 * scale}px">${SERVICE_EMOJI[category]}</div>
+  </div>`;
+
+  return L.divIcon({
+    html,
+    className: `pin pin-service${selected ? ' pin-selected' : ''}`,
+    iconSize: [SW * scale, SH * scale],
+    iconAnchor: [20 * scale, 45 * scale],
+  });
 }

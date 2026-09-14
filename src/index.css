@@ -599,6 +599,9 @@ h4 {
   bottom: calc(var(--sheet-h, 0px) + 34px);
   display: flex;
   flex-direction: column;
+  /* The services pill is wider than the round buttons; without this it drags
+     the whole column out from the right edge. */
+  align-items: flex-end;
   gap: 10px;
   z-index: 600;
 }
@@ -629,6 +632,141 @@ h4 {
   background: var(--green);
   border-color: var(--green);
   color: #fff;
+}
+
+/* ═══ agricultural services ══════════════════════════════════════════════ */
+
+/*
+ * Sellers only. It sits above the guide button and is the one control on the
+ * map wide enough to say what it does, because nobody would guess a toolbox
+ * icon means "where to buy pesticide".
+ */
+.map-service-btn {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 184px;
+  padding: 9px 12px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: left;
+  transition: all 0.18s var(--ease);
+}
+
+.map-service-btn svg {
+  flex: none;
+  color: var(--green-deep);
+}
+
+.map-service-btn:active {
+  transform: scale(0.96);
+}
+
+.map-service-btn.is-on {
+  background: var(--green-deep);
+  border-color: var(--green-deep);
+  color: #fff;
+}
+
+.map-service-btn.is-on svg {
+  color: #fff;
+}
+
+/*
+ * The announcement. A ring that swells and fades out of the button rather than
+ * the button itself flashing — a blinking control in the corner of a map reads
+ * as a fault, and this has to read as an invitation. It stops for good the
+ * first time the button is pressed.
+ */
+.map-service-btn.is-unseen {
+  position: relative;
+  border-color: var(--cta);
+}
+
+.map-service-btn.is-unseen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid var(--cta);
+  animation: service-ping 2.1s var(--ease) infinite;
+  pointer-events: none;
+}
+
+@keyframes service-ping {
+  0% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+}
+
+/*
+ * With the services layer on, the produce recedes into the map rather than
+ * disappearing from it: a seller can still see where their own harvest sits
+ * while they look for the nearest shop. Only the marker pane is touched — the
+ * services have a pane of their own, above this one.
+ */
+.map-root .leaflet-marker-pane {
+  transition: filter 0.35s var(--ease);
+}
+
+.map-root.is-services .leaflet-marker-pane {
+  filter: grayscale(1) brightness(1.24) opacity(0.34);
+  pointer-events: none;
+}
+
+/* The five kinds of service, as a key in the guide rather than on the map —
+   the map earns its space back by not explaining itself twice. */
+.guide-services li {
+  gap: 10px;
+}
+
+.service-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+/* A line of prose in a sheet that is not a warning and not a note. */
+.detail-plain {
+  margin: 0;
+  color: var(--ink-mute);
+  font-size: 13.5px;
+}
+
+/* Trial entries say so, in the sheet and nowhere else it could be missed. */
+.trial-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--amber-soft);
+  border: 1px solid #f3d9a4;
+  color: #8a5a10;
+  font-size: 12.5px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.trial-note svg {
+  flex: none;
+  margin-top: 1px;
 }
 
 /* ═══ modal / sheet ══════════════════════════════════════════════════════ */
@@ -1425,10 +1563,11 @@ textarea.input {
   color: var(--green-deep);
 }
 
+/* Block, not flex. As a flex row every <b> inside the sentence became a column
+   of its own and the prose came apart into stacked fragments — which is exactly
+   what the map-symbols note had been doing. The icon flows with the text. */
 .guide-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  display: block;
   margin-top: 12px;
   padding: 11px 13px;
   background: var(--surface-sunk);
@@ -1439,8 +1578,8 @@ textarea.input {
 }
 
 .guide-note svg {
-  flex: none;
-  margin-top: 2px;
+  vertical-align: -2px;
+  margin-right: 6px;
 }
 
 .guide-legend {

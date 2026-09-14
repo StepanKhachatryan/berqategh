@@ -1,6 +1,16 @@
 import Modal from './Modal';
 import { pinSvg, SALE_TYPE_SHORT } from './markers';
-import { IconCheck, IconClock, IconPhone, IconPin, IconRoute, IconShield } from './Icons';
+import {
+  IconCheck,
+  IconClock,
+  IconPhone,
+  IconPin,
+  IconRoute,
+  IconService,
+  IconShield,
+  IconWarn,
+} from './Icons';
+import { SERVICE_COLORS, SERVICE_LABELS, SERVICE_ORDER } from '../data/services';
 import type { Role, SaleType } from '../lib/types';
 
 interface GuideSheetProps {
@@ -96,6 +106,37 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
             «Իմ հայտարարությունները» բաժնում տեսնում եք, թե որքան ժամանակ է մնացել, և
             կարող եք վաղաժամ հանել քարտեզից, եթե բերքն արդեն վաճառվել է։ Դա ամենակարևոր
             բանն է, որ կարող եք անել գնորդների վստահությունը պահելու համար։
+          </p>
+        </section>
+      ) : null}
+
+      {/* ─── the services layer, sellers only ──────────────────────────── */}
+      {role === 'seller' ? (
+        <section className="guide-section">
+          <h4>
+            <IconService size={15} /> Գյուղատնտեսական ծառայություններ
+          </h4>
+          <p>
+            Քարտեզի աջ կողմի կոճակը ցույց է տալիս ոչ թե բերք, այլ այն, ինչ պետք է բերքից
+            առաջ։ Սեղմելիս հայտարարությունները մարում են, և դրանց տեղում հայտնվում են
+            ծառայությունների կետերը։ Կրկին սեղմելիս ամեն ինչ վերադառնում է։
+          </p>
+          <ul className="guide-legend guide-services">
+            {SERVICE_ORDER.map((category) => (
+              <li key={category}>
+                <span
+                  className="service-dot"
+                  style={{ background: SERVICE_COLORS[category] }}
+                  aria-hidden="true"
+                />
+                {SERVICE_LABELS[category]}
+              </li>
+            ))}
+          </ul>
+          <p className="guide-note">
+            <IconWarn size={15} />
+            Բաժինը փորձնական է։ Քարտեզին այս պահին երկու ցուցադրական կետ կա՝ իրական
+            ծառայություններ չեն։ Գնորդները այս բաժինը չեն տեսնում։
           </p>
         </section>
       ) : (

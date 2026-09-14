@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import MapView from './components/MapView';
 import RoleGate from './components/RoleGate';
 import ResultsPanel from './components/ResultsPanel';
+import ServiceDetail from './components/ServiceDetail';
+import { SERVICES } from './data/services';
 import FilterSheet from './components/FilterSheet';
 import SellerForm from './components/SellerForm';
 import ListingDetail from './components/ListingDetail';
@@ -36,6 +38,8 @@ const TICK_MS = 30_000;
 
 type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide' | 'recover';
 
+const SERVICES_SEEN_KEY = 'berqategh.servicesSeen';
+
 export default function App() {
   const [role, setRole] = useState<Role | null>(
     () => (localStorage.getItem(ROLE_KEY) as Role | null) ?? null,
@@ -58,6 +62,18 @@ export default function App() {
   // map uses it to keep every pin out from behind the glass.
   const [sheetHeight, setSheetHeight] = useState(0);
   const [focus, setFocus] = useState<{ point: LatLng; zoom?: number; nonce: number } | null>(null);
+
+  // ─── agricultural services (sellers only) ──────────────────────────────
+  const [servicesOn, setServicesOn] = useState(false);
+  const [serviceId, setServiceId] = useState<string | null>(null);
+  // The control pulses until somebody opens it, once, ever.
+  const [servicesSeen, setServicesSeen] = useState(() => {
+    try {
+      return localStorage.getItem(SERVICES_SEEN_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
   const [now, setNow] = useState(() => Date.now());
 
   const { toasts, push } = useToasts();
@@ -169,6 +185,10 @@ export default function App() {
     localStorage.setItem(ROLE_KEY, picked);
     setRole(picked);
     setSelectedId(null);
+    // The services layer belongs to the seller side; leaving it switched on
+    // would hand the buyer a dimmed map the moment they switched back.
+    setServicesOn(false);
+    setServiceId(null);
     record({ kind: 'role', role: picked, origin: position });
 
     // The listing duration is core to how the platform works, so it is explained
@@ -271,6 +291,21 @@ export default function App() {
 
   const isSeller = role === 'seller';
 
+  const toggleServices = () => {
+    setServicesOn((on) => !on);
+    setServiceId(null);
+    if (!servicesSeen) {
+      setServicesSeen(true);
+      try {
+        localStorage.setItem(SERVICES_SEEN_KEY, '1');
+      } catch {
+        // The control will announce itself once more. Harmless.
+      }
+    }
+  };
+
+  const openService = SERVICES.find((service) => service.id === serviceId) ?? null;
+
   return (
     <div className="app">
       <header className="app-header">
@@ -347,6 +382,18 @@ export default function App() {
             locating={locating}
             focus={focus}
             bottomInset={isSeller ? 0 : sheetHeight}
+            services={
+              isSeller
+                ? {
+                    items: SERVICES,
+                    active: servicesOn,
+                    onToggle: toggleServices,
+                    selectedId: serviceId,
+                    onSelect: setServiceId,
+                    unseen: !servicesSeen,
+                  }
+                : null
+            }
           />
 
           {isSeller ? (
@@ -409,6 +456,10 @@ export default function App() {
       ) : null}
 
       {sheet === 'guide' ? <GuideSheet role={role} onClose={closeGuide} /> : null}
+
+      {openService ? (
+        <ServiceDetail service={openService} onClose={() => setServiceId(null)} />
+      ) : null}
 
       {sheet === 'mine' ? (
         <MyListings

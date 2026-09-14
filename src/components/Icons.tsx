@@ -151,6 +151,15 @@ export const IconLeaf = ({ size = 18 }: IconProps) => (
   </svg>
 );
 
+/* A toolbox: neutral across chemicals, seed, water and machinery alike. */
+export const IconService = ({ size = 17 }: IconProps) => (
+  <svg {...base(size)}>
+    <rect x="3" y="8" width="18" height="12" rx="2.5" />
+    <path d="M9 8V6.2A2.2 2.2 0 0 1 11.2 4h1.6A2.2 2.2 0 0 1 15 6.2V8" />
+    <path d="M3 13.5h18" />
+  </svg>
+);
+
 export const IconShield = ({ size = 15 }: IconProps) => (
   <svg {...base(size)}>
     <path d="M12 3 5 6v6c0 4.5 3 8 7 9 4-1 7-4.5 7-9V6l-7-3Z" />
