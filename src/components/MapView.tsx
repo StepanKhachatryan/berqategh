@@ -434,26 +434,28 @@ export default function MapView({
         aria-label="Բերքի քարտեզ"
       />
 
-      <div className="map-floats">
-        {/*
-          Sellers only, and first in the stack so it sits above the guide. It
-          announces itself until it has been used once: a control nobody knows
-          exists is a feature nobody has.
-        */}
-        {services ? (
-          <button
-            type="button"
-            className={`map-service-btn${servicesActive ? ' is-on' : ''}${
-              services.unseen && !servicesActive ? ' is-unseen' : ''
-            }`}
-            onClick={services.onToggle}
-            aria-pressed={servicesActive}
-          >
-            <IconService size={16} />
-            <span>Գյուղատնտեսական ծառայություններ</span>
-          </button>
-        ) : null}
+      {/*
+        Sellers only, and in the map's top-left corner rather than in the column
+        of round buttons on the right. It has to carry its name — a toolbox icon
+        on its own says nothing — and a button three times the width of its
+        neighbours does not belong in their column. The top-left is the one
+        corner of the map with nothing in it.
+      */}
+      {services ? (
+        <button
+          type="button"
+          className={`map-service-btn${servicesActive ? ' is-on' : ''}${
+            services.unseen && !servicesActive ? ' is-unseen' : ''
+          }`}
+          onClick={services.onToggle}
+          aria-pressed={servicesActive}
+        >
+          <IconService size={16} />
+          <span>Գյուղատնտեսական ծառայություն</span>
+        </button>
+      ) : null}
 
+      <div className="map-floats">
         {/* Kept at the top of the stack and always on screen — the guide is
             something people need to be able to look up at any moment. */}
         <button
