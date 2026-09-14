@@ -61,7 +61,8 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
             <div className="price-box retail">
               <div className="label">Մանրածախ</div>
               <div className="value">
-                {formatPrice(listing.retailPrice)} <span className="per">/ կգ</span>
+                <span className="amount">{formatPrice(listing.retailPrice)}</span>{' '}
+                <span className="per">/ կգ</span>
               </div>
             </div>
           ) : null}
@@ -69,7 +70,8 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
             <div className="price-box wholesale">
               <div className="label">Մեծածախ</div>
               <div className="value">
-                {formatPrice(listing.wholesalePrice)} <span className="per">/ կգ</span>
+                <span className="amount">{formatPrice(listing.wholesalePrice)}</span>{' '}
+                <span className="per">/ կգ</span>
               </div>
             </div>
           ) : null}
