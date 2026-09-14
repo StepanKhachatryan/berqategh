@@ -38,8 +38,6 @@ const TICK_MS = 30_000;
 
 type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide' | 'recover';
 
-const SERVICES_SEEN_KEY = 'berqategh.servicesSeen';
-
 export default function App() {
   const [role, setRole] = useState<Role | null>(
     () => (localStorage.getItem(ROLE_KEY) as Role | null) ?? null,
@@ -66,14 +64,19 @@ export default function App() {
   // ─── agricultural services (sellers only) ──────────────────────────────
   const [servicesOn, setServicesOn] = useState(false);
   const [serviceId, setServiceId] = useState<string | null>(null);
-  // The control pulses until somebody opens it, once, ever.
-  const [servicesSeen, setServicesSeen] = useState(() => {
-    try {
-      return localStorage.getItem(SERVICES_SEEN_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
+  /*
+   * Whether the seller has opened the services layer during *this* visit.
+   *
+   * It used to be remembered in localStorage — pressed once, never announced
+   * again on that device, ever. Which is why the button behaved differently
+   * everywhere: the desktop browser, the installed app and the phone browser
+   * each keep their own storage, so it pulsed in whichever of them had not been
+   * used yet and nowhere else. "Sometimes" is not a behaviour anyone can learn.
+   *
+   * In memory instead. Every visit starts with the cue and it stops as soon as
+   * the layer is opened, the same way on every device.
+   */
+  const [servicesUsed, setServicesUsed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   const { toasts, push } = useToasts();
@@ -294,14 +297,7 @@ export default function App() {
   const toggleServices = () => {
     setServicesOn((on) => !on);
     setServiceId(null);
-    if (!servicesSeen) {
-      setServicesSeen(true);
-      try {
-        localStorage.setItem(SERVICES_SEEN_KEY, '1');
-      } catch {
-        // The control will announce itself once more. Harmless.
-      }
-    }
+    setServicesUsed(true);
   };
 
   const openService = SERVICES.find((service) => service.id === serviceId) ?? null;
@@ -390,7 +386,7 @@ export default function App() {
                     onToggle: toggleServices,
                     selectedId: serviceId,
                     onSelect: setServiceId,
-                    unseen: !servicesSeen,
+                    unseen: !servicesUsed,
                   }
                 : null
             }

@@ -687,7 +687,7 @@ h4 {
 }
 
 /*
- * The first-visit cue: the button breathes.
+ * The cue: the button breathes until the layer has been opened.
  *
  * A warm glow swells out of it and settles back, with a scale change small
  * enough that you register the movement without being able to point at it. The
@@ -712,8 +712,8 @@ h4 {
   50% {
     box-shadow:
       var(--shadow-md),
-      0 0 18px 3px rgba(255, 107, 26, 0.3);
-    transform: scale(1.025);
+      0 0 20px 4px rgba(255, 107, 26, 0.4);
+    transform: scale(1.035);
   }
 }
 
@@ -723,7 +723,7 @@ h4 {
     animation: none;
     box-shadow:
       var(--shadow-md),
-      0 0 14px 2px rgba(255, 107, 26, 0.26);
+      0 0 16px 3px rgba(255, 107, 26, 0.34);
   }
 }
 
