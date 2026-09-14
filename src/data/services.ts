@@ -67,18 +67,11 @@ export const SERVICE_SHORT: Record<ServiceCategory, string> = {
 };
 
 /*
- * Five hues, deliberately nothing like the produce palette: no red, no apricot
- * orange, no leaf green in the shades the crops use. A service pin must never
- * be mistaken for something for sale.
+ * No colours here, on purpose. Produce pins are solid blocks of the crop's own
+ * colour and that colour means something; a service pin is white with a thin
+ * outline, and the symbol carries the trade. Anything else would be arbitrary
+ * decoration competing with the one palette on the map that is not arbitrary.
  */
-export const SERVICE_COLORS: Record<ServiceCategory, string> = {
-  chemicals: '#B4544C',
-  seeds: '#3F8A5E',
-  irrigation: '#3A7CA8',
-  machinery: '#8A6A39',
-  other: '#666C8C',
-};
-
 export const SERVICE_EMOJI: Record<ServiceCategory, string> = {
   chemicals: '🧪',
   seeds: '🌱',
@@ -131,7 +124,3 @@ export const SERVICES: AgriService[] = [
     trial: true,
   },
 ];
-
-export function serviceColor(category: ServiceCategory): string {
-  return SERVICE_COLORS[category] ?? SERVICE_COLORS.other;
-}

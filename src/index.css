@@ -748,19 +748,49 @@ h4 {
   gap: 10px;
 }
 
-.service-dot {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 5px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
-}
-
 /* A line of prose in a sheet that is not a warning and not a note. */
 .detail-plain {
   margin: 0;
   color: var(--ink-mute);
   font-size: 13.5px;
+}
+
+/*
+ * A white marker needs more than the shared pin shadow to lift off a pale map:
+ * a tight dark one to draw the edge, and a wider soft one for the lift.
+ */
+.pin-service svg {
+  filter:
+    drop-shadow(0 1px 1px rgba(16, 37, 26, 0.24))
+    drop-shadow(0 4px 9px rgba(16, 37, 26, 0.22));
+}
+
+.pin-service.pin-selected svg {
+  filter:
+    drop-shadow(0 1px 1px rgba(16, 37, 26, 0.3))
+    drop-shadow(0 8px 16px rgba(16, 37, 26, 0.3));
+}
+
+/* The same mark, at rest, wherever a service is named away from the map. */
+.service-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background: #fff;
+  border: 1.4px solid var(--ink);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.detail-thumb.service-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  border-width: 1.8px;
+  font-size: 30px;
 }
 
 /* Trial entries say so, in the sheet and nowhere else it could be missed. */

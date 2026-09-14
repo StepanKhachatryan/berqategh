@@ -1,12 +1,10 @@
 import Modal from './Modal';
 import { formatLocalPhone } from '../lib/format';
-import { swatchStyle } from './markers';
 import { IconPhone, IconPin, IconWarn } from './Icons';
 import {
   PROVIDER_LABELS,
   SERVICE_EMOJI,
   SERVICE_LABELS,
-  serviceColor,
   type AgriService,
 } from '../data/services';
 
@@ -23,21 +21,16 @@ interface ServiceDetailProps {
  * has already learned how to read one of those.
  */
 export default function ServiceDetail({ service, onClose }: ServiceDetailProps) {
-  const color = serviceColor(service.category);
-
   const point = `${service.lat.toFixed(5)},${service.lng.toFixed(5)}`;
   const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
   return (
     <Modal title={service.name} subtitle={SERVICE_LABELS[service.category]} onClose={onClose}>
-      <div className="detail-hero" style={{ background: `${color}1f` }}>
-        <div
-          className="produce-swatch detail-thumb"
-          style={swatchStyle(color)}
-          aria-hidden="true"
-        >
-          <span>{SERVICE_EMOJI[service.category]}</span>
+      {/* The same white, thinly outlined mark that was tapped on the map. */}
+      <div className="detail-hero">
+        <div className="detail-thumb service-mark" aria-hidden="true">
+          {SERVICE_EMOJI[service.category]}
         </div>
         <div>
           <h2>{service.name}</h2>

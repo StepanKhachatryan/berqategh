@@ -10,7 +10,7 @@ import {
   IconShield,
   IconWarn,
 } from './Icons';
-import { SERVICE_COLORS, SERVICE_LABELS, SERVICE_ORDER } from '../data/services';
+import { SERVICE_EMOJI, SERVICE_LABELS, SERVICE_ORDER } from '../data/services';
 import type { Role, SaleType } from '../lib/types';
 
 interface GuideSheetProps {
@@ -124,11 +124,9 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
           <ul className="guide-legend guide-services">
             {SERVICE_ORDER.map((category) => (
               <li key={category}>
-                <span
-                  className="service-dot"
-                  style={{ background: SERVICE_COLORS[category] }}
-                  aria-hidden="true"
-                />
+                <span className="service-mark" aria-hidden="true">
+                  {SERVICE_EMOJI[category]}
+                </span>
                 {SERVICE_LABELS[category]}
               </li>
             ))}
