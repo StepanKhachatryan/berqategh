@@ -4,6 +4,13 @@ import { IconClose } from './Icons';
 interface ModalProps {
   title: string;
   subtitle?: string;
+  /**
+   * Leave the header bar to the close button. For sheets whose first block
+   * already names the thing — repeating it two centimetres higher is not a
+   * heading, it is the same words twice. The title still reaches screen
+   * readers through aria-label.
+   */
+  hideTitle?: boolean;
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
@@ -13,6 +20,7 @@ interface ModalProps {
 export default function Modal({
   title,
   subtitle,
+  hideTitle = false,
   onClose,
   children,
   footer,
@@ -48,10 +56,14 @@ export default function Modal({
         tabIndex={-1}
       >
         <div className="sheet-grab" />
-        <div className="modal-header">
+        <div className={`modal-header${hideTitle ? ' is-bare' : ''}`}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2>{title}</h2>
-            {subtitle ? <div className="modal-sub">{subtitle}</div> : null}
+            {hideTitle ? null : (
+              <>
+                <h2>{title}</h2>
+                {subtitle ? <div className="modal-sub">{subtitle}</div> : null}
+              </>
+            )}
           </div>
           {headerExtra}
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Փակել">

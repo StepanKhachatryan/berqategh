@@ -856,6 +856,14 @@ h4 {
   border-bottom: 1px solid var(--line);
 }
 
+/* Nothing in it but the close button, so it stops taking a header's worth of
+   room — and loses the rule underneath, which was separating a title from the
+   content when there is no title. */
+.modal-header.is-bare {
+  padding: 2px 14px 0;
+  border-bottom: none;
+}
+
 .modal-header h2 {
   font-size: 18px;
   flex: 1;
@@ -2245,13 +2253,14 @@ input[type='range']::-moz-range-thumb {
 
 /* ═══ listing detail ═════════════════════════════════════════════════════ */
 
+/* No tint behind it any more, so no padding to hold it off one either: the
+   picture and the name now line up with the rows underneath. */
 .detail-hero {
   display: flex;
   gap: 14px;
   align-items: center;
-  padding: 18px;
-  border-radius: var(--r-lg);
-  margin-bottom: 16px;
+  padding: 2px 2px 6px;
+  margin-bottom: 14px;
 }
 
 .detail-thumb {

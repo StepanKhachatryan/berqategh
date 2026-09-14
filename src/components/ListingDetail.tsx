@@ -3,7 +3,7 @@ import ProduceMark from './ProduceMark';
 import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
 import { formatLocalPhone, formatPrice, formatQuantity, postedAge } from '../lib/format';
-import { listingColor, SALE_TYPE_LABELS, swatchStyle } from './markers';
+import { listingColor, swatchStyle } from './markers';
 import { IconPhone, IconPin } from './Icons';
 import { usePlaceName } from '../lib/usePlaceName';
 import { listingTitle, type MeasuredListing } from '../lib/types';
@@ -29,9 +29,11 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
+  // The hero below is the heading: the crop's picture, its name, and the one
+  // thing about it the prices do not already say.
   return (
-    <Modal title={title} subtitle={SALE_TYPE_LABELS[listing.saleType]} onClose={onClose}>
-      <div className="detail-hero" style={{ background: `${color}1f` }}>
+    <Modal title={title} hideTitle onClose={onClose}>
+      <div className="detail-hero">
         <div
           className="produce-swatch detail-thumb"
           style={swatchStyle(color)}
@@ -41,14 +43,11 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
         </div>
         <div>
           <h2>{title}</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {listing.form === 'dried' ? (
-              <span className="chip chip-dried">Չիր — չորացրած</span>
-            ) : null}
-            <span className={`chip chip-${listing.saleType}`}>
-              {SALE_TYPE_LABELS[listing.saleType]}
-            </span>
-          </div>
+          {/* Retail or wholesale is what the price boxes are for. Dried is not
+              written anywhere else, so it stays. */}
+          {listing.form === 'dried' ? (
+            <span className="chip chip-dried">Չիր — չորացրած</span>
+          ) : null}
         </div>
       </div>
 

@@ -26,7 +26,7 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
   return (
-    <Modal title={service.name} subtitle={SERVICE_LABELS[service.category]} onClose={onClose}>
+    <Modal title={service.name} hideTitle onClose={onClose}>
       {/* The same white, thinly outlined mark that was tapped on the map. */}
       <div className="detail-hero">
         <div className="detail-thumb service-mark" aria-hidden="true">
@@ -34,11 +34,7 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
         </div>
         <div>
           <h2>{service.name}</h2>
-          {/* The category is already the sheet's subtitle and has a row of its
-              own below; a third copy here would just be noise. */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            <span className="chip">{PROVIDER_LABELS[service.provider]}</span>
-          </div>
+          <span className="chip">{PROVIDER_LABELS[service.provider]}</span>
         </div>
       </div>
 
