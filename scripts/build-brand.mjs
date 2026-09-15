@@ -229,6 +229,15 @@ const files = await page.evaluate(async (src) => {
       'icon-512.png': draw(512, onWhite),
       'icon-maskable-512.png': draw(512, maskable),
       'og-image.png': draw(1200, card, 'image/png', undefined, 630),
+
+      /*
+       * Hand-off copies, for slides, letters, printers and anyone who asks for
+       * "the logo". Large and PNG rather than WebP, because that is what every
+       * other program on earth can open.
+       */
+      'brand/berqategh-logo.png': draw(1024, discOnly),
+      'brand/berqategh-logo-on-white.png': draw(1024, onWhite),
+      'brand/berqategh-logo-wide.png': draw(1200, card, 'image/png', undefined, 630),
     },
   };
 }, dataUrl);
@@ -238,10 +247,13 @@ console.log(
     `pin square inside disc: ${files.fits ? 'yes' : 'NO — corners would leak white'}`,
 );
 
+// Names carrying a folder go where they say; the rest go to the site's public/.
 for (const [name, url] of Object.entries(files.out)) {
   const bytes = Buffer.from(url.slice(url.indexOf(',') + 1), 'base64');
-  writeFileSync(join(OUT, name), bytes);
-  console.log(`  ${name.padEnd(24)} ${(bytes.length / 1024).toFixed(1)} KB`);
+  const target = name.includes('/') ? join(root, name) : join(OUT, name);
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, bytes);
+  console.log(`  ${name.padEnd(34)} ${(bytes.length / 1024).toFixed(1)} KB`);
 }
 
 await browser.close();
