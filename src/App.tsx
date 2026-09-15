@@ -32,7 +32,6 @@ import { DEFAULT_FILTERS } from './lib/types';
 import type { Filters, LatLng, Listing, ListingDraft, MeasuredListing, Role } from './lib/types';
 
 const ROLE_KEY = 'berqategh.role';
-const GUIDE_KEY = 'berqategh.guideSeen';
 const REFRESH_MS = 60_000;
 const TICK_MS = 30_000;
 
@@ -194,18 +193,10 @@ export default function App() {
     setServiceId(null);
     record({ kind: 'role', role: picked, origin: position });
 
-    // The listing duration is core to how the platform works, so it is explained
-    // once, unprompted, the first time somebody arrives — not left behind a
-    // button they may never press.
-    if (localStorage.getItem(GUIDE_KEY)) {
-      setSheet('none');
-    } else {
-      setSheet('guide');
-    }
-  };
-
-  const closeGuide = () => {
-    localStorage.setItem(GUIDE_KEY, '1');
+    // Straight to the map. The guide used to open itself here, which put a
+    // page of rules between somebody and the thing they came for, before they
+    // had seen anything the rules were about. It is a button away whenever
+    // they want it.
     setSheet('none');
   };
 
@@ -451,7 +442,7 @@ export default function App() {
         />
       ) : null}
 
-      {sheet === 'guide' ? <GuideSheet role={role} onClose={closeGuide} /> : null}
+      {sheet === 'guide' ? <GuideSheet role={role} onClose={() => setSheet('none')} /> : null}
 
       {openService ? (
         <ServiceDetail service={openService} onClose={() => setServiceId(null)} />
