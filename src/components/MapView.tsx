@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { listingIcon, meIcon, serviceIcon, SALE_TYPE_SHORT } from './markers';
+import { fanOffsets, overlapGroup } from './spider';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
 import { listingTitle, type LatLng, type MeasuredListing } from '../lib/types';
 import { IconCrosshair, IconLayers, IconHelp, IconService } from './Icons';
@@ -116,12 +117,24 @@ export default function MapView({
   const ringRef = useRef<L.Circle | null>(null);
   const selectRef = useRef(onSelect);
   const seenRef = useRef(new Set<string>());
+  // Current listings, reachable from a marker's click handler without closing
+  // over whatever the array happened to be when the marker was made.
+  const listingsRef = useRef(listings);
+  // The stack currently opened into a fan, and the threads drawn back to it.
+  const fanRef = useRef<{ ids: string[]; lines: L.LayerGroup } | null>(null);
+  // The map is built once, before collapseFan exists; this is how its click
+  // handler reaches the current one instead of the one from mount.
+  const collapseFanRef = useRef<() => void>(() => undefined);
+  // Read inside the fan, which is built outside the render that knows it.
+  const bottomInsetRef = useRef(0);
 
   const [basemap, setBasemap] = useState<BasemapKey>('osm');
   const fittedRef = useRef(false);
   const fittedInsetRef = useRef(0);
 
   selectRef.current = onSelect;
+  listingsRef.current = listings;
+  bottomInsetRef.current = bottomInset;
   if (services) selectServiceRef.current = services.onSelect;
 
   // ─── map lifecycle ───────────────────────────────────────────────────────
@@ -158,8 +171,11 @@ export default function MapView({
     servicePane.style.zIndex = '620';
     serviceLayerRef.current = L.layerGroup();
 
-    // A tap on empty map closes whatever card is open.
-    map.on('click', () => selectRef.current(null));
+    // A tap on empty map closes whatever card is open, and any opened stack.
+    map.on('click', () => {
+      collapseFanRef.current();
+      selectRef.current(null);
+    });
 
     mapRef.current = map;
 
@@ -184,6 +200,144 @@ export default function MapView({
       maxZoom: config.maxZoom,
     }).addTo(map);
   }, [basemap]);
+
+  /*
+   * Opening and closing a stack of pins that share a spot.
+   *
+   * Imperative on purpose. The pins move in screen space, not in the data, and
+   * routing that through a render would mean the map's own state and React's
+   * disagreeing about where a marker is for a frame at a time.
+   */
+  const collapseFan = useCallback(() => {
+    const map = mapRef.current;
+    const fan = fanRef.current;
+    if (!map || !fan) return;
+
+    for (const id of fan.ids) {
+      const listing = listingsRef.current.find((item) => item.id === id);
+      const marker = markersRef.current.get(id);
+      if (!listing || !marker) continue;
+      marker.setLatLng([listing.lat, listing.lng]);
+      marker.setZIndexOffset(0);
+    }
+
+    map.removeLayer(fan.lines);
+    fanRef.current = null;
+  }, []);
+
+  collapseFanRef.current = collapseFan;
+
+  const openFan = useCallback((group: MeasuredListing[], anchor: MeasuredListing) => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const origin = map.latLngToContainerPoint([anchor.lat, anchor.lng]);
+    const offsets = fanOffsets(group.length);
+    const lines = L.layerGroup();
+
+    // The true location, still marked, because every pin above it has left.
+    L.circleMarker([anchor.lat, anchor.lng], {
+      radius: 4,
+      color: '#10251a',
+      weight: 2,
+      fillColor: '#fff',
+      fillOpacity: 1,
+      interactive: false,
+    }).addTo(lines);
+
+    group.forEach((listing, i) => {
+      const marker = markersRef.current.get(listing.id);
+      if (!marker) return;
+
+      const target = map.containerPointToLatLng(origin.add(offsets[i]));
+      marker.setLatLng(target);
+      // Above every other pin, including the ones this stack was hiding under.
+      marker.setZIndexOffset(1000);
+
+      L.polyline([[anchor.lat, anchor.lng], [target.lat, target.lng]], {
+        color: '#10251a',
+        weight: 1.5,
+        opacity: 0.45,
+        interactive: false,
+      }).addTo(lines);
+    });
+
+    lines.addTo(map);
+    fanRef.current = { ids: group.map((listing) => listing.id), lines };
+
+    /*
+     * A stack near an edge opens partly off it. Nudge the map so the whole fan
+     * is reachable, using the same reserved strips as the opening frame: the
+     * results pane below, the button column on the right.
+     */
+    const size = map.getSize();
+    const covered = window.innerWidth < 900 ? bottomInsetRef.current : 0;
+    const points = offsets.map((offset) => origin.add(offset));
+
+    const left = Math.min(...points.map((point) => point.x)) - PIN_SIDE;
+    const right = Math.max(...points.map((point) => point.x)) + PIN_SIDE;
+    const top = Math.min(...points.map((point) => point.y)) - PIN_UP;
+    const bottom = Math.max(...points.map((point) => point.y));
+
+    let dx = 0;
+    if (left < EDGE) dx = left - EDGE;
+    else if (right > size.x - CONTROL_COLUMN) dx = right - (size.x - CONTROL_COLUMN);
+
+    let dy = 0;
+    if (top < EDGE) dy = top - EDGE;
+    else if (bottom > size.y - covered - EDGE) dy = bottom - (size.y - covered - EDGE);
+
+    if (dx !== 0 || dy !== 0) map.panBy([dx, dy], { animate: true, duration: 0.25 });
+  }, []);
+
+  /*
+   * What a tap on a pin means depends on whether it is alone.
+   *
+   *   alone            → open it
+   *   part of a stack  → open the stack
+   *   part of an open fan → open it
+   *
+   * A pin under another pin cannot be tapped at all on a phone, so the first
+   * tap on a stack has to be about reaching them rather than choosing one.
+   */
+  const handlePinTap = useCallback(
+    (id: string) => {
+      const map = mapRef.current;
+      if (!map) return;
+
+      if (fanRef.current?.ids.includes(id)) {
+        collapseFan();
+        selectRef.current(id);
+        return;
+      }
+
+      collapseFan();
+
+      const listings = listingsRef.current;
+      const clicked = listings.find((item) => item.id === id);
+      if (!clicked) return;
+
+      const group = overlapGroup(map, listings, id);
+      if (group.length > 1) {
+        openFan(group, clicked);
+        return;
+      }
+
+      selectRef.current(id);
+    },
+    [collapseFan, openFan],
+  );
+
+  // A fan is drawn in pixels at one zoom level, so it cannot survive another.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.on('zoomstart', collapseFan);
+    return () => {
+      map.off('zoomstart', collapseFan);
+    };
+  }, [collapseFan]);
 
   // ─── listing pins ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -227,13 +381,13 @@ export default function MapView({
 
       marker.on('click', (event) => {
         L.DomEvent.stopPropagation(event);
-        selectRef.current(listing.id);
+        handlePinTap(listing.id);
       });
 
       marker.addTo(layer);
       markers.set(listing.id, marker);
     }
-  }, [listings, selectedId]);
+  }, [listings, selectedId, handlePinTap]);
 
   // ─── the buyer's own position and search radius ──────────────────────────
   useEffect(() => {
