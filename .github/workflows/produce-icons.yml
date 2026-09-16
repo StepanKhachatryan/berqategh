@@ -1,0 +1,61 @@
+# Converts produce photographs the moment they land in the repository.
+#
+# Someone drops apple.png into produce-images/ — from a laptop, from the GitHub
+# web page, from a phone — and this turns it into the small WebP the app ships
+# and commits it back. Nobody has to remember to run anything, and nobody needs
+# Chromium on their own machine.
+#
+# It only ever writes to src/assets/produce/, and it runs only when the folder
+# of originals actually changes.
+
+name: Produce icons
+
+on:
+  push:
+    paths:
+      - 'produce-images/**'
+      - 'scripts/build-produce-icons.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# A second upload while the first is still converting would otherwise race to
+# push; queue them instead.
+concurrency:
+  group: produce-icons-${{ github.ref }}
+
+jobs:
+  icons:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      # Playwright is deliberately not a dependency of the app — the site
+      # builds without it, and only this conversion needs a browser.
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run icons
+
+      - name: Commit the icons
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/assets/produce
+          if git diff --staged --quiet; then
+            echo 'Nothing changed — every icon was already up to date.'
+            exit 0
+          fi
+          git commit -m 'Rebuild produce icons'
+          # Someone may have pushed while the browser was installing.
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

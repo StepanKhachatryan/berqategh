@@ -1,0 +1,5 @@
+# Ամեն ինչ բաց է որոնման համակարգերի համար։
+User-agent: *
+Allow: /
+
+Sitemap: https://berqategh.am/sitemap.xml
