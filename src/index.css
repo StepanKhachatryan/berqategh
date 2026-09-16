@@ -94,10 +94,34 @@
   margin: 0;
 }
 
+/*
+ * The document itself must never scroll.
+ *
+ * On an iPhone it was: scrolling the results to the end carried on into the
+ * page, dragging the header and the map up off the top and leaving a band of
+ * empty background below the last card. The app is a fixed shell with its own
+ * scrolling areas inside it, so nothing outside those areas should move at all.
+ */
 html,
 body,
 #root {
   height: 100%;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+/*
+ * Pinned, because `overflow: hidden` alone does not stop iOS from dragging the
+ * document around: Safari rubber-bands it anyway and can leave it displaced.
+ * Body is not a containing block for fixed children, so the sheets are unharmed.
+ */
+body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
 }
 
 body {
@@ -109,6 +133,18 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overscroll-behavior: none;
+}
+
+/*
+ * A scroller that has reached its end must stop there rather than handing the
+ * gesture to whatever is behind it. This is what was turning a flick through
+ * the offers into a scroll of the whole page.
+ */
+.results-scroll,
+.modal-body,
+.produce-grid,
+.filter-body {
+  overscroll-behavior: contain;
 }
 
 button,
@@ -326,7 +362,14 @@ h4 {
   display: flex;
   flex-direction: column;
   height: 100%;
-  height: 100dvh;
+  /*
+   * Smallest viewport rather than dynamic. dvh grows and shrinks as Safari's
+   * toolbar hides, and iOS reports it as the tall value at moments when the
+   * toolbar is in fact showing — which is how the shell came out taller than
+   * the screen. With the page locked the toolbar never hides, so the smallest
+   * viewport is the only one there is and nothing is left over.
+   */
+  height: 100svh;
   overflow: hidden;
 }
 

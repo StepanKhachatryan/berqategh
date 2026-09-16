@@ -90,6 +90,10 @@
         instead of spinning.
       */
       .boot {
+        /* The page is locked, so before React mounts this needs its own
+           scrolling or a long message would be unreachable on a short screen. */
+        max-height: 100%;
+        overflow-y: auto;
         max-width: 560px;
         margin: 0 auto;
         padding: 14vh 24px 40px;
