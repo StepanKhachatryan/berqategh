@@ -37,6 +37,15 @@ const TICK_MS = 30_000;
 
 type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide' | 'recover';
 
+/** Folded to its handle, sharing the screen with the map, or covering it. */
+export type SheetStep = 'collapsed' | 'half' | 'full';
+
+const NEXT_STEP: Record<SheetStep, SheetStep> = {
+  collapsed: 'half',
+  half: 'full',
+  full: 'collapsed',
+};
+
 export default function App() {
   const [role, setRole] = useState<Role | null>(
     () => (localStorage.getItem(ROLE_KEY) as Role | null) ?? null,
@@ -54,7 +63,13 @@ export default function App() {
   const [sort, setSort] = useState<SortKey>('newest');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheet, setSheet] = useState<Sheet>('none');
-  const [collapsed, setCollapsed] = useState(false);
+  /*
+   * How tall the results pane is. Two states were not enough: at its only open
+   * height the scrolling area came out shorter than a single card on a phone,
+   * so somebody wanting to look through the offers could see less than one of
+   * them at a time. The third step hands them the screen.
+   */
+  const [sheetStep, setSheetStep] = useState<SheetStep>('half');
   // How much of the map the results pane is covering. The pane reports it; the
   // map uses it to keep every pin out from behind the glass.
   const [sheetHeight, setSheetHeight] = useState(0);
@@ -356,7 +371,7 @@ export default function App() {
         {/* The pane floats over the map, so the layout has to know how much of
             it is covered — for the attribution, and for the camera. */}
         <div
-          className={`workspace${isSeller ? '' : collapsed ? ' sheet-collapsed' : ' sheet-open'}`}
+          className={`workspace${isSeller ? '' : ` sheet-${sheetStep}`}`}
         >
           <MapView
             onOpenGuide={() => setSheet('guide')}
@@ -405,8 +420,8 @@ export default function App() {
               onSelect={handleSelect}
               sort={sort}
               onSortChange={setSort}
-              collapsed={collapsed}
-              onToggleCollapsed={() => setCollapsed((current) => !current)}
+              step={sheetStep}
+              onStepChange={() => setSheetStep((current) => NEXT_STEP[current])}
               filters={filters}
               onFiltersChange={setFilters}
               onOpenFilters={() => setSheet('filters')}

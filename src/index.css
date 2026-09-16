@@ -1902,7 +1902,7 @@ textarea.input {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 6px 14px 8px;
   background: var(--surface);
 }
 
@@ -2165,12 +2165,13 @@ input[type='range']::-moz-range-thumb {
   background: transparent;
 }
 
+/* Every pixel here is a pixel of listing nobody can see. */
 .results-head {
   flex: none;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px 10px;
+  padding: 6px 16px 8px;
 }
 
 .results-head h3 {
@@ -2786,13 +2787,28 @@ input[type='range']::-moz-range-thumb {
   --sheet-h: 0px;
 }
 
-.workspace.sheet-open {
-  --sheet-h: 42%;
+/*
+ * Half the screen. It was 42%, which on a 664px-tall phone left a scrolling
+ * area of 101px against a 109px card — less than one offer visible at a time,
+ * for a pane whose whole job is browsing offers.
+ */
+.workspace.sheet-half {
+  --sheet-h: 52%;
+}
+
+/* The list over the map, for reading through it. */
+.workspace.sheet-full {
+  --sheet-h: 86%;
 }
 
 /* Folded down to its handle, filter row and count. */
 .workspace.sheet-collapsed {
-  --sheet-h: 148px;
+  --sheet-h: 140px;
+}
+
+/* At full height the map buttons would be pushed off the top of it. */
+.workspace.sheet-full .map-floats {
+  display: none;
 }
 
 .results {
@@ -2817,9 +2833,9 @@ input[type='range']::-moz-range-thumb {
 
 .results-toggle {
   flex: none;
-  width: 46px;
-  height: 26px;
-  margin: 6px auto 0;
+  width: 56px;
+  height: 22px;
+  margin: 4px auto 0;
   display: grid;
   place-items: center;
   color: var(--ink-faint);

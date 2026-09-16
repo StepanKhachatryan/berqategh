@@ -316,8 +316,18 @@ export default function MapView({
   // ignored, because a phone's address bar sliding in and out resizes the pane
   // by a few pixels and should not move the map.
   useEffect(() => {
-    if (!fittedRef.current || Math.abs(bottomInset - fittedInsetRef.current) < 40) return;
+    const map = mapRef.current;
+    if (!map || !fittedRef.current) return;
+    if (Math.abs(bottomInset - fittedInsetRef.current) < 40) return;
+
     fittedInsetRef.current = bottomInset;
+
+    // With the pane pulled up over most of the map, there is no frame left to
+    // aim at: refitting would squeeze the whole country into a sliver and leave
+    // it there. The person is reading the list, not the map. Leave the camera
+    // where it is and let the next step back down reframe it.
+    if (bottomInset > map.getSize().y * 0.6) return;
+
     fitToListings(true);
   }, [bottomInset, fitToListings]);
 

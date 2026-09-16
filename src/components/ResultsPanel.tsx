@@ -1,11 +1,19 @@
 import { useEffect, useRef } from 'react';
 import ListingCard from './ListingCard';
+import type { SheetStep } from '../App';
 import { SORT_LABELS, type SortKey } from '../lib/filter';
 import { IconChevronDown, IconChevronUp, IconFilter, IconSearch } from './Icons';
 import { FORM_LABELS, type Filters, type MeasuredListing } from '../lib/types';
 import { getProduce } from '../data/produce';
 import { SALE_TYPE_SHORT } from './markers';
 import { formatPrice } from '../lib/format';
+
+/** What pressing the handle does next, said out loud for screen readers. */
+const STEP_ACTION: Record<SheetStep, string> = {
+  collapsed: 'Բացել ցանկը',
+  half: 'Մեծացնել ցանկը',
+  full: 'Ծալել ցանկը',
+};
 
 interface ResultsPanelProps {
   listings: MeasuredListing[];
@@ -14,8 +22,9 @@ interface ResultsPanelProps {
   onSelect: (id: string) => void;
   sort: SortKey;
   onSortChange: (sort: SortKey) => void;
-  collapsed: boolean;
-  onToggleCollapsed: () => void;
+  step: SheetStep;
+  /** Advances one step: folded, half the screen, then all of it. */
+  onStepChange: () => void;
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
   onOpenFilters: () => void;
@@ -33,8 +42,8 @@ export default function ResultsPanel({
   onSelect,
   sort,
   onSortChange,
-  collapsed,
-  onToggleCollapsed,
+  step,
+  onStepChange,
   filters,
   onFiltersChange,
   onOpenFilters,
@@ -62,15 +71,16 @@ export default function ResultsPanel({
   }, [onHeightChange]);
 
   return (
-    <div ref={rootRef} className={`results${collapsed ? ' is-collapsed' : ''}`}>
+    <div ref={rootRef} className={`results${step === 'collapsed' ? ' is-collapsed' : ''}`}>
       <button
         type="button"
         className="results-toggle"
-        onClick={onToggleCollapsed}
-        aria-label={collapsed ? 'Բացել ցանկը' : 'Փակել ցանկը'}
-        aria-expanded={!collapsed}
+        onClick={onStepChange}
+        aria-label={STEP_ACTION[step]}
+        title={STEP_ACTION[step]}
       >
-        {collapsed ? <IconChevronUp /> : <IconChevronDown />}
+        {/* Up while there is more list to show, down once it fills the screen. */}
+        {step === 'full' ? <IconChevronDown /> : <IconChevronUp />}
       </button>
 
       <FilterBar
