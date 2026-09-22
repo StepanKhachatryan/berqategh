@@ -5,7 +5,8 @@ import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
 import { formatLocalPhone, formatPrice, formatQuantity, postedAge } from '../lib/format';
 import { listingColor, swatchStyle } from './markers';
-import { IconPhone, IconPin } from './Icons';
+import { IconPhone, IconPin, IconTelegram, IconViber, IconWhatsApp } from './Icons';
+import { contactLinks } from '../lib/contact';
 import { usePlaceName } from '../lib/usePlaceName';
 import { listingTitle, type MeasuredListing } from '../lib/types';
 
@@ -15,12 +16,28 @@ interface ListingDetailProps {
   now: number;
 }
 
+/* Kept out of the component so the row is a lookup rather than a switch. */
+const MESSENGER_ICONS: Record<string, JSX.Element> = {
+  whatsapp: <IconWhatsApp />,
+  viber: <IconViber />,
+  telegram: <IconTelegram />,
+};
+
 export default function ListingDetail({ listing, onClose, now }: ListingDetailProps) {
   const color = listingColor(listing.productId, listing.form);
   const title = listingTitle(listing);
   const posted = postedAge(listing.createdAt, now);
 
   const place = usePlaceName({ lat: listing.lat, lng: listing.lng });
+
+  /* Reaching the seller is one event whichever button does it: what the funnel
+     measures is that the buyer made contact, not which app they used. */
+  const recordCall = () =>
+    record({
+      kind: 'call_click',
+      listingAt: { lat: listing.lat, lng: listing.lng },
+      productId: listing.productId,
+    });
 
   // Yandex and Google are what people actually navigate with in Armenia, so
   // both are offered directly; each deep-links into the installed app on a
@@ -33,15 +50,15 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
    * A photograph needs no frame around it. The ring exists so a bare emoji has
    * somewhere to sit and so a 23px dot on the map reads as a thing rather than
    * a smudge; at this size, with a real apricot in hand, it is just a circle
-   * drawn around a picture. Dried fruit keeps the ring, because what it holds
-   * is the sun rather than a crop.
+   * drawn around a picture. The ring comes back only when there is no picture
+   * and the mark falls through to an emoji.
    */
-  const photo = listing.form === 'fresh' ? produceImage(listing.productId) : null;
+  const photo = produceImage(listing.productId, listing.form);
 
   return (
     <Modal
       title={title}
-      subtitle={listing.form === 'dried' ? 'Չիր — չորացրած' : undefined}
+      subtitle={listing.form === 'dried' ? 'Չիր - չորացրած' : undefined}
       onClose={onClose}
     >
       {/* The picture and what the crop costs, side by side. Prices used to run
@@ -140,23 +157,39 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
       {listing.note ? <p className="detail-note">{listing.note}</p> : null}
 
       <div style={{ display: 'grid', gap: 10 }}>
-        {/* The number is cleared once a listing leaves the map, so the call
-            button only exists while there is somebody to call. */}
+        {/* The number is cleared once a listing leaves the map, so the contact
+            row only exists while there is somebody to reach.
+
+            Calling stays the wide button, because it is the one that always
+            works and the one a farmer expects. The messengers sit beside it as
+            icons: cheaper than a call for the buyer, and the number is already
+            in international form, so each is a link rather than a feature. */}
         {listing.phone ? (
-          <a
-            className="btn btn-cta btn-lg btn-block call-btn"
-            href={`tel:${listing.phone}`}
-            onClick={() =>
-              record({
-                kind: 'call_click',
-                listingAt: { lat: listing.lat, lng: listing.lng },
-                productId: listing.productId,
-              })
-            }
-          >
-            <IconPhone />
-            Զանգահարել՝ {formatLocalPhone(listing.phone)}
-          </a>
+          <div className="contact-row">
+            <a
+              className="btn btn-cta btn-lg call-btn"
+              href={`tel:${listing.phone}`}
+              onClick={() => recordCall()}
+            >
+              <IconPhone />
+              Զանգել՝ {formatLocalPhone(listing.phone)}
+            </a>
+
+            {contactLinks(listing.phone).map((link) => (
+              <a
+                key={link.id}
+                className={`btn contact-app app-${link.id}`}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                title={link.label}
+                aria-label={link.label}
+                onClick={() => recordCall()}
+              >
+                {MESSENGER_ICONS[link.id]}
+              </a>
+            ))}
+          </div>
         ) : null}
 
         <div className="nav-block">

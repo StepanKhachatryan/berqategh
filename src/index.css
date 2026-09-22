@@ -432,28 +432,29 @@ h4 {
   display: flex;
   padding: 3px;
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--ink);
   border-radius: var(--r-pill);
   gap: 2px;
 }
 
-/* With a white track the chosen side can no longer be a white pill against a
-   tinted one, so it carries the weight in ink and edge instead: green type on
-   a raised, outlined pill, against muted grey on nothing. */
+/* Both sides are white and both are ink. Which one is chosen is said by the
+   ring around it and by the weight of the type — never by hue, because the one
+   colour the header should not be competing with is the map. */
 
 .role-switch button {
   padding: 7px 14px;
   border-radius: var(--r-pill);
   font-size: 13.5px;
   font-weight: 600;
-  color: var(--ink-mute);
+  color: var(--ink);
   transition: all 0.18s var(--ease);
 }
 
 .role-switch button[aria-pressed='true'] {
   background: var(--surface);
-  color: var(--green-deep);
-  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  font-weight: 700;
   box-shadow: var(--shadow-sm);
 }
 
@@ -802,6 +803,47 @@ h4 {
 
 .map-service-btn.is-on svg {
   color: #fff;
+}
+
+/*
+ * The on/off switch on the right of the label.
+ *
+ * Changing the button's colour on press told people what state it was in, but
+ * only after they had already pressed it — nothing about a coloured pill says
+ * it can be pressed at all. A track with a knob in it is the one control
+ * everybody already reads as a switch, on a phone and on a desktop alike, and
+ * it makes the two states legible side by side rather than by memory.
+ */
+.map-service-btn .switch {
+  flex: none;
+  position: relative;
+  width: 30px;
+  height: 17px;
+  margin-left: 2px;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
+  transition: background 0.2s var(--ease);
+}
+
+.map-service-btn .switch i {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 37, 26, 0.35);
+  transition: transform 0.2s var(--ease);
+}
+
+/* Against the deep green the track has to be light, or the knob vanishes. */
+.map-service-btn.is-on .switch {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.map-service-btn.is-on .switch i {
+  transform: translateX(13px);
 }
 
 /*
@@ -1509,9 +1551,12 @@ textarea.input {
   transition: all 0.15s var(--ease);
 }
 
+/* Hover only darkens the edge. A green wash under the name tinted every
+   photograph sitting on it and read as "already chosen", which is the state
+   below — pointing at a crop is not choosing it. */
 .produce-item:hover {
-  border-color: var(--green);
-  background: var(--green-soft);
+  border-color: var(--ink);
+  background: var(--surface);
 }
 
 .produce-item[aria-pressed='true'] {
@@ -2510,8 +2555,69 @@ input[type='range']::-moz-range-thumb {
   margin-bottom: 16px;
 }
 
+/*
+ * Reaching the seller: one wide button and three square ones, on a line.
+ *
+ * Calling takes whatever width is left over, because it is the only route that
+ * always works and the only one that can show the number - a buyer who wants to
+ * write the number down should not have to open anything first. The messengers
+ * are fixed squares in their own brand colours, since the mark is doing the
+ * whole job of saying which app opens.
+ *
+ * The row wraps rather than being switched at a breakpoint. Four buttons and an
+ * eight-digit number need about 350px; below that the call keeps its own line
+ * and the messengers drop under it, which happens on its own from the basis
+ * widths and needs no guess about which phones are narrow.
+ */
+.contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 6px;
+}
+
 .call-btn {
   text-decoration: none;
+  /* Grows into the free space; the basis is what the number needs to be read. */
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 0 12px;
+  font-size: 15px;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+/* Never shrinks: the row is meant to wrap when it runs out of width, and a
+   messenger squeezed to 32px is a worse answer than a second line. */
+.contact-app {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 54px;
+  padding: 0;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.contact-app:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.contact-app:active {
+  transform: scale(0.95);
+}
+
+/* The apps' own colours. These are the one place on the site where the palette
+   is not ours to choose - a green WhatsApp mark is how it is recognised. */
+.app-whatsapp {
+  background: #25d366;
+}
+.app-viber {
+  background: #7360f2;
+}
+.app-telegram {
+  background: #2aabee;
 }
 
 .nav-block {
@@ -2929,11 +3035,16 @@ input[type='range']::-moz-range-thumb {
     display: none;
   }
 
+  /* Off the very corner. Flush right and hard against the bottom edge, this
+     sat in the one part of a wide screen the eye never visits, next to the
+     scrollbar and the attribution — and it is the only thing a seller comes
+     here to press. Lifted and pulled inward until it is inside the map rather
+     than pinned to its frame. */
   .fab {
     left: auto;
-    right: 20px;
+    right: 88px;
     transform: none;
-    bottom: 20px;
+    bottom: 56px;
   }
 
   .fab:active {

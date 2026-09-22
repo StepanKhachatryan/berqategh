@@ -90,15 +90,15 @@ interface PinOptions {
  * cannot be the shared ProduceMark component — but the two must agree, or the
  * same tomato would be a picture in the list and a drawing on the map.
  *
- * Dried fruit keeps its emoji here, as it always has: the pin's colour already
- * carries the չիր distinction, and the listing it opens shows the sun.
+ * Dried produce gets the plate of չիր rather than the fresh crop, which is the
+ * whole reason a dried fig on the map was an unreadable green blob: its emoji
+ * was 🫒, and at pin size an olive and a fig are the same dark smudge.
  */
 function pinMark(productId: string, form: ProduceForm): string {
-  if (form === 'fresh') {
-    const src = produceImage(productId);
-    // The URL is emitted by the bundler, not by anything a seller typed.
-    if (src) return `<img class="pin-photo" src="${src}" alt="">`;
-  }
+  const src = produceImage(productId, form);
+  // The URL is emitted by the bundler, not by anything a seller typed.
+  if (src) return `<img class="pin-photo" src="${src}" alt="">`;
+
   return produceEmoji(productId);
 }
 

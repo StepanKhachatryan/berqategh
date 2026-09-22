@@ -127,7 +127,7 @@ export default function SellerForm({
     } else if (!isInsideArmenia(location)) {
       // The database refuses these too; catching it here means the seller can
       // still fix the pin instead of meeting an error on submit.
-      found.location = 'Կետը Հայաստանից դուրս է — նշե՛ք վաճառքի կետը Հայաստանի ներսում';
+      found.location = 'Կետը Հայաստանից դուրս է - նշե՛ք վաճառքի կետը Հայաստանի ներսում';
     }
 
     return found;
@@ -244,7 +244,13 @@ export default function SellerForm({
               style={swatchStyle(product?.color ?? '#9aa79c')}
               aria-hidden="true"
             >
-              <ProduceMark productId={product?.id ?? ''} fallback="🧺" />
+              {/* Follows the fresh/dried choice below, so the preview is the
+                  same picture the buyer will see on the map. */}
+              <ProduceMark
+                productId={product?.id ?? ''}
+                form={dryable ? form : 'fresh'}
+                fallback="🧺"
+              />
             </span>
             <span className="picker-text">
               {product ? (
@@ -337,7 +343,7 @@ export default function SellerForm({
             hasError={showErrors && Boolean(errors.retailPrice)}
           />
           {!wantsRetail ? (
-            <p className="field-hint">Անջատված է — դուք ընտրել եք միայն մեծածախ վաճառք։</p>
+            <p className="field-hint">Անջատված է - դուք ընտրել եք միայն մեծածախ վաճառք։</p>
           ) : showErrors && errors.retailPrice ? (
             <p className="field-error">{errors.retailPrice}</p>
           ) : null}
@@ -355,7 +361,7 @@ export default function SellerForm({
             hasError={showErrors && Boolean(errors.wholesalePrice)}
           />
           {!wantsWholesale ? (
-            <p className="field-hint">Անջատված է — դուք ընտրել եք միայն մանրածախ վաճառք։</p>
+            <p className="field-hint">Անջատված է - դուք ընտրել եք միայն մանրածախ վաճառք։</p>
           ) : showErrors && errors.wholesalePrice ? (
             <p className="field-error">{errors.wholesalePrice}</p>
           ) : null}
@@ -536,7 +542,7 @@ function PriceInput({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         disabled={disabled}
-        placeholder={disabled ? '—' : 'Օր․՝ 450'}
+        placeholder={disabled ? '-' : 'Օր․՝ 450'}
       />
       <span className="affix affix-end">֏ / կգ</span>
     </div>

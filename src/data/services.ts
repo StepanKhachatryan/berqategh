@@ -99,7 +99,7 @@ export const PROVIDER_LABELS: Record<ServiceProvider, string> = {
 export const SERVICES: AgriService[] = [
   {
     id: 'trial-armavir',
-    name: 'Փորձնական կետ — ագրոխանութ',
+    name: 'Փորձնական կետ - ագրոխանութ',
     category: 'chemicals',
     provider: 'company',
     phone: null,
@@ -112,7 +112,7 @@ export const SERVICES: AgriService[] = [
   },
   {
     id: 'trial-ararat',
-    name: 'Փորձնական կետ — տեխնիկայի ծառայություն',
+    name: 'Փորձնական կետ - տեխնիկայի ծառայություն',
     category: 'machinery',
     provider: 'person',
     phone: null,

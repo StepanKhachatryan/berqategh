@@ -1,7 +1,7 @@
 import { ownerToken, supabase } from './supabase';
 import type { ListingRow, MyListingRow } from './database.types';
 import type { Listing, ListingDraft } from './types';
-import type { ProduceCategory } from '../data/produce';
+import { getProduce, type ProduceCategory } from '../data/produce';
 
 // One string literal, not a concatenation: supabase-js parses this at the type
 // level to infer the row shape, and only a literal survives that parse.
@@ -9,12 +9,25 @@ import type { ProduceCategory } from '../data/produce';
 // prettier-ignore
 const COLUMNS = 'id, product_id, product_name, category, sale_type, form, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at' as const;
 
+/*
+ * A row stores the crop's name and group as they stood when it was published,
+ * so a listing still reads sensibly if the crop later leaves the catalogue.
+ *
+ * That copy must not outrank the catalogue while the crop is still in it. When
+ * Սալաթ was corrected to Հազար, or Տարխուն to Թարխուն, every listing already on
+ * the map would otherwise have kept the old spelling for its whole life, and a
+ * crop moved between groups would go on being filtered under the group it left.
+ * The catalogue wins where it still knows the id; the stored copy is the
+ * fallback it was always meant to be.
+ */
 function toListing(row: ListingRow | MyListingRow): Listing {
+  const current = getProduce(row.product_id);
+
   return {
     id: row.id,
     productId: row.product_id,
-    productName: row.product_name,
-    category: row.category as ProduceCategory,
+    productName: current?.hy ?? row.product_name,
+    category: (current?.category ?? row.category) as ProduceCategory,
     saleType: row.sale_type as Listing['saleType'],
     form: (row.form ?? 'fresh') as Listing['form'],
     retailPrice: row.retail_price,

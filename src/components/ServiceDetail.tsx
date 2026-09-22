@@ -1,6 +1,7 @@
 import Modal from './Modal';
 import { formatLocalPhone } from '../lib/format';
-import { IconPhone, IconPin, IconWarn } from './Icons';
+import { IconPhone, IconPin, IconTelegram, IconViber, IconWarn, IconWhatsApp } from './Icons';
+import { contactLinks } from '../lib/contact';
 import {
   PROVIDER_LABELS,
   SERVICE_EMOJI,
@@ -75,10 +76,34 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
 
       <div style={{ display: 'grid', gap: 10 }}>
         {service.phone ? (
-          <a className="btn btn-cta btn-lg btn-block call-btn" href={`tel:${service.phone}`}>
-            <IconPhone />
-            Զանգահարել՝ {formatLocalPhone(service.phone)}
-          </a>
+          /* The same row as a listing's, for the same reason: a shop is just
+             as likely to answer on WhatsApp as on a call. */
+          <div className="contact-row">
+            <a className="btn btn-cta btn-lg call-btn" href={`tel:${service.phone}`}>
+              <IconPhone />
+              Զանգել՝ {formatLocalPhone(service.phone)}
+            </a>
+
+            {contactLinks(service.phone).map((link) => (
+              <a
+                key={link.id}
+                className={`btn contact-app app-${link.id}`}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                title={link.label}
+                aria-label={link.label}
+              >
+                {link.id === 'whatsapp' ? (
+                  <IconWhatsApp />
+                ) : link.id === 'viber' ? (
+                  <IconViber />
+                ) : (
+                  <IconTelegram />
+                )}
+              </a>
+            ))}
+          </div>
         ) : (
           <p className="detail-plain">Հեռախոսահամար դեռ չկա։</p>
         )}

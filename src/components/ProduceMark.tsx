@@ -16,16 +16,18 @@ interface ProduceMarkProps {
  * Every place a crop appears goes through here, so the set can be filled in one
  * picture at a time without touching five components each round.
  *
- * Dried fruit keeps the sun rather than the crop, photograph or not — a picture
- * of a fresh apricot on a listing for չիր would say the wrong thing.
+ * Dried fruit does not borrow the fresh crop's picture: a photograph of a plump
+ * apricot on a listing for չիր would say the wrong thing. It gets the plate of
+ * dried fruit instead, and falls back to the sun where there is no likeness —
+ * dried mint is still a leaf.
  */
 export default function ProduceMark({ productId, form = 'fresh', fallback }: ProduceMarkProps) {
-  if (form === 'dried') return <span>☀️</span>;
-
-  const src = produceImage(productId);
+  const src = produceImage(productId, form);
   if (src) {
     return <img className="produce-photo" src={src} alt="" loading="lazy" decoding="async" />;
   }
+
+  if (form === 'dried') return <span>☀️</span>;
 
   return <span>{produceEmoji(productId) || fallback || '🧺'}</span>;
 }

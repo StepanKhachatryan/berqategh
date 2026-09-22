@@ -616,6 +616,12 @@ export default function MapView({
         >
           <IconService size={16} />
           <span>Գյուղատնտեսական ծառայություն</span>
+          {/* A switch, not just a colour change. Colour alone only tells you
+              what state it is in once you already know it is a control — the
+              track and knob say "this is pressable" before the first press. */}
+          <span className="switch" aria-hidden="true">
+            <i />
+          </span>
         </button>
       ) : null}
 
