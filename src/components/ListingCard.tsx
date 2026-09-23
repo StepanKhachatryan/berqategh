@@ -30,9 +30,10 @@ export default function ListingCard({ listing, selected, onSelect, now }: Listin
       </span>
 
       <span className="listing-main">
+        {/* The name alone. listingTitle already renders "Ծիրան (չիր)", so a
+            chip beside it saying Չիր was the same word twice on one line. */}
         <span className="listing-title">
           <h4>{listingTitle(listing)}</h4>
-          {listing.form === 'dried' ? <span className="chip chip-dried">Չիր</span> : null}
         </span>
 
         <span className="listing-prices">
