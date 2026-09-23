@@ -15,6 +15,13 @@ interface ModalProps {
   children: ReactNode;
   footer?: ReactNode;
   headerExtra?: ReactNode;
+  /**
+   * A full-bleed branded header that replaces the plain one - title, media and
+   * all - leaving only the close button on top of it. Used by premium
+   * advertisers, whose card is meant to look like theirs rather than ours.
+   * `title` is still required: it names the dialog for screen readers.
+   */
+  hero?: ReactNode;
 }
 
 export default function Modal({
@@ -25,6 +32,7 @@ export default function Modal({
   children,
   footer,
   headerExtra,
+  hero,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -55,18 +63,35 @@ export default function Modal({
         ref={panelRef}
         tabIndex={-1}
       >
-        <div className="sheet-grab" />
-        <div className="modal-header">
-          {headerMedia}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h2>{title}</h2>
-            {subtitle ? <div className="modal-sub">{subtitle}</div> : null}
+        {hero ? (
+          <div className="modal-hero">
+            {hero}
+            <div className="sheet-grab on-hero" />
+            <button
+              type="button"
+              className="icon-btn on-hero"
+              onClick={onClose}
+              aria-label="Փակել"
+            >
+              <IconClose />
+            </button>
           </div>
-          {headerExtra}
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Փակել">
-            <IconClose />
-          </button>
-        </div>
+        ) : (
+          <>
+            <div className="sheet-grab" />
+            <div className="modal-header">
+              {headerMedia}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h2>{title}</h2>
+                {subtitle ? <div className="modal-sub">{subtitle}</div> : null}
+              </div>
+              {headerExtra}
+              <button type="button" className="icon-btn" onClick={onClose} aria-label="Փակել">
+                <IconClose />
+              </button>
+            </div>
+          </>
+        )}
         <div className="modal-body">{children}</div>
         {footer ? <div className="modal-footer">{footer}</div> : null}
       </div>

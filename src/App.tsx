@@ -29,6 +29,7 @@ import { applyFilters, countActiveFilters, sortListings, type SortKey } from './
 import { useDistances } from './lib/useDistances';
 import { useGeolocation } from './lib/useGeolocation';
 import PublishedSheet from './components/PublishedSheet';
+import PremiumServiceSheet from './components/PremiumServiceSheet';
 import { DEFAULT_FILTERS } from './lib/types';
 import type { Filters, LatLng, Listing, ListingDraft, MeasuredListing, Role } from './lib/types';
 
@@ -523,7 +524,14 @@ export default function App() {
 
       {sheet === 'guide' ? <GuideSheet role={role} onClose={() => setSheet('none')} /> : null}
 
-      {openService ? (
+      {/* Premium advertisers open their own card; everyone else, the standard
+          sheet. The check narrows the type, so the card can rely on it. */}
+      {openService?.premium ? (
+        <PremiumServiceSheet
+          service={{ ...openService, premium: openService.premium }}
+          onClose={() => setServiceId(null)}
+        />
+      ) : openService ? (
         <ServiceDetail service={openService} onClose={() => setServiceId(null)} />
       ) : null}
 

@@ -351,7 +351,7 @@ function premiumServiceIcon(service: AgriService, selected: boolean): L.DivIcon 
 }
 
 export function serviceIcon(service: AgriService, selected = false): L.DivIcon {
-  return service.tier === 'premium'
+  return service.premium
     ? premiumServiceIcon(service, selected)
     : regularServiceIcon(service, selected);
 }

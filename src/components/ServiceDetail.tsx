@@ -1,44 +1,12 @@
 import Modal from './Modal';
-import { formatLocalPhone } from '../lib/format';
-import { contactLinks } from '../lib/contact';
-import { IconPhone, IconPin, IconTelegram, IconViber, IconWarn, IconWhatsApp } from './Icons';
+import ContactRow from './ContactRow';
+import { readLink } from '../lib/links';
+import { IconPin, IconWarn } from './Icons';
 import { OFFERINGS, primaryOffering, type AgriService } from '../data/services';
 
 interface ServiceDetailProps {
   service: AgriService;
   onClose: () => void;
-}
-
-const MESSENGER_ICONS: Record<string, JSX.Element> = {
-  whatsapp: <IconWhatsApp />,
-  viber: <IconViber />,
-  telegram: <IconTelegram />,
-};
-
-/**
- * A link an advertiser gave us, made safe and made readable.
- *
- * Only http and https survive: anything else - a javascript: URL above all -
- * is dropped rather than rendered, because these will one day be typed in by
- * advertisers rather than by us. Facebook is named as Facebook, since the page
- * slug says nothing to a farmer; anything else is shown as its bare domain.
- */
-function readLink(raw: string | null): { href: string; label: string; text: string } | null {
-  if (!raw) return null;
-
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    return null;
-  }
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
-
-  const host = url.hostname.replace(/^www\./, '').replace(/^m\./, '');
-  if (host === 'facebook.com' || host === 'fb.com' || host.endsWith('.facebook.com')) {
-    return { href: url.href, label: 'Facebook', text: 'Բացել Facebook էջը' };
-  }
-  return { href: url.href, label: 'Կայք', text: host };
 }
 
 /**
@@ -77,25 +45,8 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
       {/* The same row as a listing's: the number stays readable on the call
           button, and a shop is as likely to answer on WhatsApp as on a call. */}
       {service.phone ? (
-        <div className="contact-row" style={{ marginBottom: 14 }}>
-          <a className="btn btn-cta btn-lg call-btn" href={`tel:${service.phone}`}>
-            <IconPhone />
-            Զանգել՝ {formatLocalPhone(service.phone)}
-          </a>
-
-          {contactLinks(service.phone).map((entry) => (
-            <a
-              key={entry.id}
-              className={`btn contact-app app-${entry.id}`}
-              href={entry.href}
-              target="_blank"
-              rel="noreferrer noopener"
-              title={entry.label}
-              aria-label={entry.label}
-            >
-              {MESSENGER_ICONS[entry.id]}
-            </a>
-          ))}
+        <div style={{ marginBottom: 14 }}>
+          <ContactRow phone={service.phone} />
         </div>
       ) : (
         <p className="detail-plain" style={{ marginBottom: 14 }}>

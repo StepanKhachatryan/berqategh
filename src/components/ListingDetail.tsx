@@ -3,10 +3,10 @@ import ProduceMark from './ProduceMark';
 import { produceImage } from '../data/produceImages';
 import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
-import { formatLocalPhone, formatPrice, formatQuantity, postedAge } from '../lib/format';
+import { formatPrice, formatQuantity, postedAge } from '../lib/format';
 import { listingColor, swatchStyle } from './markers';
-import { IconPhone, IconPin, IconTelegram, IconViber, IconWhatsApp } from './Icons';
-import { contactLinks } from '../lib/contact';
+import { IconPin } from './Icons';
+import ContactRow from './ContactRow';
 import { usePlaceName } from '../lib/usePlaceName';
 import { listingTitle, type MeasuredListing } from '../lib/types';
 
@@ -15,13 +15,6 @@ interface ListingDetailProps {
   onClose: () => void;
   now: number;
 }
-
-/* Kept out of the component so the row is a lookup rather than a switch. */
-const MESSENGER_ICONS: Record<string, JSX.Element> = {
-  whatsapp: <IconWhatsApp />,
-  viber: <IconViber />,
-  telegram: <IconTelegram />,
-};
 
 export default function ListingDetail({ listing, onClose, now }: ListingDetailProps) {
   const color = listingColor(listing.productId, listing.form);
@@ -163,33 +156,7 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
             works and the one a farmer expects. The messengers sit beside it as
             icons: cheaper than a call for the buyer, and the number is already
             in international form, so each is a link rather than a feature. */}
-        {listing.phone ? (
-          <div className="contact-row">
-            <a
-              className="btn btn-cta btn-lg call-btn"
-              href={`tel:${listing.phone}`}
-              onClick={() => recordCall()}
-            >
-              <IconPhone />
-              Զանգել՝ {formatLocalPhone(listing.phone)}
-            </a>
-
-            {contactLinks(listing.phone).map((link) => (
-              <a
-                key={link.id}
-                className={`btn contact-app app-${link.id}`}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                title={link.label}
-                aria-label={link.label}
-                onClick={() => recordCall()}
-              >
-                {MESSENGER_ICONS[link.id]}
-              </a>
-            ))}
-          </div>
-        ) : null}
+        {listing.phone ? <ContactRow phone={listing.phone} onContact={recordCall} /> : null}
 
         <div className="nav-block">
           <span className="nav-label">
