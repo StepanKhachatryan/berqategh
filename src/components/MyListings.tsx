@@ -73,9 +73,6 @@ export default function MyListings({
             <br />
             Սեղմե՛ք «Տեղադրել բերք»՝ սկսելու համար։
           </p>
-          <button type="button" className="btn btn-ghost btn-block" onClick={onRecover}>
-            Արդեն տեղադրե՞լ եք ուրիշ սարքից
-          </button>
         </>
       ) : (
         <div className="mine-list">
@@ -147,13 +144,16 @@ export default function MyListings({
         </div>
       )}
 
+      {/* The only way into recovery. There used to be a second button in the
+          empty state, worded differently, doing the identical thing - two
+          names for one action read as two actions. */}
       <button
         type="button"
         className="btn btn-ghost btn-block"
         style={{ marginTop: 14 }}
         onClick={onRecover}
       >
-        Վերականգնել այլ սարքից
+        Վերականգնել իմ հայտարարությունները
       </button>
     </Modal>
   );

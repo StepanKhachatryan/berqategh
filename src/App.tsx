@@ -28,6 +28,7 @@ import { record, recordVisit } from './lib/analytics';
 import { applyFilters, countActiveFilters, sortListings, type SortKey } from './lib/filter';
 import { useDistances } from './lib/useDistances';
 import { useGeolocation } from './lib/useGeolocation';
+import PublishedSheet from './components/PublishedSheet';
 import { DEFAULT_FILTERS } from './lib/types';
 import type { Filters, LatLng, Listing, ListingDraft, MeasuredListing, Role } from './lib/types';
 
@@ -57,6 +58,13 @@ export default function App() {
   const [loadingMine, setLoadingMine] = useState(false);
   // Issued by the server on first publish and stable while anything is live.
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null);
+  /* Shown once, right after publishing, to put the recovery code in front of
+     a seller who otherwise never opens the screen that holds it. */
+  const [published, setPublished] = useState<{
+    code: string;
+    phone: string;
+    span: string;
+  } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -276,11 +284,35 @@ export default function App() {
     setListings((current) => [created, ...current]);
     setMine((current) => [created, ...current]);
     setSheet('none');
-    setSelectedId(created.id);
+
+    /*
+     * The map flies to the new pin, but the listing is deliberately NOT
+     * selected. Selecting opens its detail sheet, and the recovery code sheet
+     * is about to open on top of it - two sheets stacked, the lower one
+     * unreachable. A seller has no use for a sheet describing what they typed
+     * thirty seconds ago; they need the code, and then to see their pin land.
+     */
     setFocus({ point: { lat: created.lat, lng: created.lng }, zoom: 14, nonce: Date.now() });
     const days = draft.durationDays ?? 30;
     const span = days === 30 ? '1 ամիս' : days === 90 ? '3 ամիս' : `${days} օր`;
-    push('success', `Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի ${span}։`);
+
+    /*
+     * The code, then the confirmation - and a toast only if there is no code.
+     *
+     * A seller who has just published has no reason to open «Իմ
+     * հայտարարությունները», so the first time they ever go looking for the
+     * recovery code is after their storage has been cleared, when it is gone.
+     * Showing it here is the difference between a listing they can get back
+     * and one they cannot.
+     */
+    const code = await issueRecoveryCode().catch(() => null);
+    if (code) {
+      setRecoveryCode(code);
+      setPublished({ code, phone: draft.phone, span });
+    } else {
+      push('success', `Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի ${span}։`);
+    }
+
     void loadMine();
   };
 
@@ -477,6 +509,15 @@ export default function App() {
           onLocate={handleLocate}
           onSubmit={handleCreate}
           onClose={() => setSheet('none')}
+        />
+      ) : null}
+
+      {published ? (
+        <PublishedSheet
+          code={published.code}
+          phone={published.phone}
+          span={published.span}
+          onClose={() => setPublished(null)}
         />
       ) : null}
 
