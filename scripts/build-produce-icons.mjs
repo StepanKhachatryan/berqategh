@@ -9,10 +9,13 @@
  *
  * A file is named after the produce id it belongs to (apple.png → apple.webp),
  * and the app picks it up automatically. Anything already converted is skipped
- * unless the original is newer, so re-running is cheap.
+ * unless the original's CONTENT has changed, so re-running is cheap.
+ *
+ * Pass --force to rebuild everything regardless.
  */
 
-import { readdirSync, readFileSync, writeFileSync, statSync, existsSync, mkdirSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, extname, basename, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -54,14 +57,46 @@ if (sources.length === 0) {
   process.exit(0);
 }
 
-const pending = sources.filter(({ id, path }) => {
-  const out = join(OUT, `${id}.webp`);
-  if (!existsSync(out)) return true;
-  return statSync(path).mtimeMs > statSync(out).mtimeMs;
+/*
+ * What has actually changed, decided by the content of the originals.
+ *
+ * This used to compare modification times, which is wrong anywhere the files
+ * arrive from git rather than from an editor. A fresh checkout stamps every
+ * file with the moment it was written, so "is the original newer than its
+ * icon" becomes a coin flip decided by the order git happened to unpack them.
+ * A brand new picture still converted, because there was no icon to compare
+ * against - but REPLACING a picture silently did nothing, and the old icon
+ * stayed on the site looking like the upload had simply not worked.
+ *
+ * A hash of the bytes has no such problem: same picture, same digest, on any
+ * machine and in any checkout.
+ */
+const MANIFEST = join(OUT, 'sources.json');
+
+const previous = existsSync(MANIFEST)
+  ? JSON.parse(readFileSync(MANIFEST, 'utf8'))
+  : {};
+
+const digest = (path) => createHash('sha256').update(readFileSync(path)).digest('hex').slice(0, 16);
+
+const current = Object.fromEntries(sources.map(({ id, path }) => [id, digest(path)]));
+
+const force = process.argv.includes('--force');
+
+const pending = sources.filter(({ id }) => {
+  if (force) return true;
+  if (!existsSync(join(OUT, `${id}.webp`))) return true;
+  return previous[id] !== current[id];
 });
 
 if (pending.length === 0) {
   console.log(`${sources.length} icon(s) already up to date.`);
+  // The manifest still has to catch up the first time it is written, and after
+  // a source is deleted, or the next run would keep thinking it is stale.
+  if (JSON.stringify(previous) !== JSON.stringify(current)) {
+    writeFileSync(MANIFEST, JSON.stringify(current, null, 2) + '\n');
+    console.log('Recorded source digests.');
+  }
   process.exit(0);
 }
 
@@ -181,4 +216,9 @@ for (const { name, id, path } of pending) {
 }
 
 await browser.close();
+
+// Written only now, so a run that dies halfway leaves the unconverted sources
+// still looking stale and the next run picks them up.
+writeFileSync(MANIFEST, JSON.stringify(current, null, 2) + '\n');
+
 console.log(`\n${pending.length} icon(s), ${(total / 1024).toFixed(0)} KB total.`);
