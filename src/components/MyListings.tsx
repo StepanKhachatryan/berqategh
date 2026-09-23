@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Modal from './Modal';
 import ProduceMark from './ProduceMark';
 import { formatPrice, timeLeft } from '../lib/format';
-import { listingColor, SALE_TYPE_SHORT, swatchStyle } from './markers';
+import { listingColor, swatchStyle } from './markers';
 import { IconArchive, IconTrash } from './Icons';
 import { listingTitle, type Listing } from '../lib/types';
 
@@ -195,9 +195,6 @@ function MyListingCard({
         <div className="listing-main">
           <div className="listing-title">
             <h4>{listingTitle(listing)}</h4>
-            <span className={`chip chip-${listing.saleType}`}>
-              {SALE_TYPE_SHORT[listing.saleType]}
-            </span>
           </div>
           <div className="listing-prices">
             {listing.retailPrice !== null ? (

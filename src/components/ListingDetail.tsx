@@ -55,12 +55,11 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
    */
   const photo = produceImage(listing.productId, listing.form);
 
+  // No subtitle for dried fruit: listingTitle already renders "Թուզ (չիր)" in
+  // the heading, and a line under it repeating the same word is a line nobody
+  // reads twice.
   return (
-    <Modal
-      title={title}
-      subtitle={listing.form === 'dried' ? 'Չիր - չորացրած' : undefined}
-      onClose={onClose}
-    >
+    <Modal title={title} onClose={onClose}>
       {/* The picture and what the crop costs, side by side. Prices used to run
           the full width of the sheet and take a third of it to say two
           numbers. */}

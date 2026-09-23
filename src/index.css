@@ -308,19 +308,6 @@ h4 {
   white-space: nowrap;
 }
 
-.chip-retail {
-  background: var(--green-soft);
-  color: var(--green-deep);
-}
-.chip-wholesale {
-  background: var(--blue-soft);
-  color: #1d4ed8;
-}
-.chip-both {
-  background: var(--amber-soft);
-  color: #b45309;
-}
-
 .chip-dried {
   background: #f2e6d6;
   color: #7a4a1d;

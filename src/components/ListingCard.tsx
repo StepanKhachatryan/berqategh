@@ -1,7 +1,7 @@
 import { formatDistance } from '../lib/geo';
 import ProduceMark from './ProduceMark';
 import { formatPrice, formatQuantity, postedAge } from '../lib/format';
-import { listingColor, SALE_TYPE_SHORT, swatchStyle } from './markers';
+import { listingColor, swatchStyle } from './markers';
 import { IconClock, IconRoute } from './Icons';
 import { listingTitle, type MeasuredListing } from '../lib/types';
 
@@ -33,9 +33,6 @@ export default function ListingCard({ listing, selected, onSelect, now }: Listin
         <span className="listing-title">
           <h4>{listingTitle(listing)}</h4>
           {listing.form === 'dried' ? <span className="chip chip-dried">Չիր</span> : null}
-          <span className={`chip chip-${listing.saleType}`}>
-            {SALE_TYPE_SHORT[listing.saleType]}
-          </span>
         </span>
 
         <span className="listing-prices">
