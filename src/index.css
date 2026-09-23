@@ -48,6 +48,13 @@
   --green-deep: #0d6f31;
   --green-soft: #e6f6ec;
 
+  /* Services on the map. Cyan because no crop is: produce covers nearly the
+     whole wheel, and a shop should read as a shop before its symbol does.
+     Mirrored as SERVICE_FILL in markers.ts, where the SVG needs the value. */
+  --service: #0891b2;
+  --service-deep: #0e6d86;
+  --service-soft: #e6f6fa;
+
   --cta: #ff6b1a;
   --cta-hot: #ff8a3d;
   --cta-deep: #e05105;
@@ -871,10 +878,43 @@ h4 {
   pointer-events: none;
 }
 
-/* The five kinds of service, as a key in the guide rather than on the map —
-   the map earns its space back by not explaining itself twice. */
+/* The two kinds of service marker, as a key in the guide rather than on the
+   map - the map earns its space back by not explaining itself twice. */
+.guide-services {
+  margin-bottom: 12px;
+}
+
 .guide-services li {
   gap: 10px;
+}
+
+/* A premium bubble at rest, for the key: one face, no roll. */
+.guide-bubble {
+  flex: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px 0 7px;
+  margin-bottom: 6px;
+  border: 2px solid var(--service);
+  border-radius: 7px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.guide-bubble::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  bottom: -8px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid var(--service);
 }
 
 /* A line of prose in a sheet that is not a warning and not a note. */
@@ -885,8 +925,9 @@ h4 {
 }
 
 /*
- * A white marker needs more than the shared pin shadow to lift off a pale map:
- * a tight dark one to draw the edge, and a wider soft one for the lift.
+ * Service markers sit on the services pane, above faded produce, and need to
+ * lift off it: a tight dark shadow to draw the edge, a wider soft one for the
+ * lift.
  */
 .pin-service svg {
   filter:
@@ -900,7 +941,8 @@ h4 {
     drop-shadow(0 8px 16px rgba(16, 37, 26, 0.3));
 }
 
-/* The same mark, at rest, wherever a service is named away from the map. */
+/* The same mark, at rest, wherever a service is named away from the map:
+   the service cyan around a white window, as on the pin. */
 .service-mark {
   flex: none;
   display: grid;
@@ -909,9 +951,200 @@ h4 {
   height: 26px;
   border-radius: 9px;
   background: #fff;
-  border: 1.4px solid var(--ink);
+  border: 2px solid var(--service);
   font-size: 14px;
   line-height: 1;
+}
+
+/* ─── premium: the turning bubble ─────────────────────────────────────────
+   See premiumServiceIcon in markers.ts for how the faces are arranged and
+   why some of them carry more than one offering. What is here is the box
+   itself, the roll, and the switch that happens behind its back. */
+
+.pin-premium {
+  /* The marker root is zero-sized; the bubble hangs off it. */
+  overflow: visible;
+}
+
+.premium-pin {
+  /* A square cross-section, so every side of the box is the same height. */
+  --pb-h: 34px;
+  --pb-half: 17px;
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* The tail's tip lands on the point, whatever width the labels made it. */
+  transform: translate(calc(-1 * var(--pb-tail-x)), -100%);
+  /* On the wrapper rather than the faces, so the shadow is cast by the whole
+     silhouette as it turns instead of turning with each face. */
+  filter:
+    drop-shadow(0 1px 1.5px rgba(6, 58, 74, 0.34))
+    drop-shadow(0 6px 12px rgba(6, 58, 74, 0.26));
+  cursor: pointer;
+}
+
+.premium-pin.is-selected {
+  filter:
+    drop-shadow(0 1px 2px rgba(6, 58, 74, 0.42))
+    drop-shadow(0 10px 20px rgba(6, 58, 74, 0.36));
+}
+
+.pb-stage {
+  position: relative;
+  perspective: 480px;
+}
+
+/* Every label in one grid cell, invisible: the widest one sizes the box. The
+   extra 2px each side is the face's border, so the text inside a face has
+   exactly the room it had here. */
+.pb-sizer {
+  display: grid;
+  height: var(--pb-h);
+  visibility: hidden;
+}
+
+.pb-sizer-cell {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 13px 0 11px;
+  white-space: nowrap;
+}
+
+.pb-prism {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: pb-roll 10.4s ease-in-out infinite;
+}
+
+.pb-prism.is-still {
+  animation: none;
+}
+
+.pb-face {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border: 2px solid var(--service);
+  border-radius: 8px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.premium-pin.is-selected .pb-face {
+  border-color: var(--service-deep);
+}
+
+/* Centred, because the box is as wide as its longest label: a short one
+   pushed to the left edge leaves the right half of the face empty. */
+.pb-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 11px 0 9px;
+  white-space: nowrap;
+  opacity: 0;
+}
+
+/* The one layer a side shows when it never changes - and, with motion
+   switched off, the only thing the bubble shows at all. */
+.pb-layer.pb-on {
+  opacity: 1;
+}
+
+.pb-emoji {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.pb-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Pointing at the place, like the stem on every other pin. Kept left of
+   centre, which is what makes a box read as something said rather than a
+   sign. */
+.pb-tail {
+  width: 0;
+  height: 0;
+  margin-top: -1px;
+  margin-left: calc(var(--pb-tail-x) - 7px);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid var(--service);
+}
+
+/*
+ * A quarter turn per step: held for most of it, rolled in the last 23%. The
+ * step length is STEP_S in markers.ts, which sets each prism's duration
+ * inline; the 10.4s on .pb-prism is only a fallback.
+ */
+@keyframes pb-roll {
+  0%,
+  19.25% {
+    transform: rotateX(0deg);
+  }
+  25%,
+  44.25% {
+    transform: rotateX(90deg);
+  }
+  50%,
+  69.25% {
+    transform: rotateX(180deg);
+  }
+  75%,
+  94.25% {
+    transform: rotateX(270deg);
+  }
+  100% {
+    transform: rotateX(360deg);
+  }
+}
+
+/*
+ * A layer is shown for four steps of its period - from the moment its side
+ * turns its back, through the moment it faces you, to the next time it turns
+ * its back. Twelve steps covers three and six offerings, twenty covers five.
+ * Run with step-end, so it switches rather than fades.
+ */
+@keyframes pb-layer-12 {
+  0% {
+    opacity: 1;
+  }
+  33.3333% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pb-layer-20 {
+  0% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* No roll: the bubble shows its first offering and holds it. */
+@media (prefers-reduced-motion: reduce) {
+  .pb-prism,
+  .pb-layer {
+    animation: none !important;
+  }
 }
 
 /* Trial entries say so, in the sheet and nowhere else it could be missed. */
@@ -2616,6 +2849,63 @@ input[type='range']::-moz-range-thumb {
   text-decoration: none;
   height: 44px;
   font-size: 14px;
+}
+
+/* ─── what a service offers ───────────────────────────────────────────────
+   Squares, each a symbol over its name. Named because a symbol alone cannot
+   carry "fertiliser" or "hail net", and a farmer should not have to guess. */
+.detail-link {
+  color: var(--service-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.offering-heading {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  margin: 0 0 8px;
+}
+
+.offering-grid {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.offering {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 92px;
+  padding: 10px 5px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  text-align: center;
+}
+
+.offering-emoji {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.offering-label {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink-soft);
+  /* break-word, not anywhere: "anywhere" makes every letter a break point and
+     the browser takes the last one that fits, which is how Պարարտանյու ended
+     up above a lone թ. With break-word the soft hyphens in the labels win, and
+     an arbitrary break is only the last resort for a word with none. */
+  overflow-wrap: break-word;
 }
 
 /* ═══ my listings ════════════════════════════════════════════════════════ */

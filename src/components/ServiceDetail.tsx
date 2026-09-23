@@ -1,125 +1,149 @@
 import Modal from './Modal';
 import { formatLocalPhone } from '../lib/format';
-import { IconPhone, IconPin, IconTelegram, IconViber, IconWarn, IconWhatsApp } from './Icons';
 import { contactLinks } from '../lib/contact';
-import {
-  PROVIDER_LABELS,
-  SERVICE_EMOJI,
-  SERVICE_LABELS,
-  type AgriService,
-} from '../data/services';
+import { IconPhone, IconPin, IconTelegram, IconViber, IconWarn, IconWhatsApp } from './Icons';
+import { OFFERINGS, primaryOffering, type AgriService } from '../data/services';
 
 interface ServiceDetailProps {
   service: AgriService;
   onClose: () => void;
 }
 
+const MESSENGER_ICONS: Record<string, JSX.Element> = {
+  whatsapp: <IconWhatsApp />,
+  viber: <IconViber />,
+  telegram: <IconTelegram />,
+};
+
 /**
- * What a farmer needs before driving somewhere: who it is, what they do, the
- * number to ring first, and where to go.
+ * A link an advertiser gave us, made safe and made readable.
  *
- * Deliberately the same shape as a listing's sheet, minus the prices — a seller
- * has already learned how to read one of those.
+ * Only http and https survive: anything else - a javascript: URL above all -
+ * is dropped rather than rendered, because these will one day be typed in by
+ * advertisers rather than by us. Facebook is named as Facebook, since the page
+ * slug says nothing to a farmer; anything else is shown as its bare domain.
+ */
+function readLink(raw: string | null): { href: string; label: string; text: string } | null {
+  if (!raw) return null;
+
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+
+  const host = url.hostname.replace(/^www\./, '').replace(/^m\./, '');
+  if (host === 'facebook.com' || host === 'fb.com' || host.endsWith('.facebook.com')) {
+    return { href: url.href, label: 'Facebook', text: 'Բացել Facebook էջը' };
+  }
+  return { href: url.href, label: 'Կայք', text: host };
+}
+
+/**
+ * What a farmer needs before driving somewhere, in the order they need it:
+ * who it is, how to reach them, where to read more, where to go, and what they
+ * will find there.
+ *
+ * The name is the heading rather than a row, because it is the first line and
+ * a row saying the same thing under it would be the heading twice.
  */
 export default function ServiceDetail({ service, onClose }: ServiceDetailProps) {
   const point = `${service.lat.toFixed(5)},${service.lng.toFixed(5)}`;
   const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
+  const link = readLink(service.link);
 
   return (
-    /* The same white, thinly outlined mark that was tapped on the map, on one
-       line with the name and the close button. Who provides it is a row below,
-       so it is not repeated here. */
     <Modal
       title={service.name}
       headerMedia={
         <div className="header-thumb service-mark" aria-hidden="true">
-          {SERVICE_EMOJI[service.category]}
+          {primaryOffering(service).emoji}
         </div>
       }
       onClose={onClose}
     >
-
       {/* The badge is the point of the whole entry while the data is trial. */}
       {service.trial ? (
-        <p className="trial-note">
+        <p className="trial-note" style={{ marginTop: 0, marginBottom: 14 }}>
           <IconWarn size={15} />
-          Փորձնական գրառում։ Այս կետը ցուցադրական է և իրական ծառայություն չի ներկայացնում։
+          Փորձնական գրառում։ Այս կետը ցուցադրական է, իրական ծառայություն չի ներկայացնում,
+          և հեռախոսահամարը գոյություն չունի։
         </p>
       ) : null}
 
+      {/* The same row as a listing's: the number stays readable on the call
+          button, and a shop is as likely to answer on WhatsApp as on a call. */}
+      {service.phone ? (
+        <div className="contact-row" style={{ marginBottom: 14 }}>
+          <a className="btn btn-cta btn-lg call-btn" href={`tel:${service.phone}`}>
+            <IconPhone />
+            Զանգել՝ {formatLocalPhone(service.phone)}
+          </a>
+
+          {contactLinks(service.phone).map((entry) => (
+            <a
+              key={entry.id}
+              className={`btn contact-app app-${entry.id}`}
+              href={entry.href}
+              target="_blank"
+              rel="noreferrer noopener"
+              title={entry.label}
+              aria-label={entry.label}
+            >
+              {MESSENGER_ICONS[entry.id]}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p className="detail-plain" style={{ marginBottom: 14 }}>
+          Հեռախոսահամար դեռ չկա։
+        </p>
+      )}
+
       <div className="detail-rows">
+        {link ? (
+          <div className="detail-row">
+            <span className="k">{link.label}</span>
+            <a className="v detail-link" href={link.href} target="_blank" rel="noreferrer noopener">
+              {link.text}
+            </a>
+          </div>
+        ) : null}
+
         <div className="detail-row">
           <span className="k">Հասցե</span>
           <span className="v">{service.address}</span>
         </div>
-
-        <div className="detail-row">
-          <span className="k">Ծառայության տեսակ</span>
-          <span className="v">{SERVICE_LABELS[service.category]}</span>
-        </div>
-
-        <div className="detail-row">
-          <span className="k">Ով է մատուցում</span>
-          <span className="v">{PROVIDER_LABELS[service.provider]}</span>
-        </div>
-
-        {service.hours ? (
-          <div className="detail-row">
-            <span className="k">Աշխատանքային ժամեր</span>
-            <span className="v">{service.hours}</span>
-          </div>
-        ) : null}
       </div>
 
-      {service.note ? <p className="detail-note">{service.note}</p> : null}
+      {/* Symbol and name together: there is no emoji for a hail net or for
+          fertiliser, and a symbol a farmer has to guess at is no help. */}
+      <h4 className="offering-heading">Ապրանքներ և ծառայություններ</h4>
+      <ul className="offering-grid">
+        {service.offerings.map((id) => (
+          <li key={id} className="offering">
+            <span className="offering-emoji" aria-hidden="true">
+              {OFFERINGS[id].emoji}
+            </span>
+            <span className="offering-label">{OFFERINGS[id].label}</span>
+          </li>
+        ))}
+      </ul>
 
-      <div style={{ display: 'grid', gap: 10 }}>
-        {service.phone ? (
-          /* The same row as a listing's, for the same reason: a shop is just
-             as likely to answer on WhatsApp as on a call. */
-          <div className="contact-row">
-            <a className="btn btn-cta btn-lg call-btn" href={`tel:${service.phone}`}>
-              <IconPhone />
-              Զանգել՝ {formatLocalPhone(service.phone)}
-            </a>
-
-            {contactLinks(service.phone).map((link) => (
-              <a
-                key={link.id}
-                className={`btn contact-app app-${link.id}`}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                title={link.label}
-                aria-label={link.label}
-              >
-                {link.id === 'whatsapp' ? (
-                  <IconWhatsApp />
-                ) : link.id === 'viber' ? (
-                  <IconViber />
-                ) : (
-                  <IconTelegram />
-                )}
-              </a>
-            ))}
-          </div>
-        ) : (
-          <p className="detail-plain">Հեռախոսահամար դեռ չկա։</p>
-        )}
-
-        <div className="nav-block">
-          <span className="nav-label">
-            <IconPin /> Ինչպես հասնել
-          </span>
-          <div className="nav-links">
-            <a className="btn btn-ghost" href={yandexUrl} target="_blank" rel="noreferrer noopener">
-              Yandex Maps
-            </a>
-            <a className="btn btn-ghost" href={googleUrl} target="_blank" rel="noreferrer noopener">
-              Google Maps
-            </a>
-          </div>
+      <div className="nav-block">
+        <span className="nav-label">
+          <IconPin /> Ինչպես հասնել
+        </span>
+        <div className="nav-links">
+          <a className="btn btn-ghost" href={yandexUrl} target="_blank" rel="noreferrer noopener">
+            Yandex Maps
+          </a>
+          <a className="btn btn-ghost" href={googleUrl} target="_blank" rel="noreferrer noopener">
+            Google Maps
+          </a>
         </div>
       </div>
     </Modal>

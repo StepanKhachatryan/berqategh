@@ -11,7 +11,11 @@ import {
   IconShield,
   IconWarn,
 } from './Icons';
-import { SERVICE_EMOJI, SERVICE_LABELS, SERVICE_ORDER } from '../data/services';
+import { SERVICES } from '../data/services';
+
+/* Counted rather than written out, so the note cannot go on saying "two"
+   after the trials have been replaced by real advertisers. */
+const TRIAL_COUNT = SERVICES.filter((service) => service.trial).length;
 import type { Role, SaleType } from '../lib/types';
 
 interface GuideSheetProps {
@@ -118,25 +122,39 @@ export default function GuideSheet({ role, onClose }: GuideSheetProps) {
             <IconService size={15} /> Գյուղատնտեսական ծառայություններ
           </h4>
           <p>
-            Քարտեզի աջ կողմի կոճակը ցույց է տալիս ոչ թե բերք, այլ այն, ինչ պետք է բերքից
-            առաջ։ Սեղմելիս հայտարարությունները մարում են, և դրանց տեղում հայտնվում են
-            ծառայությունների կետերը։ Կրկին սեղմելիս ամեն ինչ վերադառնում է։
+            Քարտեզի վերևի ձախ անջատիչը ցույց է տալիս ոչ թե բերք, այլ այն, ինչ պետք է
+            բերքից առաջ։ Միացնելիս հայտարարությունները մարում են, և դրանց տեղում
+            հայտնվում են ծառայությունների կետերը։ Անջատելիս ամեն ինչ վերադառնում է։
           </p>
+          {/* The two kinds of marker, drawn as they appear - not the list of
+              trades, which is two dozen long and belongs in each sheet. */}
           <ul className="guide-legend guide-services">
-            {SERVICE_ORDER.map((category) => (
-              <li key={category}>
-                <span className="service-mark" aria-hidden="true">
-                  {SERVICE_EMOJI[category]}
-                </span>
-                {SERVICE_LABELS[category]}
-              </li>
-            ))}
+            <li>
+              <span className="service-mark" aria-hidden="true">
+                🧪
+              </span>
+              Երկնագույն կետերը խանութներ և ծառայություններ են, ոչ թե բերք։
+            </li>
+            <li>
+              <span className="guide-bubble" aria-hidden="true">
+                <span>🫘</span> Սերմեր
+              </span>
+              Պտտվող պատուհանը հերթով ցույց է տալիս, թե ինչ կա այնտեղ։
+            </li>
           </ul>
-          <p className="guide-note">
-            <IconWarn size={15} />
-            Բաժինը փորձնական է։ Քարտեզին այս պահին երկու ցուցադրական կետ կա՝ իրական
-            ծառայություններ չեն։ Գնորդները այս բաժինը չեն տեսնում։
-          </p>
+          <p>Սեղմե՛ք ցանկացածի վրա՝ հեռախոսը, հասցեն և ամբողջ ցանկը տեսնելու համար։</p>
+          {TRIAL_COUNT > 0 ? (
+            <p className="guide-note">
+              <IconWarn size={15} />
+              Բաժինը փորձնական է։ Քարտեզին այս պահին {TRIAL_COUNT} ցուցադրական կետ կա՝
+              իրական ծառայություններ չեն։ Գնորդները այս բաժինը չեն տեսնում։
+            </p>
+          ) : (
+            <p className="guide-note">
+              <IconWarn size={15} />
+              Գնորդները այս բաժինը չեն տեսնում։
+            </p>
+          )}
         </section>
       ) : (
         <section className="guide-section">

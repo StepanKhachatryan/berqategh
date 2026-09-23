@@ -5,7 +5,7 @@ import { fanOffsets, overlapGroup } from './spider';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
 import { listingTitle, type LatLng, type MeasuredListing } from '../lib/types';
 import { IconCrosshair, IconLayers, IconHelp, IconService } from './Icons';
-import { SERVICE_LABELS, type AgriService } from '../data/services';
+import { OFFERINGS, type AgriService } from '../data/services';
 
 /**
  * Two genuinely different views, not two renderings of the same one: the
@@ -109,6 +109,8 @@ export default function MapView({
   const layerRef = useRef<L.LayerGroup | null>(null);
   const serviceLayerRef = useRef<L.LayerGroup | null>(null);
   const serviceMarkersRef = useRef(new Map<string, L.Marker>());
+  /** Whether each service marker was last drawn selected. */
+  const serviceSelectedRef = useRef(new Map<string, boolean>());
   const selectServiceRef = useRef<(id: string | null) => void>(() => undefined);
   // Where the map was before the services layer took over, so leaving it puts
   // the seller back where they were rather than somewhere across the country.
@@ -183,8 +185,16 @@ export default function MapView({
       map.remove();
       mapRef.current = null;
       layerRef.current = null;
+      serviceLayerRef.current = null;
       tileRef.current = null;
       markersRef.current.clear();
+      // The service markers belonged to the map that was just removed. Left
+      // in the map of live markers, they read as "already drawn" to the next
+      // map, which then never draws any - the services layer came up empty
+      // after any remount, including the one strict mode does on every load
+      // in development.
+      serviceMarkersRef.current.clear();
+      serviceSelectedRef.current.clear();
     };
   }, []);
 
@@ -498,20 +508,30 @@ export default function MapView({
     const live = serviceMarkersRef.current;
 
     for (const service of items) {
-      const icon = serviceIcon(service.category, service.id === serviceSelected);
+      const selected = service.id === serviceSelected;
       const existing = live.get(service.id);
 
+      // Only the markers whose selection actually changed are rebuilt.
+      // Rebuilding a premium bubble restarts its roll, and restarting every
+      // bubble on the map because one other marker was tapped makes them all
+      // jump at once.
       if (existing) {
-        existing.setIcon(icon);
+        if (serviceSelectedRef.current.get(service.id) !== selected) {
+          existing.setIcon(serviceIcon(service, selected));
+          serviceSelectedRef.current.set(service.id, selected);
+        }
         continue;
       }
+
+      const icon = serviceIcon(service, selected);
+      serviceSelectedRef.current.set(service.id, selected);
 
       const marker = L.marker([service.lat, service.lng], {
         icon,
         pane: 'services',
         riseOnHover: true,
         keyboard: true,
-        alt: `${service.name} — ${SERVICE_LABELS[service.category]}`,
+        alt: `${service.name} - ${service.offerings.map((id) => OFFERINGS[id].label).join(', ')}`,
       });
 
       marker.on('click', (event) => {
@@ -527,6 +547,7 @@ export default function MapView({
       if (items.some((service) => service.id === id)) continue;
       layer.removeLayer(marker);
       live.delete(id);
+      serviceSelectedRef.current.delete(id);
     }
   }, [items, serviceSelected]);
 

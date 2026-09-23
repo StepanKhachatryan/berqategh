@@ -3,7 +3,12 @@ import { produceColor, produceEmoji } from '../data/produce';
 import { produceImage } from '../data/produceImages';
 import type { CSSProperties } from 'react';
 import type { ProduceForm, SaleType } from '../lib/types';
-import { SERVICE_EMOJI, type ServiceCategory } from '../data/services';
+import {
+  OFFERINGS,
+  primaryOffering,
+  type AgriService,
+  type Offering,
+} from '../data/services';
 
 /**
  * Map symbols carry two independent facts at once:
@@ -179,17 +184,21 @@ export function swatchStyle(color: string): CSSProperties {
 }
 
 /*
- * Service markers: white, thinly outlined in near-black, with the trade's
- * symbol inside and a shadow holding them off the map.
+ * Service markers.
  *
- * Produce pins are solid blocks of the crop's own colour, so this is the
- * opposite treatment — a label rather than a swatch. Nothing about a
- * pesticide shop is red or brown, and colour on these was arbitrary decoration
- * competing with colour on the listings, which is not.
+ * Services are drawn in the one hue no crop on the map uses. Produce covers
+ * nearly the whole wheel - tomato red, apricot orange, corn yellow, cucumber
+ * green, plum purple, walnut brown - and cyan is the gap. A seller turning
+ * the services layer on should be able to tell a shop from a harvest by colour
+ * before they have read a single symbol, including when the produce has faded
+ * into the background behind it.
  *
- * Shape carries the rest: a rounded square where produce is a teardrop or a
- * hexagon, legible at a glance from a moving car.
+ * Shape says the rest: a rounded square where produce is a teardrop, a crate
+ * or a gem.
  */
+export const SERVICE_FILL = '#0891b2';
+const SERVICE_EDGE = '#0e6d86';
+
 const SW = 40;
 const SH = 48;
 
@@ -198,18 +207,21 @@ const SH = 48;
 const SERVICE_SHAPE =
   'M11 3h18a8 8 0 0 1 8 8v14a8 8 0 0 1-8 8h-4.5L20 45l-4.5-12H11a8 8 0 0 1-8-8V11a8 8 0 0 1 8-8z';
 
-export function serviceSvg(scale = 1, selected = false): string {
+/** The same construction as a produce pin: white halo, coloured body, white window. */
+export function serviceSvg(scale = 1): string {
   return `<svg width="${SW * scale}" height="${SH * scale}" viewBox="0 0 ${SW} ${SH}" xmlns="http://www.w3.org/2000/svg">
-    <path d="${SERVICE_SHAPE}" fill="#fff" stroke="#10251a" stroke-width="${selected ? 2.4 : 1.4}" stroke-linejoin="round"/>
+    <path d="${SERVICE_SHAPE}" fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+    <path d="${SERVICE_SHAPE}" fill="${SERVICE_FILL}" stroke="${SERVICE_EDGE}" stroke-width="1.6" stroke-linejoin="round"/>
+    <rect x="7.5" y="7.5" width="25" height="21" rx="5" fill="#fff"/>
   </svg>`;
 }
 
-export function serviceIcon(category: ServiceCategory, selected = false): L.DivIcon {
+function regularServiceIcon(service: AgriService, selected: boolean): L.DivIcon {
   const scale = selected ? 1.18 : 1;
 
   const html = `<div class="pin-body" style="width:${SW * scale}px;height:${SH * scale}px">
-    ${serviceSvg(scale, selected)}
-    <div class="pin-emoji" style="top:${10 * scale}px;font-size:${17 * scale}px">${SERVICE_EMOJI[category]}</div>
+    ${serviceSvg(scale)}
+    <div class="pin-emoji" style="top:${9.5 * scale}px;font-size:${16 * scale}px">${primaryOffering(service).emoji}</div>
   </div>`;
 
   return L.divIcon({
@@ -218,4 +230,128 @@ export function serviceIcon(category: ServiceCategory, selected = false): L.DivI
     iconSize: [SW * scale, SH * scale],
     iconAnchor: [20 * scale, 45 * scale],
   });
+}
+
+/*
+ * Premium: a speech bubble that is really a box, turning over.
+ *
+ * The bubble is a four-sided box lying on its long axis, and it rolls a
+ * quarter turn at a time, so each face it brings round shows the next thing
+ * the business sells. Four sides, because that is what a box has - the thing
+ * asked for was a cuboid, not a drum.
+ *
+ * Four sides and any number of offerings do not divide evenly, and that is
+ * the whole difficulty. Two offerings go A B A B and four go A B C D, one per
+ * side, fixed. But three on four sides would come round as A B C A and then
+ * A again, a roll that changes nothing. So when the count does not divide
+ * four, each side carries every offering it will ever need stacked on top of
+ * itself, and switches which one is showing at the moment that side is
+ * facing directly away - the one moment nobody can see it. The sequence the
+ * viewer sees is then simply A B C A B C, for any count.
+ *
+ * All of it is CSS keyframes with computed delays. Nothing runs in JavaScript
+ * once the marker is drawn, so a map with several of these costs nothing
+ * while it sits there.
+ */
+
+/** One step: how long a face is held, plus the quarter turn to the next. */
+const STEP_S = 2.6;
+/** The most offerings a bubble turns through; the sheet lists the rest. */
+const MAX_FACES = 6;
+/** Where the tail meets the ground, measured from the bubble's left edge. */
+const TAIL_X = 20;
+
+function gcd(a: number, b: number): number {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+/** A stable offset per marker, so a map full of these does not turn in unison. */
+function stagger(id: string): number {
+  let h = 0;
+  for (const c of id) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return (Math.abs(h) % 1000) / 1000 * 4 * STEP_S;
+}
+
+function faceContent(offering: Offering): string {
+  return `<span class="pb-emoji">${offering.emoji}</span><span class="pb-text">${offering.short}</span>`;
+}
+
+function premiumServiceIcon(service: AgriService, selected: boolean): L.DivIcon {
+  const shown = service.offerings.slice(0, MAX_FACES).map((id) => OFFERINGS[id]);
+  const n = shown.length;
+  const offset = stagger(service.id);
+
+  // Every label, stacked in one grid cell and hidden: the widest sets the
+  // width of the box, so no face is ever clipped and none is wider than it
+  // needs to be.
+  const sizer = shown
+    .map((offering) => `<span class="pb-sizer-cell">${faceContent(offering)}</span>`)
+    .join('');
+
+  let prism: string;
+
+  if (n === 1) {
+    // Nothing to turn to.
+    prism = `<div class="pb-prism is-still">
+      <div class="pb-face" style="transform:translateZ(0)"><div class="pb-layer pb-on">${faceContent(shown[0])}</div></div>
+    </div>`;
+  } else {
+    // In steps, how long before the sequence of (side, offering) repeats.
+    const period = (4 * n) / gcd(4, n);
+    const fixed = period === 4;
+
+    const faces = [0, 1, 2, 3].map((side) => {
+      let layers: string;
+
+      if (fixed) {
+        layers = `<div class="pb-layer pb-on">${faceContent(shown[side % n])}</div>`;
+      } else {
+        // Each time this side comes to the front within one period, it shows
+        // offering (step mod n). The layer for that step is visible for the
+        // four steps centred on it: it appears while the side is facing away
+        // and disappears the next time it faces away.
+        layers = Array.from({ length: period / 4 }, (_, round) => {
+          const step = side + 4 * round;
+          const start = ((step - 2 + period) % period) * STEP_S;
+          const delay = start - period * STEP_S - offset;
+          // The first side's first offering is what shows when motion is off.
+          const first = step === 0 ? ' pb-on' : '';
+          return `<div class="pb-layer${first}" style="animation:pb-layer-${period} ${period * STEP_S}s step-end ${delay.toFixed(2)}s infinite">${faceContent(shown[step % n])}</div>`;
+        }).join('');
+      }
+
+      // Side k sits a quarter turn behind side k-1, half the box's height out
+      // from its axis - the box has a square cross-section, so every side is
+      // the same height as the one facing you.
+      return `<div class="pb-face" style="transform:rotateX(${-90 * side}deg) translateZ(var(--pb-half))">${layers}</div>`;
+    }).join('');
+
+    // Duration set here as well as in the stylesheet, so STEP_S is the one
+    // number to change: the layer delays above are computed against it.
+    prism = `<div class="pb-prism" style="animation-duration:${4 * STEP_S}s;animation-delay:${(-offset).toFixed(2)}s">${faces}</div>`;
+  }
+
+  const html = `<div class="premium-pin${selected ? ' is-selected' : ''}" style="--pb-tail-x:${TAIL_X}px">
+    <div class="pb-stage">
+      <div class="pb-sizer" aria-hidden="true">${sizer}</div>
+      ${prism}
+    </div>
+    <div class="pb-tail"></div>
+  </div>`;
+
+  // Zero-sized and anchored at its own origin: the bubble's width depends on
+  // its longest label, which is only known once it is laid out, so it places
+  // itself instead - see .premium-pin, which puts the tail's tip on the point.
+  return L.divIcon({
+    html,
+    className: `pin pin-premium${selected ? ' pin-selected' : ''}`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+  });
+}
+
+export function serviceIcon(service: AgriService, selected = false): L.DivIcon {
+  return service.tier === 'premium'
+    ? premiumServiceIcon(service, selected)
+    : regularServiceIcon(service, selected);
 }
