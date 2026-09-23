@@ -230,15 +230,38 @@ export default function App() {
     }
   };
 
-  const handleLocate = useCallback(async () => {
-    const point = await locate();
-    if (point) {
-      setFocus({ point, zoom: 12, nonce: Date.now() });
-    } else if (locateStatus !== 'locating') {
-      push('error', 'Չհաջողվեց որոշել ձեր տեղը։ Ստուգե՛ք բրաուզերի թույլտվությունը։');
-    }
-    return point;
-  }, [locate, locateStatus, push]);
+  /*
+   * Find the visitor, and say so only when they asked to be found.
+   *
+   * `silent` is for the automatic attempt the seller form makes when it opens.
+   * Nobody asked for that one, the form already carries an inline line saying
+   * what happened, and the village search sits right underneath - so a red
+   * banner over the form is pure noise for someone who simply keeps location
+   * turned off.
+   *
+   * This callback must stay stable. It used to depend on locateStatus, which
+   * changes on every step of a lookup (idle -> locating -> denied), handing a
+   * new function identity to everything holding it. The seller form re-ran its
+   * open-the-form lookup on that identity, so a failure started a lookup, which
+   * changed the status, which changed the identity, which started a lookup. One
+   * denied permission produced 154 geolocation calls and 78 stacked error
+   * toasts that buried the form - which is what a seller filmed and sent in.
+   *
+   * The locateStatus read it depended on was stale anyway: locate() resolves
+   * only once it has finished, so the status can never be 'locating' here.
+   */
+  const handleLocate = useCallback(
+    async (silent = false) => {
+      const point = await locate();
+      if (point) {
+        setFocus({ point, zoom: 12, nonce: Date.now() });
+      } else if (!silent) {
+        push('error', 'Չհաջողվեց որոշել ձեր տեղը։ Ստուգե՛ք բրաուզերի թույլտվությունը։');
+      }
+      return point;
+    },
+    [locate, push],
+  );
 
   const handlePickLocation = useCallback(
     (point: LatLng) => {

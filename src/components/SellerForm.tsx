@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Modal from './Modal';
 import ProducePicker from './ProducePicker';
 import ProduceMark from './ProduceMark';
@@ -44,7 +44,8 @@ function loadRemembered(): Remembered {
 interface SellerFormProps {
   initialLocation: LatLng | null;
   locateStatus: LocateStatus;
-  onLocate: () => Promise<LatLng | null>;
+  /** `silent` suppresses the error toast for lookups the seller did not ask for. */
+  onLocate: (silent?: boolean) => Promise<LatLng | null>;
   onSubmit: (draft: ListingDraft) => Promise<void>;
   onClose: () => void;
 }
@@ -91,19 +92,40 @@ export default function SellerForm({
   const wantsWholesale = saleType === 'wholesale' || saleType === 'both';
   const dryable = product ? canBeDried(product.id) : false;
 
-  // Ask for the seller's position as soon as the form opens — the common case
-  // is a farmer standing at the stall who should not have to do anything.
+  /*
+   * Ask for the seller's position as soon as the form opens - the common case
+   * is a farmer standing at the stall who should not have to do anything.
+   *
+   * Exactly once per opening, guarded by a ref rather than by the dependency
+   * list. A lookup changes state, state changes identities, and anything in the
+   * dependencies that moves turns "on open" into "forever": the form asked
+   * again, the answer failed again, and the failures stacked up over the fields
+   * until nothing could be filled in. A ref cannot be invalidated by a re-render,
+   * so the attempt happens on opening and never again.
+   *
+   * Silent, too. If it fails, the status line below says so and the village
+   * search is right there; the seller asked to publish a harvest, not to be
+   * located.
+   */
+  const askedOnOpen = useRef(false);
+
   useEffect(() => {
-    if (initialLocation) return;
+    if (initialLocation || askedOnOpen.current) return;
+    askedOnOpen.current = true;
+
     let cancelled = false;
     setLocating(true);
-    onLocate()
+    onLocate(true)
       .then((point) => {
         if (!cancelled && point) setLocation(point);
       })
-      .finally(() => {
-        if (!cancelled) setLocating(false);
-      });
+      // Deliberately not gated on `cancelled`: React's strict mode runs an
+      // effect, tears it down and runs it again, and the second run stops at
+      // the ref above. If the spinner were switched off only by a run that was
+      // never cancelled, it would be the torn-down first run that owned it and
+      // the button would spin for ever.
+      .finally(() => setLocating(false));
+
     return () => {
       cancelled = true;
     };

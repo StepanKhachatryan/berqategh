@@ -14,9 +14,25 @@ export function useToasts() {
   const nextId = useRef(1);
   const timers = useRef<number[]>([]);
 
+  /*
+   * The same message is never shown twice at once.
+   *
+   * A repeated failure is not more informative the fifth time, and a stack of
+   * identical banners is actively harmful: a seller once filmed a form buried
+   * under 78 copies of one location error, with no way to reach the fields
+   * underneath. The cause of that repetition is fixed, but a toast queue that
+   * can be made to bury the interface is a bad building block whatever calls
+   * it, so the ceiling belongs here too.
+   */
   const push = useCallback((kind: ToastKind, text: string) => {
     const id = nextId.current++;
-    setToasts((current) => [...current, { id, kind, text }]);
+
+    setToasts((current) =>
+      current.some((toast) => toast.text === text && toast.kind === kind)
+        ? current
+        : [...current, { id, kind, text }],
+    );
+
     const timer = window.setTimeout(
       () => setToasts((current) => current.filter((toast) => toast.id !== id)),
       kind === 'error' ? 6000 : 3600,
