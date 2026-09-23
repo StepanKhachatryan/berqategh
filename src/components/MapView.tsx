@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import L from 'leaflet';
 import { listingIcon, meIcon, serviceIcon, SALE_TYPE_SHORT } from './markers';
 import { fanOffsets, overlapGroup } from './spider';
@@ -87,6 +87,8 @@ export interface ServicesLayer {
   onSelect: (id: string | null) => void;
   /** The control draws attention to itself until it has been used once. */
   unseen: boolean;
+  /** Drawn under the toggle while the layer is on: the search. */
+  panel?: ReactNode;
 }
 
 export default function MapView({
@@ -115,6 +117,8 @@ export default function MapView({
   // Where the map was before the services layer took over, so leaving it puts
   // the seller back where they were rather than somewhere across the country.
   const beforeServicesRef = useRef<{ center: L.LatLng; zoom: number } | null>(null);
+  /** Whether the services layer is on the current map right now. */
+  const servicesShownRef = useRef(false);
   const meRef = useRef<L.Marker | null>(null);
   const ringRef = useRef<L.Circle | null>(null);
   const selectRef = useRef(onSelect);
@@ -195,6 +199,8 @@ export default function MapView({
       // in development.
       serviceMarkersRef.current.clear();
       serviceSelectedRef.current.clear();
+      servicesShownRef.current = false;
+      beforeServicesRef.current = null;
     };
   }, []);
 
@@ -563,9 +569,18 @@ export default function MapView({
     if (!map || !layer) return;
 
     if (servicesActive) {
-      beforeServicesRef.current = { center: map.getCenter(), zoom: map.getZoom() };
-      layer.addTo(map);
+      // Only on the way in. This effect also runs whenever the list of
+      // services changes - every keystroke in the search - and saving the view
+      // then would overwrite the seller's own view with a services view, so
+      // switching the layer off would no longer take them home.
+      if (!servicesShownRef.current) {
+        beforeServicesRef.current = { center: map.getCenter(), zoom: map.getZoom() };
+        layer.addTo(map);
+        servicesShownRef.current = true;
+      }
 
+      // Frame whatever is showing: all of it on opening, the matches when the
+      // search narrows it. Nothing matching leaves the camera where it is.
       if (items && items.length > 0) {
         map.fitBounds(
           L.latLngBounds(items.map((s) => [s.lat, s.lng] as [number, number])),
@@ -579,6 +594,9 @@ export default function MapView({
       }
       return;
     }
+
+    if (!servicesShownRef.current) return;
+    servicesShownRef.current = false;
 
     map.removeLayer(layer);
     const previous = beforeServicesRef.current;
@@ -644,6 +662,10 @@ export default function MapView({
             <i />
           </span>
         </button>
+      ) : null}
+
+      {services && servicesActive && services.panel ? (
+        <div className="map-service-panel">{services.panel}</div>
       ) : null}
 
       <div className="map-floats">

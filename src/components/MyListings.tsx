@@ -15,6 +15,9 @@ interface MyListingsProps {
   onDelete: (listing: Listing) => Promise<void>;
   /** The seller's recovery code, once the server has issued one. */
   recoveryCode: string | null;
+  /** The seller opted in to agricultural offers. */
+  offersConsent: boolean;
+  onWithdrawOffers: () => Promise<void>;
   onRecover: () => void;
   onClose: () => void;
 }
@@ -26,10 +29,13 @@ export default function MyListings({
   onArchive,
   onDelete,
   recoveryCode,
+  offersConsent,
+  onWithdrawOffers,
   onRecover,
   onClose,
 }: MyListingsProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   const live = listings.filter(
     (listing) => !listing.archivedAt && new Date(listing.expiresAt).getTime() > now,
@@ -61,6 +67,31 @@ export default function MyListings({
             </span>
           </div>
           <div className="code-card-code">{recoveryCode}</div>
+        </div>
+      ) : null}
+
+      {/* Withdrawing has to be as easy as agreeing was, and in the place a
+          seller already goes to manage what they have on the site. */}
+      {offersConsent ? (
+        <div className="consent-card">
+          <span>
+            📣 Դուք համաձայնել եք ստանալ գյուղատնտեսական առաջարկներ ձեր բերքի համար։
+          </span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            disabled={withdrawing}
+            onClick={async () => {
+              setWithdrawing(true);
+              try {
+                await onWithdrawOffers();
+              } finally {
+                setWithdrawing(false);
+              }
+            }}
+          >
+            Հրաժարվել
+          </button>
         </div>
       ) : null}
 

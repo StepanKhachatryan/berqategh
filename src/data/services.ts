@@ -70,6 +70,42 @@ export interface Offering {
   emoji: string;
 }
 
+/*
+ * The other words people type for each offering, for search.
+ *
+ * Armenian keyboards are not a given - plenty of farmers type in Latin
+ * transliteration or in Russian - and the words in use are not always the
+ * catalogue's: a farmer asks for «դեղ» for their trees, not for
+ * «թունաքիմիկատ». Matching is by prefix-free substring, so a stem such as
+ * "удобр" covers every ending.
+ */
+export const OFFERING_ALIASES: Record<OfferingId, string[]> = {
+  seeds: ['սերմ', 'seed', 'serm', 'semena', 'семен'],
+  seedlings: ['տնկի', 'սածիլ', 'seedling', 'tnki', 'sazhen', 'саженц', 'рассад'],
+  fertilizer: ['պարարտ', 'ազոտ', 'գոմաղբ', 'fertiliz', 'pararta', 'udobr', 'удобр'],
+  pesticide: ['դեղ', 'սրսկ', 'թույն', 'pesticid', 'tunakimik', 'yadokhim', 'ядохим', 'пестиц', 'химик'],
+  'irrigation-systems': ['ջուր', 'կաթիլային', 'ոռոգ', 'irrigat', 'drip', 'vorog', 'orog', 'полив', 'капельн', 'орош'],
+  'hail-nets': ['կարկուտ', 'ցանց', 'hail', 'net', 'setka', 'сетк', 'град'],
+  greenhouses: ['ջերմոց', 'greenhouse', 'jermoc', 'teplic', 'теплиц'],
+  machinery: ['տրակտոր', 'տեխնիկա', 'tractor', 'traktor', 'tekhnik', 'technik', 'трактор', 'техник'],
+  'heavy-machinery': ['կոմբայն', 'էքսկավատոր', 'combine', 'kombain', 'excavat', 'комбайн', 'экскават', 'техник'],
+  'spare-parts': ['պահեստամաս', 'մաս', 'parts', 'zapchast', 'запчаст'],
+  tools: ['գործիք', 'tool', 'instrument', 'инструмент'],
+  fodder: ['անասնակեր', 'խոտ', 'կեր', 'fodder', 'feed', 'korm', 'корм', 'сено'],
+  beekeeping: ['մեղու', 'փեթակ', 'bee', 'pchel', 'пчел', 'улей'],
+  packaging: ['տուփ', 'արկղ', 'տարա', 'packag', 'box', 'upakov', 'упаков', 'ящик', 'тара'],
+  'irrigation-install': ['մոնտաժ', 'տեղադր', 'install', 'montazh', 'монтаж'],
+  'drone-spraying': ['դրոն', 'սրսկ', 'drone', 'dron', 'spray', 'дрон', 'опрыск'],
+  // Ploughing is done with a tractor, and "tractor" is what gets typed.
+  tillage: ['վար', 'հերկ', 'հող', 'տրակտոր', 'plough', 'plow', 'till', 'traktor', 'vspash', 'вспаш', 'пахот', 'трактор'],
+  harvesting: ['բերքահավաք', 'հավաք', 'կոմբայն', 'harvest', 'uborka', 'уборк'],
+  transport: ['բեռնափոխադր', 'մեքենա', 'տրանսպորտ', 'transport', 'truck', 'gruz', 'перевоз', 'груз'],
+  'cold-storage': ['սառնարան', 'պահեստ', 'cold', 'storage', 'holodil', 'холодил', 'склад'],
+  agronomist: ['ագրոնոմ', 'խորհրդատու', 'agronom', 'агроном', 'consult', 'консульт'],
+  'soil-testing': ['հողի անալիզ', 'լաբորատոր', 'soil', 'analiz', 'почв', 'анализ', 'лаборат'],
+  veterinary: ['անասնաբույժ', 'անասնաբուժ', 'vet', 'veterinar', 'ветеринар'],
+};
+
 export const OFFERINGS: Record<OfferingId, Offering> = {
   seeds: { label: 'Սերմեր', short: 'Սերմեր', emoji: '🫘' },
   seedlings: { label: 'Տնկիներ', short: 'Տնկիներ', emoji: '🌱' },
@@ -291,4 +327,59 @@ export function livePromotion(service: AgriService, now: number = Date.now()): P
   const [y, m, d] = promotion.until.split('-').map(Number);
   const end = new Date(y, m - 1, d + 1).getTime();
   return now < end ? promotion : null;
+}
+
+/** Lowercased, soft hyphens out, spaces squeezed: the form both sides are compared in. */
+function fold(text: string): string {
+  return text.toLowerCase().replace(/\u00AD/g, '').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Everything a service can be found by, folded once. The offerings contribute
+ * their full name, their short name and every alias, so typing «դեղ» finds a
+ * shop whose catalogue entry says «Թունաքիմիկատներ».
+ */
+function haystack(service: AgriService): string {
+  const words = [service.name, service.address];
+  for (const id of service.offerings) {
+    words.push(OFFERINGS[id].label, OFFERINGS[id].short, ...OFFERING_ALIASES[id]);
+  }
+  return fold(words.join(' '));
+}
+
+/**
+ * The services a search leaves on the map.
+ *
+ * Every word typed must appear somewhere - "սերմ արմավիր" is seed in Armavir,
+ * not seed or Armavir - and a chosen offering must be one they actually offer.
+ */
+export function searchServices(
+  services: AgriService[],
+  query: string,
+  offering: OfferingId | null,
+): AgriService[] {
+  const words = fold(query).split(' ').filter(Boolean);
+
+  return services.filter((service) => {
+    if (offering && !service.offerings.includes(offering)) return false;
+    if (words.length === 0) return true;
+    const text = haystack(service);
+    return words.every((word) => text.includes(word));
+  });
+}
+
+/**
+ * The offerings worth a chip: those at least one service actually has, most
+ * common first, so the row starts with what there is most of and never offers
+ * a filter that would empty the map.
+ */
+export function offeringsInUse(services: AgriService[]): { id: OfferingId; count: number }[] {
+  const counts = new Map<OfferingId, number>();
+  for (const service of services) {
+    for (const id of service.offerings) counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  const order = Object.keys(OFFERINGS) as OfferingId[];
+  return [...counts.entries()]
+    .map(([id, count]) => ({ id, count }))
+    .sort((a, b) => b.count - a.count || order.indexOf(a.id) - order.indexOf(b.id));
 }

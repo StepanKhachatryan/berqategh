@@ -93,6 +93,12 @@ export type Database = {
       archive_expired_listings: { Args: never; Returns: number };
       issue_recovery_code: { Args: Record<string, never>; Returns: string | null };
       claim_listings: { Args: { p_phone: string; p_code: string }; Returns: number };
+      record_marketing_consent: {
+        Args: { p_listing_id: string; p_version: string };
+        Returns: boolean;
+      };
+      marketing_consent_status: { Args: Record<string, never>; Returns: boolean };
+      withdraw_marketing_consent: { Args: Record<string, never>; Returns: number };
     };
     Enums: {
       [_ in never]: never;

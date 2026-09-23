@@ -48,6 +48,11 @@ export interface ListingDraft {
   lat: number;
   lng: number;
   durationDays?: number;
+  /**
+   * The seller ticked the box to hear about agricultural offers. Not a column
+   * on the listing: it is sent to record_marketing_consent after publishing.
+   */
+  marketingConsent?: boolean;
 }
 
 export type DistanceMode = 'road' | 'straight';

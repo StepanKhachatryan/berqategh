@@ -3,7 +3,7 @@ import MapView from './components/MapView';
 import RoleGate from './components/RoleGate';
 import ResultsPanel from './components/ResultsPanel';
 import ServiceDetail from './components/ServiceDetail';
-import { SERVICES } from './data/services';
+import { SERVICES, searchServices, type OfferingId } from './data/services';
 import FilterSheet from './components/FilterSheet';
 import SellerForm from './components/SellerForm';
 import ListingDetail from './components/ListingDetail';
@@ -30,6 +30,13 @@ import { useDistances } from './lib/useDistances';
 import { useGeolocation } from './lib/useGeolocation';
 import PublishedSheet from './components/PublishedSheet';
 import PremiumServiceSheet from './components/PremiumServiceSheet';
+import ServiceSearch from './components/ServiceSearch';
+import {
+  forgetOffersAnswer,
+  marketingConsentStatus,
+  recordMarketingConsent,
+  withdrawMarketingConsent,
+} from './lib/marketing';
 import { DEFAULT_FILTERS } from './lib/types';
 import type { Filters, LatLng, Listing, ListingDraft, MeasuredListing, Role } from './lib/types';
 
@@ -59,6 +66,9 @@ export default function App() {
   const [loadingMine, setLoadingMine] = useState(false);
   // Issued by the server on first publish and stable while anything is live.
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null);
+  /* Whether this seller has opted in to agricultural offers. Loaded with their
+     listings; shown in «Իմ հայտարարությունները» with the way to withdraw. */
+  const [offersConsent, setOffersConsent] = useState(false);
   /* Shown once, right after publishing, to put the recovery code in front of
      a seller who otherwise never opens the screen that holds it. */
   const [published, setPublished] = useState<{
@@ -87,6 +97,16 @@ export default function App() {
   // ─── agricultural services (sellers only) ──────────────────────────────
   const [servicesOn, setServicesOn] = useState(false);
   const [serviceId, setServiceId] = useState<string | null>(null);
+  /* The services search. Kept here rather than in the panel so the map can
+     be handed the filtered list; memoised below, because the map refits
+     whenever that list changes and a fresh array each render would refit it
+     on every tick. */
+  const [serviceQuery, setServiceQuery] = useState('');
+  const [serviceOffering, setServiceOffering] = useState<OfferingId | null>(null);
+  const serviceMatches = useMemo(
+    () => searchServices(SERVICES, serviceQuery, serviceOffering),
+    [serviceQuery, serviceOffering],
+  );
   /*
    * Whether the seller has opened the services layer during *this* visit.
    *
@@ -129,6 +149,7 @@ export default function App() {
       setMine(await fetchMyListings());
       // Best effort: a seller with nothing live has no code, which is fine.
       setRecoveryCode(await issueRecoveryCode().catch(() => null));
+      setOffersConsent(await marketingConsentStatus().catch(() => false));
     } catch (error) {
       push('error', error instanceof Error ? error.message : 'Չհաջողվեց բեռնել');
     } finally {
@@ -282,6 +303,15 @@ export default function App() {
 
   const handleCreate = async (draft: ListingDraft) => {
     const created = await createListing(draft);
+
+    // After the listing exists, because consent is recorded against it - the
+    // server reads the number from the listing, not from us. Best effort: a
+    // failure here must never cost the seller the listing they just made.
+    if (draft.marketingConsent) {
+      const recorded = await recordMarketingConsent(created.id).catch(() => false);
+      if (recorded) setOffersConsent(true);
+    }
+
     setListings((current) => [created, ...current]);
     setMine((current) => [created, ...current]);
     setSheet('none');
@@ -315,6 +345,17 @@ export default function App() {
     }
 
     void loadMine();
+  };
+
+  const handleWithdrawOffers = async () => {
+    try {
+      await withdrawMarketingConsent();
+      setOffersConsent(false);
+      forgetOffersAnswer();
+      push('success', 'Դուք այլևս առաջարկներ չեք ստանա։ Ձեր համարը հեռացվեց ցուցակից։');
+    } catch (error) {
+      push('error', error instanceof Error ? error.message : 'Չհաջողվեց');
+    }
   };
 
   const handleArchive = async (listing: Listing) => {
@@ -360,6 +401,9 @@ export default function App() {
     setServicesOn((on) => !on);
     setServiceId(null);
     setServicesUsed(true);
+    // A search belongs to one visit to the layer; the next starts with all.
+    setServiceQuery('');
+    setServiceOffering(null);
   };
 
   const openService = SERVICES.find((service) => service.id === serviceId) ?? null;
@@ -443,12 +487,23 @@ export default function App() {
             services={
               isSeller
                 ? {
-                    items: SERVICES,
+                    items: serviceMatches,
                     active: servicesOn,
                     onToggle: toggleServices,
                     selectedId: serviceId,
                     onSelect: setServiceId,
                     unseen: !servicesUsed,
+                    panel: (
+                      <ServiceSearch
+                        all={SERVICES}
+                        matches={serviceMatches}
+                        query={serviceQuery}
+                        onQueryChange={setServiceQuery}
+                        offering={serviceOffering}
+                        onOfferingChange={setServiceOffering}
+                        onPick={setServiceId}
+                      />
+                    ),
                   }
                 : null
             }
@@ -543,6 +598,8 @@ export default function App() {
           onArchive={handleArchive}
           onDelete={handleDelete}
           recoveryCode={recoveryCode}
+          offersConsent={offersConsent}
+          onWithdrawOffers={handleWithdrawOffers}
           onRecover={() => setSheet('recover')}
           onClose={() => setSheet('none')}
         />
