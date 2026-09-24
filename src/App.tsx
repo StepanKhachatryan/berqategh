@@ -12,7 +12,7 @@ import RecoverySheet from './components/RecoverySheet';
 import GuideSheet from './components/GuideSheet';
 import InstallPrompt from './components/InstallPrompt';
 import { ToastStack, useToasts } from './components/Toasts';
-import { IconArchive, IconPlus } from './components/Icons';
+import { IconArchive, IconHelp, IconPlus } from './components/Icons';
 
 import {
   archiveListing,
@@ -455,6 +455,19 @@ export default function App() {
             Վաճառող
           </button>
         </div>
+
+        {/* The guide, off the map and into the header: the same place on
+            every screen and in every mode, rather than one more button in a
+            column that moves with the results sheet. */}
+        <button
+          type="button"
+          className="header-guide"
+          onClick={() => setSheet('guide')}
+          title="Ինչպես օգտվել"
+          aria-label="Ինչպես օգտվել"
+        >
+          <IconHelp size={19} />
+        </button>
       </header>
 
       {!isConfigured ? (
@@ -474,7 +487,6 @@ export default function App() {
           className={`workspace${isSeller ? '' : ` sheet-${sheetStep}`}`}
         >
           <MapView
-            onOpenGuide={() => setSheet('guide')}
             listings={visible}
             selectedId={selectedId}
             onSelect={handleSelect}
@@ -509,7 +521,10 @@ export default function App() {
             }
           />
 
-          {isSeller ? (
+          {/* Not while the services layer is up: the seller is shopping for
+              seed there, not publishing a harvest, and the button sat on top
+              of the very pins they were looking at. */}
+          {isSeller && !servicesOn ? (
             <button type="button" className="btn btn-cta fab" onClick={() => setSheet('seller')}>
               <IconPlus />
               Տեղադրել բերք

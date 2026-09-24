@@ -446,20 +446,35 @@ h4 {
     display: none;
   }
 
+  /* The header carries the name, "my listings", the role switch and the
+     guide on one line. Each gives a little so the name is not the one that
+     gives everything. */
   .app-header {
-    gap: 10px;
+    gap: 6px;
     padding-left: 12px;
     padding-right: 12px;
   }
 
-  .app-header > .btn {
-    width: 40px;
-    padding: 0;
+  /* The spacer's gap on both sides cost twice; push with a margin instead. */
+  .header-spacer {
+    display: none;
   }
 
   .brand {
+    margin-right: auto;
     font-size: 16px;
     gap: 7px;
+  }
+
+  .app-header > .btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+  }
+
+  .app-header .header-guide {
+    width: 36px;
+    height: 36px;
   }
 
   .brand-mark {
@@ -468,8 +483,16 @@ h4 {
   }
 
   .role-switch button {
-    padding: 7px 11px;
-    font-size: 12.5px;
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+}
+
+/* Below this, the name would be cut to «Բեր…». The mark alone is the brand
+   and reads better than a truncated word. */
+@media (max-width: 379px) {
+  .brand > span {
+    display: none;
   }
 }
 
@@ -525,9 +548,11 @@ h4 {
   background: var(--surface) !important;
   color: var(--ink) !important;
   border-color: var(--line) !important;
-  width: 36px !important;
-  height: 36px !important;
-  line-height: 36px !important;
+  /* 44px: the size a fingertip can hit without looking, and the width of
+     the column of buttons stacked under these. */
+  width: 44px !important;
+  height: 44px !important;
+  line-height: 44px !important;
   font-size: 19px !important;
 }
 
@@ -611,24 +636,19 @@ h4 {
     var(--shadow-sm);
 }
 
-/* Clear of the results sheet, which overlaps the bottom of the map on phones. */
-/* Clear of the results pane, whatever height it is currently at. */
+/* The basemap and locate buttons, directly under the zoom as a Leaflet
+   control in the same corner - so they no longer have to dodge the results
+   sheet coming up from the bottom. Same width as the zoom buttons, so the
+   column reads as one. */
 .map-floats {
-  position: absolute;
-  right: 12px;
-  bottom: calc(var(--sheet-h, 0px) + 34px);
   display: flex;
   flex-direction: column;
-  /* The services pill is wider than the round buttons; without this it drags
-     the whole column out from the right edge. */
-  align-items: flex-end;
   gap: 10px;
-  z-index: 600;
 }
 
 .map-float-btn {
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-md);
   background: var(--surface);
   border: 1px solid var(--line);
@@ -1852,16 +1872,22 @@ textarea.input {
 
 /* ═══ guide ══════════════════════════════════════════════════════════════ */
 
-.map-float-btn.is-guide {
+/* In the header, right of the role switch, on every screen. Dark, as it was
+   on the map, so it keeps reading as the one button that explains things. */
+.header-guide {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   background: var(--ink);
-  border-color: var(--ink);
   color: #fff;
+  transition: background 0.16s var(--ease);
 }
 
-.map-float-btn.is-guide:hover {
+.header-guide:hover {
   background: var(--green-deep);
-  border-color: var(--green-deep);
-  color: #fff;
 }
 
 /* The five-day rule leads the guide, so it gets the one coloured panel on the page. */
@@ -3342,32 +3368,27 @@ input[type='range']::-moz-range-thumb {
   background: var(--bg-tint);
 }
 
-/* The kinds of thing there are, most common first; one tap each. */
+/* The kinds of thing there are, most common first; one tap each. They wrap
+   onto as many rows as they need - a row that scrolls sideways hides most of
+   itself, and nobody discovers what a swipe would have shown them. */
 .svc-chips {
   display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  padding-bottom: 1px;
-}
-
-.svc-chips::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .svc-chip {
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 32px;
-  padding: 0 6px 0 10px;
+  gap: 4px;
+  height: 30px;
+  padding: 0 4px 0 8px;
   border: 1.5px solid var(--line-strong);
   border-radius: var(--r-pill);
   background: var(--surface);
   color: var(--ink);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -3381,8 +3402,8 @@ input[type='range']::-moz-range-thumb {
 .svc-chip-count {
   display: grid;
   place-items: center;
-  min-width: 20px;
-  height: 20px;
+  min-width: 18px;
+  height: 18px;
   padding: 0 5px;
   border-radius: var(--r-pill);
   background: var(--bg-tint);
@@ -3394,6 +3415,59 @@ input[type='range']::-moz-range-thumb {
 .svc-chip[aria-pressed='true'] .svc-chip-count {
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
+}
+
+/*
+ * On a phone the search lives along the bottom, full width, where a thumb
+ * already is - with the results opening upwards above the box, and the chips
+ * under it. The map frames its matches above the panel (see panelBottom in
+ * MapView), and the attribution rides on top of it.
+ */
+@media (max-width: 899px) {
+  .map-service-panel {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    max-width: none;
+  }
+
+  .svc-search {
+    padding: 10px 12px calc(10px + var(--safe-b));
+    border: none;
+    border-top: 1px solid var(--line);
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    box-shadow: 0 -8px 28px rgba(16, 37, 26, 0.13);
+  }
+
+  /* Without the counts, three or four chips share a row instead of two; on
+     a phone the rows are the cost, and the number is the least of it. */
+  .svc-chip-count {
+    display: none;
+  }
+
+  .svc-chip {
+    gap: 3px;
+    padding: 0 9px 0 7px;
+    font-size: 11.5px;
+  }
+
+  .svc-chips {
+    gap: 4px;
+  }
+
+  .svc-search .svc-results {
+    order: -1;
+    max-height: min(34vh, 260px);
+    border-top: none;
+    border-bottom: 1px solid var(--line);
+    padding: 0 0 6px;
+  }
+}
+
+.map-pane.has-bottom-panel .leaflet-bottom {
+  bottom: var(--panel-bottom);
+  margin-bottom: 8px;
 }
 
 .svc-results {
@@ -3938,9 +4012,6 @@ input[type='range']::-moz-range-thumb {
     transform: scale(0.96);
   }
 
-  .map-floats {
-    bottom: 84px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

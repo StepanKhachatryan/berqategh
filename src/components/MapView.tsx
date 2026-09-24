@@ -1,10 +1,19 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
+import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import { listingIcon, meIcon, serviceIcon, SALE_TYPE_SHORT } from './markers';
 import { fanOffsets, overlapGroup } from './spider';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
 import { listingTitle, type LatLng, type MeasuredListing } from '../lib/types';
-import { IconCrosshair, IconLayers, IconHelp, IconService } from './Icons';
+import { IconCrosshair, IconLayers, IconService } from './Icons';
 import { OFFERINGS, type AgriService } from '../data/services';
 
 /**
@@ -29,6 +38,8 @@ const EDGE = 26;
  * the country lands underneath one of them.
  */
 const CONTROL_COLUMN = 58;
+/** Where a premium bubble's tail sits, from its left edge (TAIL_X in markers.ts). */
+const PREMIUM_TAIL_X = 20;
 
 /**
  * A pin is drawn from its point upwards, so the shape reaches well above the
@@ -59,7 +70,6 @@ const BASEMAPS = {
 type BasemapKey = keyof typeof BASEMAPS;
 
 interface MapViewProps {
-  onOpenGuide: () => void;
   listings: MeasuredListing[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
@@ -92,7 +102,6 @@ export interface ServicesLayer {
 }
 
 export default function MapView({
-  onOpenGuide,
   listings,
   selectedId,
   onSelect,
@@ -113,6 +122,16 @@ export default function MapView({
   const serviceMarkersRef = useRef(new Map<string, L.Marker>());
   /** Whether each service marker was last drawn selected. */
   const serviceSelectedRef = useRef(new Map<string, boolean>());
+  /** The Leaflet control the basemap and locate buttons are drawn into. */
+  const [floatsHost, setFloatsHost] = useState<HTMLElement | null>(null);
+  /**
+   * Which edge of the map the services search covers, and by how much. On a
+   * phone it is a panel along the bottom; on a desktop, a column down the
+   * top-left. Both zero when there is no panel.
+   */
+  const [panelBottom, setPanelBottom] = useState(0);
+  const [panelLeft, setPanelLeft] = useState(0);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const selectServiceRef = useRef<(id: string | null) => void>(() => undefined);
   // Where the map was before the services layer took over, so leaving it puts
   // the seller back where they were rather than somewhere across the country.
@@ -168,6 +187,24 @@ export default function MapView({
     });
 
     L.control.zoom({ position: 'topright' }).addTo(map);
+
+    /*
+     * The basemap and locate buttons, as a control in the same corner as the
+     * zoom, added after it - so Leaflet stacks them directly under + and -
+     * with its own spacing, rather than this file guessing how tall the zoom
+     * is. React draws the buttons into it through a portal.
+     */
+    const Floats = L.Control.extend({
+      onAdd() {
+        const el = L.DomUtil.create('div', 'map-floats');
+        L.DomEvent.disableClickPropagation(el);
+        L.DomEvent.disableScrollPropagation(el);
+        return el;
+      },
+    });
+    const floats = new Floats({ position: 'topright' });
+    floats.addTo(map);
+    setFloatsHost(floats.getContainer() ?? null);
     layerRef.current = L.layerGroup().addTo(map);
 
     // Services get a pane of their own, above the markers. It is what lets the
@@ -201,6 +238,7 @@ export default function MapView({
       serviceSelectedRef.current.clear();
       servicesShownRef.current = false;
       beforeServicesRef.current = null;
+      setFloatsHost(null);
     };
   }, []);
 
@@ -582,11 +620,23 @@ export default function MapView({
       // Frame whatever is showing: all of it on opening, the matches when the
       // search narrows it. Nothing matching leaves the camera where it is.
       if (items && items.length > 0) {
+        // A premium bubble hangs off to the right of its point by nearly its
+        // whole width - its tail is near its left edge - where a normal pin
+        // is centred on it. Measured off the bubbles actually drawn, so the
+        // widest label decides, and reserved on the right along with the
+        // column of buttons.
+        const pane = map.getPane('services');
+        const reach = Math.max(
+          PIN_SIDE,
+          ...Array.from(pane?.querySelectorAll<HTMLElement>('.premium-pin') ?? []).map(
+            (bubble) => bubble.offsetWidth - PREMIUM_TAIL_X,
+          ),
+        );
         map.fitBounds(
           L.latLngBounds(items.map((s) => [s.lat, s.lng] as [number, number])),
           {
-            paddingTopLeft: [EDGE + PIN_SIDE, EDGE + PIN_UP],
-            paddingBottomRight: [CONTROL_COLUMN + PIN_SIDE, EDGE],
+            paddingTopLeft: [EDGE + PIN_SIDE + panelLeft, EDGE + PIN_UP],
+            paddingBottomRight: [CONTROL_COLUMN + reach, EDGE + panelBottom],
             maxZoom: 12,
             animate: true,
           },
@@ -604,7 +654,44 @@ export default function MapView({
       map.setView(previous.center, previous.zoom, { animate: true });
       beforeServicesRef.current = null;
     }
-  }, [servicesActive, items]);
+    // panelBottom too: on a phone the search panel is measured only after it
+    // has appeared, and grows as results open - the matches have to be framed
+    // above it each time, not underneath.
+  }, [servicesActive, items, panelBottom, panelLeft]);
+
+  /*
+   * The search panel's footprint on the map's bottom edge. On a phone it is a
+   * full-width panel along the bottom, and the pins it frames, and the map's
+   * attribution, have to stay above it; on a desktop it sits in the top-left
+   * corner and covers no edge at all. Measured rather than assumed, because
+   * its height changes with every chip row and every result.
+   */
+  // A layout effect, so the height is known before the browser paints and the
+  // services fit that follows frames the matches above the panel the first
+  // time, rather than under it and then again above it.
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    const host = hostRef.current;
+    if (!panel || !host || typeof ResizeObserver === 'undefined') {
+      setPanelBottom(0);
+      setPanelLeft(0);
+      return;
+    }
+    const measure = () => {
+      const p = panel.getBoundingClientRect();
+      const h = host.getBoundingClientRect();
+      const alongBottom = Math.abs(p.bottom - h.bottom) < 2;
+      setPanelBottom(alongBottom ? Math.round(p.height) : 0);
+      // In the corner, it is the width that matters: pins have to land to its
+      // right, since it runs from under the toggle most of the way down.
+      setPanelLeft(alongBottom ? 0 : Math.round(p.right - h.left));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(panel);
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, [servicesActive, services?.panel]);
 
   // ─── imperative pan requests ─────────────────────────────────────────────
   useEffect(() => {
@@ -627,7 +714,10 @@ export default function MapView({
   }, []);
 
   return (
-    <div className="map-pane">
+    <div
+      className={`map-pane${panelBottom > 0 ? ' has-bottom-panel' : ''}`}
+      style={{ '--panel-bottom': `${panelBottom}px` } as CSSProperties}
+    >
       <div
         ref={hostRef}
         className={`map-root${basemap === 'osm' ? ' is-osm' : ''}${
@@ -665,21 +755,14 @@ export default function MapView({
       ) : null}
 
       {services && servicesActive && services.panel ? (
-        <div className="map-service-panel">{services.panel}</div>
+        <div className="map-service-panel" ref={panelRef}>
+          {services.panel}
+        </div>
       ) : null}
 
-      <div className="map-floats">
-        {/* Kept at the top of the stack and always on screen — the guide is
-            something people need to be able to look up at any moment. */}
-        <button
-          type="button"
-          className="map-float-btn is-guide"
-          onClick={onOpenGuide}
-          title="Ինչպես օգտվել"
-          aria-label="Ինչպես օգտվել"
-        >
-          <IconHelp />
-        </button>
+      {floatsHost
+        ? createPortal(
+            <>
         <button
           type="button"
           className={`map-float-btn${basemap === 'satellite' ? ' is-on' : ''}`}
@@ -699,7 +782,10 @@ export default function MapView({
         >
           {locating ? <span className="spinner spinner-dark" /> : <IconCrosshair />}
         </button>
-      </div>
+            </>,
+            floatsHost,
+          )
+        : null}
     </div>
   );
 }
