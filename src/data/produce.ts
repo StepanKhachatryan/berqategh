@@ -57,6 +57,7 @@ export const PRODUCE: Produce[] = [
   { id: 'watermelon', hy: 'Ձմերուկ', aliases: ['watermelon', 'dzmeruk', 'arbuz'], category: 'fruit', color: '#E24A4A', emoji: '🍉' },
   { id: 'melon', hy: 'Սեխ', aliases: ['melon', 'sekh', 'dynya'], category: 'fruit', color: '#EFCB68', emoji: '🍈' },
   { id: 'fig', hy: 'Թուզ', aliases: ['fig', 'tuz', 'inzhir'], category: 'fruit', color: '#7A4E7E', emoji: '🫒' },
+  { id: 'olive', hy: 'Ձիթապտուղ', aliases: ['olive', 'dzitaptugh', 'dzitaptux', 'zeytun', 'maslina', 'маслин', 'оливк'], category: 'fruit', color: '#6B7A2E', emoji: '🫒' },
   { id: 'pomegranate', hy: 'Նուռ', aliases: ['pomegranate', 'nur', 'granat'], category: 'fruit', color: '#C42B3A', emoji: '🍎' },
   { id: 'persimmon', hy: 'Խուրմա', aliases: ['persimmon', 'khurma'], category: 'fruit', color: '#F07B22', emoji: '🍊' },
   { id: 'mulberry', hy: 'Թութ', aliases: ['mulberry', 'tut', 'shelkovica'], category: 'fruit', color: '#5B2C6F', emoji: '🫐' },
