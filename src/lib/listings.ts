@@ -63,7 +63,8 @@ function photoUrl(path: string): string {
  * database is told the file is there, and the photo joins the review queue.
  * The bucket separately refuses anything but a JPEG under 512 KB.
  */
-export async function uploadListingPhoto(listingId: string, photo: Blob): Promise<void> {
+/** Uploads the photo and returns its public URL: photos go live on upload. */
+export async function uploadListingPhoto(listingId: string, photo: Blob): Promise<string> {
   const { data: path, error: ticketError } = await supabase().rpc('start_photo_upload', {
     p_listing_id: listingId,
   });
@@ -80,6 +81,7 @@ export async function uploadListingPhoto(listingId: string, photo: Blob): Promis
   });
   if (finishError) throw new Error(finishError.message);
   if (done !== true) throw new Error('Լուսանկարը չհաստատվեց');
+  return photoUrl(path);
 }
 
 /**

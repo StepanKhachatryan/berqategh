@@ -41,7 +41,7 @@ export default function PublishedSheet({ code, phone, span, photoSent, onClose }
     >
       <p className="published-span">
         Այն քարտեզին կմնա {span}։
-        {photoSent ? ' Լուսանկարը գնորդները կտեսնեն ստուգումից հետո։' : ''}
+        {photoSent ? ' Լուսանկարն էլ արդեն տեղադրված է։' : ''}
       </p>
 
       <div className="published-code-card">

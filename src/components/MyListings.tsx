@@ -7,12 +7,13 @@ import { IconArchive, IconTrash } from './Icons';
 import { listingTitle, type Listing } from '../lib/types';
 
 
-/* An upload in progress is not worth a line: it either finishes as pending
-   in a moment or is cleaned away within the hour. */
+/* An upload in progress is not worth a line: it either finishes in a moment
+   or is cleaned away within the hour. Photos go live on upload; 'pending' is
+   left from when they waited for review. */
 const PHOTO_STATUS: Partial<Record<NonNullable<Listing['photoStatus']>, string>> = {
   pending: '📷 Լուսանկարը ստուգվում է',
-  approved: '📷 Լուսանկարը հաստատված է',
-  rejected: '📷 Լուսանկարը չի հաստատվել',
+  approved: '📷 Լուսանկարը տեղադրված է',
+  rejected: '📷 Լուսանկարը հեռացվել է',
 };
 
 interface MyListingsProps {

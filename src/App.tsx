@@ -318,17 +318,19 @@ export default function App() {
     // listing is already live, and a failed upload says so rather than
     // taking the listing down with it.
     let photoSent = false;
+    let listing = created;
     if (draft.photo) {
       try {
-        await uploadListingPhoto(created.id, draft.photo);
+        const url = await uploadListingPhoto(created.id, draft.photo);
+        listing = { ...created, photoUrl: url, photoStatus: 'approved' };
         photoSent = true;
       } catch {
         push('error', 'Հայտարարությունը հրապարակվեց, բայց լուսանկարը չհաջողվեց բեռնել։');
       }
     }
 
-    setListings((current) => [created, ...current]);
-    setMine((current) => [created, ...current]);
+    setListings((current) => [listing, ...current]);
+    setMine((current) => [listing, ...current]);
     setSheet('none');
 
     /*

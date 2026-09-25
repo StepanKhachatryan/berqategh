@@ -516,7 +516,7 @@ export default function SellerForm({
           {photoBusy ? <p className="field-hint">Նկարը մշակվում է…</p> : null}
           {photoError ? <p className="field-error">{photoError}</p> : null}
           <p className="field-hint">
-            Մեկ լուսանկար՝ ձեր բերքի։ Գնորդները այն կտեսնեն ստուգումից հետո։ Անպատշաճ
+            Մեկ լուսանկար՝ ձեր բերքի։ Անպատշաճ
             լուսանկարները կհեռացվեն։
           </p>
         </div>
