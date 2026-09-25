@@ -8,6 +8,8 @@ interface PublishedSheetProps {
   phone: string;
   /** How long the listing will stand, already in words. */
   span: string;
+  /** A photo went up with the listing, and is now waiting for review. */
+  photoSent: boolean;
   onClose: () => void;
 }
 
@@ -25,7 +27,7 @@ interface PublishedSheetProps {
  * whatever is to hand. Nothing else competes for the eye: what the number is
  * for is said underneath it, and the only button dismisses.
  */
-export default function PublishedSheet({ code, phone, span, onClose }: PublishedSheetProps) {
+export default function PublishedSheet({ code, phone, span, photoSent, onClose }: PublishedSheetProps) {
   return (
     <Modal
       title="Հայտարարությունը հրապարակվեց"
@@ -37,7 +39,10 @@ export default function PublishedSheet({ code, phone, span, onClose }: Published
         </button>
       }
     >
-      <p className="published-span">Այն քարտեզին կմնա {span}։</p>
+      <p className="published-span">
+        Այն քարտեզին կմնա {span}։
+        {photoSent ? ' Լուսանկարը գնորդները կտեսնեն ստուգումից հետո։' : ''}
+      </p>
 
       <div className="published-code-card">
         <span className="published-code-label">Ձեր վերականգնման կոդը</span>

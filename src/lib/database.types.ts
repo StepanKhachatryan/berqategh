@@ -30,6 +30,12 @@ export type ListingRow = {
   created_at: string;
   expires_at: string;
   archived_at: string | null;
+  /**
+   * The seller's photo's storage path, and only once the site owner has
+   * approved it - a generated column, empty while the photo waits for review
+   * (migration 0018). Never written by the browser.
+   */
+  photo_public: string | null;
 };
 
 /**
@@ -54,12 +60,20 @@ export type EventInsert = {
   product_id?: string | null;
 };
 
-/** What `my_listings()` returns — the same columns, own rows only. */
-export type MyListingRow = ListingRow;
+/**
+ * What `my_listings()` returns: the same columns, own rows only, plus where
+ * the seller's photo stands in review.
+ */
+export type MyListingRow = ListingRow & {
+  photo_status: 'uploading' | 'pending' | 'approved' | 'rejected' | null;
+};
 
 /** Writes carry the token even though reads never return it. */
 export type ListingInsert = ListingRow extends infer R
-  ? Omit<R & { owner_token: string }, 'id' | 'created_at' | 'expires_at' | 'archived_at'> &
+  ? Omit<
+      R & { owner_token: string },
+      'id' | 'created_at' | 'expires_at' | 'archived_at' | 'photo_public'
+    > &
       Partial<Pick<ListingRow, 'id' | 'created_at' | 'expires_at' | 'archived_at'>>
   : never;
 
@@ -99,6 +113,8 @@ export type Database = {
       };
       marketing_consent_status: { Args: Record<string, never>; Returns: boolean };
       withdraw_marketing_consent: { Args: Record<string, never>; Returns: number };
+      start_photo_upload: { Args: { p_listing_id: string }; Returns: string | null };
+      finish_photo_upload: { Args: { p_listing_id: string }; Returns: boolean };
     };
     Enums: {
       [_ in never]: never;

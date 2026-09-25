@@ -21,6 +21,7 @@ import {
   fetchActiveListings,
   fetchMyListings,
   issueRecoveryCode,
+  uploadListingPhoto,
   claimListings,
 } from './lib/listings';
 import { isConfigured } from './lib/supabase';
@@ -75,6 +76,7 @@ export default function App() {
     code: string;
     phone: string;
     span: string;
+    photoSent: boolean;
   } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -312,6 +314,19 @@ export default function App() {
       if (recorded) setOffersConsent(true);
     }
 
+    // The photo, against the listing that now exists. Also best effort: the
+    // listing is already live, and a failed upload says so rather than
+    // taking the listing down with it.
+    let photoSent = false;
+    if (draft.photo) {
+      try {
+        await uploadListingPhoto(created.id, draft.photo);
+        photoSent = true;
+      } catch {
+        push('error', 'Հայտարարությունը հրապարակվեց, բայց լուսանկարը չհաջողվեց բեռնել։');
+      }
+    }
+
     setListings((current) => [created, ...current]);
     setMine((current) => [created, ...current]);
     setSheet('none');
@@ -339,7 +354,7 @@ export default function App() {
     const code = await issueRecoveryCode().catch(() => null);
     if (code) {
       setRecoveryCode(code);
-      setPublished({ code, phone: draft.phone, span });
+      setPublished({ code, phone: draft.phone, span, photoSent });
     } else {
       push('success', `Հայտարարությունը հրապարակվեց։ Այն ակտիվ կլինի ${span}։`);
     }
@@ -588,6 +603,7 @@ export default function App() {
           code={published.code}
           phone={published.phone}
           span={published.span}
+          photoSent={published.photoSent}
           onClose={() => setPublished(null)}
         />
       ) : null}

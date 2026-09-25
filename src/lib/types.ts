@@ -31,6 +31,10 @@ export interface Listing {
   createdAt: string;
   expiresAt: string;
   archivedAt: string | null;
+  /** The seller's own photo, only once approved; null otherwise. */
+  photoUrl: string | null;
+  /** Where the photo stands in review - known only to its seller. */
+  photoStatus: 'uploading' | 'pending' | 'approved' | 'rejected' | null;
 }
 
 export interface ListingDraft {
@@ -53,6 +57,11 @@ export interface ListingDraft {
    * on the listing: it is sent to record_marketing_consent after publishing.
    */
   marketingConsent?: boolean;
+  /**
+   * The seller's photo, already converted on the phone (see lib/photo.ts).
+   * Not a column: it is uploaded against the listing once the listing exists.
+   */
+  photo?: Blob | null;
 }
 
 export type DistanceMode = 'road' | 'straight';

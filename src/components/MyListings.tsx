@@ -7,6 +7,14 @@ import { IconArchive, IconTrash } from './Icons';
 import { listingTitle, type Listing } from '../lib/types';
 
 
+/* An upload in progress is not worth a line: it either finishes as pending
+   in a moment or is cleaned away within the hour. */
+const PHOTO_STATUS: Partial<Record<NonNullable<Listing['photoStatus']>, string>> = {
+  pending: '📷 Լուսանկարը ստուգվում է',
+  approved: '📷 Լուսանկարը հաստատված է',
+  rejected: '📷 Լուսանկարը չի հաստատվել',
+};
+
 interface MyListingsProps {
   listings: Listing[];
   loading: boolean;
@@ -248,6 +256,12 @@ function MyListingCard({
                 : timeLeft(listing.expiresAt, now)}
             </span>
           </div>
+          {/* Only the seller sees this: where their photo stands in review. */}
+          {!archived && listing.photoStatus && PHOTO_STATUS[listing.photoStatus] ? (
+            <div className={`photo-status is-${listing.photoStatus}`}>
+              {PHOTO_STATUS[listing.photoStatus]}
+            </div>
+          ) : null}
         </div>
       </div>
 

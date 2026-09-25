@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import Modal from './Modal';
+import PhotoViewer from './PhotoViewer';
 import ProduceMark from './ProduceMark';
 import { produceImage } from '../data/produceImages';
 import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
 import { formatPrice, formatQuantity, postedAge } from '../lib/format';
 import { listingColor, swatchStyle } from './markers';
-import { IconPin } from './Icons';
+import { IconExpand, IconPin } from './Icons';
 import ContactRow from './ContactRow';
 import { usePlaceName } from '../lib/usePlaceName';
 import { listingTitle, type MeasuredListing } from '../lib/types';
@@ -22,6 +24,7 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   const posted = postedAge(listing.createdAt, now);
 
   const place = usePlaceName({ lat: listing.lat, lng: listing.lng });
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   /* Reaching the seller is one event whichever button does it: what the funnel
      measures is that the buyer made contact, not which app they used. */
@@ -52,12 +55,32 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   // the heading, and a line under it repeating the same word is a line nobody
   // reads twice.
   return (
+    <>
+    {photoOpen && listing.photoUrl ? (
+      <PhotoViewer src={listing.photoUrl} alt={title} onClose={() => setPhotoOpen(false)} />
+    ) : null}
     <Modal title={title} onClose={onClose}>
       {/* The picture and what the crop costs, side by side. Prices used to run
           the full width of the sheet and take a third of it to say two
           numbers. */}
       <div className="detail-media">
-        {photo ? (
+        {/* The seller's own photo, once approved, takes the catalogue
+            picture's place: same square, beside the prices, so the sheet is
+            no taller and the price and the call button stay exactly where a
+            buyer expects them. A tap opens it full size. */}
+        {listing.photoUrl ? (
+          <button
+            type="button"
+            className="seller-photo"
+            onClick={() => setPhotoOpen(true)}
+            aria-label="Բացել լուսանկարը"
+          >
+            <img src={listing.photoUrl} alt={`${title}՝ վաճառողի լուսանկարը`} />
+            <span className="seller-photo-zoom" aria-hidden="true">
+              <IconExpand size={14} />
+            </span>
+          </button>
+        ) : photo ? (
           <img className="detail-photo" src={photo} alt="" />
         ) : (
           <div className="produce-swatch detail-mark" style={swatchStyle(color)} aria-hidden="true">
@@ -183,5 +206,6 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
         </div>
       </div>
     </Modal>
+    </>
   );
 }

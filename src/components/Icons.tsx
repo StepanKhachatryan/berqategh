@@ -221,3 +221,10 @@ export const IconTelegram = ({ size = 18 }: IconProps) => (
     <path d="M21.7 4.4 18.5 19.6c-.24 1.06-.87 1.32-1.77.82l-4.9-3.6-2.36 2.27c-.26.26-.48.48-.99.48l.35-5 9.1-8.22c.4-.35-.09-.55-.62-.2L5.05 12.23.2 10.72c-1.05-.33-1.07-1.05.22-1.56L20.34 3.4c.88-.33 1.64.2 1.36 1Z" />
   </svg>
 );
+
+/** Two corners pulling apart: "open this bigger". */
+export const IconExpand = ({ size = 16 }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+  </svg>
+);

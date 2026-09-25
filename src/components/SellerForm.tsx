@@ -4,6 +4,7 @@ import ProducePicker from './ProducePicker';
 import ProduceMark from './ProduceMark';
 import LocationPicker from './LocationPicker';
 import { CONSENT_DETAIL, CONSENT_LABEL, SELLER_MEMORY_KEY } from '../lib/marketing';
+import { PHOTO_ACCEPT, PhotoError, preparePhoto, type PreparedPhoto } from '../lib/photo';
 import { canBeDried, CATEGORY_LABELS, getProduce, type Produce } from '../data/produce';
 import { isValidLocalPhone, PHONE_LOCAL_LENGTH, toE164 } from '../lib/format';
 import { isInsideArmenia } from '../lib/geo';
@@ -84,6 +85,40 @@ export default function SellerForm({
   const [phone, setPhone] = useState(remembered.phone);
   const [sellerName, setSellerName] = useState(remembered.name);
   const [offers, setOffers] = useState(remembered.offers);
+  const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+
+  // The preview is an object URL; let it go when replaced or when the form closes.
+  useEffect(() => () => {
+    if (photo) URL.revokeObjectURL(photo.previewUrl);
+  }, [photo]);
+
+  async function handlePhotoPicked(input: HTMLInputElement) {
+    const file = input.files?.[0];
+    // Cleared at once, so picking the same file again still fires a change.
+    input.value = '';
+    if (!file) return;
+
+    setPhotoError(null);
+    setPhotoBusy(true);
+    try {
+      setPhoto(await preparePhoto(file));
+    } catch (error) {
+      setPhotoError(
+        error instanceof PhotoError ? error.message : 'Չհաջողվեց մշակել նկարը։ Փորձե՛ք այլ լուսանկար։',
+      );
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  function clearPhoto() {
+    setPhoto(null);
+    setPhotoError(null);
+  }
   const [note, setNote] = useState('');
   const [location, setLocation] = useState<LatLng | null>(initialLocation);
   // Whether the pin came from a deliberate choice rather than from the device.
@@ -202,6 +237,7 @@ export default function SellerForm({
         lng: location.lng,
         durationDays,
         marketingConsent: offers,
+        photo: photo?.blob ?? null,
       });
 
       localStorage.setItem(
@@ -417,6 +453,72 @@ export default function SellerForm({
             />
             <span className="affix affix-end">կգ</span>
           </div>
+        </div>
+
+        {/* ─── photo ───────────────────────────────────────────────────── */}
+        <div className="field">
+          <label className="field-label">
+            Լուսանկար <span style={{ color: 'var(--ink-faint)', fontWeight: 500 }}>(ըստ ցանկության)</span>
+          </label>
+
+          {/* Two inputs rather than one, so the choice is two plain buttons:
+              the camera, or a photo already on the phone. A single input
+              leaves that choice to a system menu many sellers never see. */}
+          <input
+            ref={cameraRef}
+            type="file"
+            accept={PHOTO_ACCEPT}
+            capture="environment"
+            hidden
+            onChange={(event) => void handlePhotoPicked(event.target)}
+          />
+          <input
+            ref={galleryRef}
+            type="file"
+            accept={PHOTO_ACCEPT}
+            hidden
+            onChange={(event) => void handlePhotoPicked(event.target)}
+          />
+
+          {photo ? (
+            <div className="photo-preview">
+              <img src={photo.previewUrl} alt="Ձեր լուսանկարը" />
+              <div className="photo-preview-actions">
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => galleryRef.current?.click()}>
+                  Փոխել
+                </button>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={clearPhoto}>
+                  Հեռացնել
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="photo-pick">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                disabled={photoBusy}
+                onClick={() => cameraRef.current?.click()}
+              >
+                📷 Նկարել
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                disabled={photoBusy}
+                onClick={() => galleryRef.current?.click()}
+              >
+                🖼️ Ընտրել նկարներից
+              </button>
+            </div>
+          )}
+
+          {photoBusy ? <p className="field-hint">Նկարը մշակվում է…</p> : null}
+          {photoError ? <p className="field-error">{photoError}</p> : null}
+          <p className="field-hint">
+            Մեկ լուսանկար՝ ձեր բերքի։ Գնորդները այն կտեսնեն ստուգումից հետո։ Անպատշաճ
+            լուսանկարները կհեռացվեն։
+          </p>
         </div>
 
         {/* ─── phone ───────────────────────────────────────────────────── */}

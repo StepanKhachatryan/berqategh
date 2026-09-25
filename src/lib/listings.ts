@@ -7,7 +7,7 @@ import { getProduce, type ProduceCategory } from '../data/produce';
 // level to infer the row shape, and only a literal survives that parse.
 // owner_token is deliberately absent — the client has no SELECT privilege on it.
 // prettier-ignore
-const COLUMNS = 'id, product_id, product_name, category, sale_type, form, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at' as const;
+const COLUMNS = 'id, product_id, product_name, category, sale_type, form, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at, photo_public' as const;
 
 /*
  * A row stores the crop's name and group as they stood when it was published,
@@ -41,7 +41,45 @@ function toListing(row: ListingRow | MyListingRow): Listing {
     createdAt: row.created_at,
     expiresAt: row.expires_at,
     archivedAt: row.archived_at,
+    photoUrl: row.photo_public ? photoUrl(row.photo_public) : null,
+    photoStatus: 'photo_status' in row ? row.photo_status : null,
   };
+}
+
+const PHOTO_BUCKET = 'listing-photos';
+
+/** An approved photo's public address. Built locally; no request is made. */
+function photoUrl(path: string): string {
+  return supabase().storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/**
+ * Sends the seller's photo for a listing they have just published.
+ *
+ * Three steps, because the key in the browser is public and cannot be what
+ * decides who uploads. The database hands out a ticket - one random path,
+ * only for a listing this device owns, and only if it has no photo yet. The
+ * bucket accepts a file at exactly that path and nowhere else. Then the
+ * database is told the file is there, and the photo joins the review queue.
+ * The bucket separately refuses anything but a JPEG under 512 KB.
+ */
+export async function uploadListingPhoto(listingId: string, photo: Blob): Promise<void> {
+  const { data: path, error: ticketError } = await supabase().rpc('start_photo_upload', {
+    p_listing_id: listingId,
+  });
+  if (ticketError) throw new Error(ticketError.message);
+  if (!path) throw new Error('Լուսանկարի համար թույլտվություն չստացվեց');
+
+  const { error: uploadError } = await supabase()
+    .storage.from(PHOTO_BUCKET)
+    .upload(path, photo, { contentType: 'image/jpeg', upsert: false, cacheControl: '31536000' });
+  if (uploadError) throw new Error(uploadError.message);
+
+  const { data: done, error: finishError } = await supabase().rpc('finish_photo_upload', {
+    p_listing_id: listingId,
+  });
+  if (finishError) throw new Error(finishError.message);
+  if (done !== true) throw new Error('Լուսանկարը չհաստատվեց');
 }
 
 /**
