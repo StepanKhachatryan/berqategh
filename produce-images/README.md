@@ -45,7 +45,8 @@ build-ին պետք չէ։ Մեկ անգամ՝
 npm i -g playwright && npx playwright install chromium
 ```
 
-**The name must be the crop id exactly** - `grape.png`, not `grape_red.png`.
+**The name must be the crop id** - `grape.png`, not `grape_red.png`. An
+underscore counts as a hyphen, so `grape_white.png` works as `grape-white`.
 A picture whose name matches no crop is converted but never shown. The
 workflow checks this and fails (with a "did you mean" hint) when a name is off;
 run `npm run icons:check` to check locally.

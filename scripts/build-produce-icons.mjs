@@ -50,7 +50,9 @@ mkdirSync(OUT, { recursive: true });
 
 const sources = readdirSync(SRC)
   .filter((name) => INPUT.has(extname(name).toLowerCase()))
-  .map((name) => ({ name, id: basename(name, extname(name)), path: join(SRC, name) }));
+  // Crop ids use hyphens; an underscore is the easy slip (grape_white.png), so
+  // it is read as a hyphen rather than producing a picture nothing shows.
+  .map((name) => ({ name, id: basename(name, extname(name)).replace(/_/g, '-'), path: join(SRC, name) }));
 
 if (sources.length === 0) {
   console.log('produce-images/ is empty — nothing to build.');

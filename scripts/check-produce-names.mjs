@@ -28,7 +28,8 @@ for (const group of ['honey', 'dried']) ids.add(group);
 const INPUT = new Set(['.png', '.webp', '.jpg', '.jpeg']);
 const unknown = readdirSync(join(root, 'produce-images'))
   .filter((name) => INPUT.has(extname(name).toLowerCase()))
-  .filter((name) => !ids.has(basename(name, extname(name))));
+  // The converter reads an underscore as a hyphen, so grape_white.png is fine.
+  .filter((name) => !ids.has(basename(name, extname(name)).replace(/_/g, '-')));
 
 if (unknown.length === 0) {
   console.log(`All pictures in produce-images/ match a crop (${ids.size} names known).`);
@@ -38,7 +39,12 @@ if (unknown.length === 0) {
 // Suggest the id the file was probably meant to have.
 const near = (name) => {
   const stem = basename(name, extname(name)).toLowerCase().replace(/_/g, '-');
-  const guess = [...ids].find((id) => stem === id || stem.startsWith(id) || id.startsWith(stem.split('-')[0]));
+  // An exact match once underscores become hyphens (grape_white -> grape-white)
+  // beats a prefix match (grape), which beats any other crop sharing the first word.
+  const guess =
+    (ids.has(stem) && stem) ||
+    [...ids].filter((id) => stem.startsWith(id)).sort((a, b) => b.length - a.length)[0] ||
+    [...ids].find((id) => id.startsWith(stem.split('-')[0]));
   return guess ? ` - did you mean "${guess}${extname(name)}"?` : '';
 };
 

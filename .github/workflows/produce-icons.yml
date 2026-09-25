@@ -45,21 +45,32 @@ jobs:
       - run: npm install --no-save playwright
       - run: npx playwright install --with-deps chromium
 
-      - run: npm run icons
-
-      - name: Commit the icons
+      # Converts on the newest main and pushes, starting over if someone pushed
+      # in the meantime. Rebasing a finished conversion onto newer uploads
+      # conflicts in sources.json - which is how a delete followed quickly by
+      # an upload once left the new pictures unconverted - while converting
+      # again on top of them cannot.
+      - name: Convert and commit the icons
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/assets/produce
-          if git diff --staged --quiet; then
-            echo 'Nothing changed — every icon was already up to date.'
-            exit 0
-          fi
-          git commit -m 'Rebuild produce icons'
-          # Someone may have pushed while the browser was installing.
-          git pull --rebase origin "${GITHUB_REF_NAME}"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin "${GITHUB_REF_NAME}"
+            git reset --hard "origin/${GITHUB_REF_NAME}"
+            npm run icons
+            git add src/assets/produce
+            if git diff --staged --quiet; then
+              echo 'Nothing changed - every icon was already up to date.'
+              exit 0
+            fi
+            git commit -m 'Rebuild produce icons'
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "Main moved while converting; starting over (attempt ${attempt})."
+            sleep $((attempt * 3))
+          done
+          exit 1
 
       # After the commit, so the pictures that are named right go live even
       # when one is not. A wrong name fails the run and GitHub emails about it.
