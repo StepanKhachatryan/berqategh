@@ -3,7 +3,6 @@ import Modal from './Modal';
 import ProducePicker from './ProducePicker';
 import ProduceMark from './ProduceMark';
 import LocationPicker from './LocationPicker';
-import { CONSENT_DETAIL, CONSENT_LABEL, SELLER_MEMORY_KEY } from '../lib/marketing';
 import { PHOTO_ACCEPT, PhotoError, preparePhoto, type PreparedPhoto } from '../lib/photo';
 import { canBeDried, CATEGORY_LABELS, getProduce, type Produce } from '../data/produce';
 import { isValidLocalPhone, PHONE_LOCAL_LENGTH, toE164 } from '../lib/format';
@@ -26,21 +25,15 @@ const DURATION_OPTIONS: { value: number; label: string }[] = [
   { value: 90, label: '3 ամիս' },
 ];
 
-const REMEMBERED_KEY = SELLER_MEMORY_KEY;
+const REMEMBERED_KEY = 'berqategh.seller';
 
 interface Remembered {
   phone: string;
   name: string;
-  /**
-   * The seller's own last answer to the offers box. Starting the next form from
-   * it is their choice carried forward, not a box ticked on their behalf; a
-   * seller who has never answered starts from unticked.
-   */
-  offers: boolean;
 }
 
 function loadRemembered(): Remembered {
-  const blank: Remembered = { phone: '', name: '', offers: false };
+  const blank: Remembered = { phone: '', name: '' };
   try {
     const raw = localStorage.getItem(REMEMBERED_KEY);
     if (raw) return { ...blank, ...(JSON.parse(raw) as Partial<Remembered>) };
@@ -84,7 +77,6 @@ export default function SellerForm({
   const [quantity, setQuantity] = useState('');
   const [phone, setPhone] = useState(remembered.phone);
   const [sellerName, setSellerName] = useState(remembered.name);
-  const [offers, setOffers] = useState(remembered.offers);
   const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -236,13 +228,12 @@ export default function SellerForm({
         lat: location.lat,
         lng: location.lng,
         durationDays,
-        marketingConsent: offers,
         photo: photo?.blob ?? null,
       });
 
       localStorage.setItem(
         REMEMBERED_KEY,
-        JSON.stringify({ phone, name: sellerName.trim(), offers } satisfies Remembered),
+        JSON.stringify({ phone, name: sellerName.trim() } satisfies Remembered),
       );
     } catch (error) {
       setFailure(error instanceof Error ? error.message : 'Չհաջողվեց պահպանել');
@@ -550,21 +541,6 @@ export default function SellerForm({
               Գրե՛ք համարը առանց առջևի զրոյի։ Գնորդները կզանգեն ուղիղ այս համարին։
             </p>
           )}
-
-          {/* Right under the number it is about. Unticked unless the seller
-              ticked it last time, and the whole of what it means is written
-              out beside it rather than behind a link nobody opens. */}
-          <label className="consent-check">
-            <input
-              type="checkbox"
-              checked={offers}
-              onChange={(event) => setOffers(event.target.checked)}
-            />
-            <span>
-              <b>{CONSENT_LABEL}</b>
-              <small>{CONSENT_DETAIL}</small>
-            </span>
-          </label>
         </div>
 
         {/* ─── location ────────────────────────────────────────────────── */}

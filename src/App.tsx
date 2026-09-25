@@ -33,9 +33,7 @@ import PublishedSheet from './components/PublishedSheet';
 import PremiumServiceSheet from './components/PremiumServiceSheet';
 import ServiceSearch from './components/ServiceSearch';
 import {
-  forgetOffersAnswer,
   marketingConsentStatus,
-  recordMarketingConsent,
   withdrawMarketingConsent,
 } from './lib/marketing';
 import { DEFAULT_FILTERS } from './lib/types';
@@ -306,14 +304,6 @@ export default function App() {
   const handleCreate = async (draft: ListingDraft) => {
     const created = await createListing(draft);
 
-    // After the listing exists, because consent is recorded against it - the
-    // server reads the number from the listing, not from us. Best effort: a
-    // failure here must never cost the seller the listing they just made.
-    if (draft.marketingConsent) {
-      const recorded = await recordMarketingConsent(created.id).catch(() => false);
-      if (recorded) setOffersConsent(true);
-    }
-
     // The photo, against the listing that now exists. Also best effort: the
     // listing is already live, and a failed upload says so rather than
     // taking the listing down with it.
@@ -368,7 +358,6 @@ export default function App() {
     try {
       await withdrawMarketingConsent();
       setOffersConsent(false);
-      forgetOffersAnswer();
       push('success', 'Դուք այլևս առաջարկներ չեք ստանա։ Ձեր համարը հեռացվեց ցուցակից։');
     } catch (error) {
       push('error', error instanceof Error ? error.message : 'Չհաջողվեց');

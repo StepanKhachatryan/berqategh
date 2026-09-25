@@ -53,11 +53,6 @@ export interface ListingDraft {
   lng: number;
   durationDays?: number;
   /**
-   * The seller ticked the box to hear about agricultural offers. Not a column
-   * on the listing: it is sent to record_marketing_consent after publishing.
-   */
-  marketingConsent?: boolean;
-  /**
    * The seller's photo, already converted on the phone (see lib/photo.ts).
    * Not a column: it is uploaded against the listing once the listing exists.
    */
