@@ -10,8 +10,10 @@
  *      does not ask for HEIC, so they are covered without asking for it;
  *   2. it must actually decode as an image - a renamed file fails here,
  *      whatever its name says;
- *   3. it is scaled so its longer side is at most 1600px, which is sharp on
- *      any phone and a fraction of the camera's size;
+ *   3. it is cropped to a square around its centre - the shape of the box
+ *      the listing shows it in, so the box is filled with no empty bands -
+ *      and scaled to at most 1200px a side, sharp on any phone and a fraction
+ *      of the camera's size;
  *   4. the mark is drawn on;
  *   5. it is encoded as JPEG, at lower quality, then smaller, until it is
  *      under the limit.
@@ -36,7 +38,7 @@ export const MAX_PHOTO_BYTES = 500_000;
 /** Nothing a phone camera takes is this big; anything that is, is not a photo. */
 const MAX_INPUT_BYTES = 40 * 1024 * 1024;
 
-const LONG_SIDE = 1600;
+const SIDE = 1200;
 const QUALITIES = [0.86, 0.8, 0.72, 0.64, 0.56];
 
 const MARK = 'ԲերքաՏեղ';
@@ -91,7 +93,7 @@ function toJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
  * is the same share of a small picture as of a large one.
  */
 function stamp(ctx: CanvasRenderingContext2D, width: number): void {
-  const size = Math.max(16, Math.round(width * 0.042));
+  const size = Math.max(12, Math.round(width * 0.028));
   const pad = Math.round(size * 0.7);
 
   ctx.save();
@@ -136,13 +138,17 @@ export async function preparePhoto(file: File): Promise<PreparedPhoto> {
     // A fallback font is still a mark.
   }
 
-  let scale = Math.min(1, LONG_SIDE / Math.max(source.width, source.height));
+  // The centred square: the middle of a landscape photo, or of a portrait one.
+  const crop = Math.min(source.width, source.height);
+  const cropX = (source.width - crop) / 2;
+  const cropY = (source.height - crop) / 2;
+  let side = Math.min(SIDE, crop);
 
   // Quality first, then size: a smaller photo at good quality beats a large
   // one full of blocks. In practice the first or second try is under 500 KB.
   for (let attempt = 0; attempt < 4; attempt++) {
-    const width = Math.max(1, Math.round(source.width * scale));
-    const height = Math.max(1, Math.round(source.height * scale));
+    const width = Math.max(1, Math.round(side));
+    const height = width;
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -155,7 +161,7 @@ export async function preparePhoto(file: File): Promise<PreparedPhoto> {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(source, 0, 0, width, height);
+    ctx.drawImage(source, cropX, cropY, crop, crop, 0, 0, width, height);
     stamp(ctx, width);
 
     for (const quality of QUALITIES) {
@@ -165,7 +171,7 @@ export async function preparePhoto(file: File): Promise<PreparedPhoto> {
         return { blob, previewUrl: URL.createObjectURL(blob), width, height };
       }
     }
-    scale *= 0.75;
+    side *= 0.75;
   }
 
   throw new PhotoError('Չհաջողվեց նկարը փոքրացնել։ Փորձե՛ք այլ լուսանկար։');

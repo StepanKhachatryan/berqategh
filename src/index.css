@@ -2669,12 +2669,12 @@ input[type='range']::-moz-range-thumb {
   background: var(--surface-sunk);
 }
 
-/* Fitted, not cropped, for the same reason as the seller's preview: the
-   whole photo, mark and all, scaled into the square. */
+/* Filling the square. New photos are square already; cover also fills the
+   box for any uploaded before photos were cropped. */
 .seller-photo img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
 }
 
@@ -3344,13 +3344,12 @@ input[type='range']::-moz-range-thumb {
   gap: 12px;
 }
 
-/* Whole, not cropped: a square crop of a landscape photo cuts the mark off
-   its corner, and the point of the preview is to show exactly what goes up. */
+/* The photo is cropped square before this, so it fills the box exactly. */
 .photo-preview img {
   flex: none;
   width: 116px;
   height: 116px;
-  object-fit: contain;
+  object-fit: cover;
   background: var(--surface-sunk);
   border-radius: var(--r-md);
   border: 1px solid var(--line);
