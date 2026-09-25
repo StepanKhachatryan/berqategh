@@ -15,6 +15,7 @@ on:
     paths:
       - 'produce-images/**'
       - 'scripts/build-produce-icons.mjs'
+      - 'scripts/check-produce-names.mjs'
   workflow_dispatch:
 
 permissions:
@@ -59,3 +60,8 @@ jobs:
           # Someone may have pushed while the browser was installing.
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      # After the commit, so the pictures that are named right go live even
+      # when one is not. A wrong name fails the run and GitHub emails about it.
+      - name: Check every picture matches a crop
+        run: npm run icons:check

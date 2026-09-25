@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "icons": "node scripts/build-produce-icons.mjs",
+    "icons:check": "node scripts/check-produce-names.mjs",
     "brand": "node scripts/build-brand.mjs",
     "qr": "node scripts/build-qr.mjs"
   },
