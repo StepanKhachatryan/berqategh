@@ -1,6 +1,12 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  # Each production deploy costs credits, so skip the ones that cannot change
+  # the site: pushes that touch only the photo originals (the icon workflow
+  # commits the converted ones separately, and that commit does deploy), the
+  # database migrations and Edge Functions (Supabase, not Netlify), scripts,
+  # workflows and notes. Exit 0 = nothing the site uses changed = skip.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)produce-images' ':(exclude)supabase' ':(exclude)scripts' ':(exclude).github' ':(exclude)*.md'"
 
 [build.environment]
   NODE_VERSION = "20"

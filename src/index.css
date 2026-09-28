@@ -237,6 +237,65 @@ h4 {
   box-shadow: 0 10px 26px rgba(255, 107, 26, 0.42);
 }
 
+/*
+ * The two raised buttons: publishing a harvest (red) and calling a seller
+ * (green). Colours taken from the reference design the owner chose: a flat
+ * face, a lighter line along the top edge, and a darker lip underneath that
+ * makes it read as a key standing off the page, with a soft shadow on
+ * whatever it sits over - the map included. Hover darkens the face; pressing
+ * sinks the key onto its lip.
+ */
+.btn-3d {
+  --face: #d2534a;
+  --face-hover: #b8433b;
+  --lip: #982d25;
+  --lip-hover: #7f241d;
+  --hi: rgba(255, 255, 255, 0.3);
+  --drop: rgba(152, 45, 37, 0.3);
+  background: var(--face);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 16px;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.14);
+  box-shadow:
+    inset 0 2px 0 var(--hi),
+    0 4px 0 var(--lip),
+    0 10px 20px var(--drop);
+  transition:
+    background 0.15s var(--ease),
+    box-shadow 0.15s var(--ease),
+    transform 0.1s var(--ease);
+}
+
+.btn-3d:hover:not(:disabled) {
+  background: var(--face-hover);
+  box-shadow:
+    inset 0 2px 0 var(--hi),
+    0 4px 0 var(--lip-hover),
+    0 12px 24px var(--drop);
+}
+
+.btn-3d:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 2px 0 var(--hi),
+    0 1px 0 var(--lip-hover),
+    0 4px 10px var(--drop);
+}
+
+.btn-sell {
+  font-size: 18px;
+}
+
+.btn-call {
+  --face: #21a05f;
+  --face-hover: #1a8a51;
+  --lip: #0a5a2a;
+  --lip-hover: #084a22;
+  --hi: rgba(255, 255, 255, 0.28);
+  --drop: rgba(10, 90, 42, 0.26);
+}
+
 .btn-green {
   background: linear-gradient(135deg, #21b957, var(--green));
   color: #fff;
@@ -2866,28 +2925,41 @@ input[type='range']::-moz-range-thumb {
  * widths and needs no guess about which phones are narrow.
  */
 .contact-row {
+  container-type: inline-size;
   display: flex;
-  flex-wrap: wrap;
   align-items: stretch;
-  gap: 6px;
+  gap: 8px;
+  /* Room for the call key's lip and shadow under it. */
+  padding-bottom: 4px;
 }
 
 .call-btn {
   text-decoration: none;
-  /* Grows into the free space; the basis is what the number needs to be read. */
-  flex: 1 1 200px;
+  /* Takes whatever the three squares leave. */
+  flex: 1 1 0;
   min-width: 0;
-  padding: 0 12px;
-  font-size: 15px;
+  padding: 0 14px;
+  font-size: 16px;
   gap: 7px;
   white-space: nowrap;
 }
 
-/* Never shrinks: the row is meant to wrap when it runs out of width, and a
-   messenger squeezed to 32px is a worse answer than a second line. */
+.call-number {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A phone-width row: the word goes, the icon and the number say it. */
+@container (max-width: 380px) {
+  .call-word {
+    display: none;
+  }
+}
+
+/* Square, 1:1, and never squeezed: the call button gives up the width. */
 .contact-app {
-  flex: 0 0 44px;
-  width: 44px;
+  flex: 0 0 54px;
+  width: 54px;
   height: 54px;
   padding: 0;
   border-radius: var(--r-md);
@@ -3944,20 +4016,19 @@ input[type='range']::-moz-range-thumb {
 
 /* ═══ seller FAB ═════════════════════════════════════════════════════════ */
 
+/* Centred with auto margins rather than a transform, so the transform is free
+   for the key-press of .btn-3d. */
 .fab {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: max-content;
   /* Clears the Leaflet attribution strip, which also sits at the bottom. */
   bottom: calc(48px + var(--safe-b));
   z-index: 650;
-  height: 54px;
-  padding: 0 26px;
-  font-size: 16px;
-}
-
-.fab:active {
-  transform: translateX(-50%) scale(0.96);
+  height: 56px;
+  padding: 0 28px;
 }
 
 /* ═══ responsive layout ══════════════════════════════════════════════════ */
@@ -4051,19 +4122,46 @@ input[type='range']::-moz-range-thumb {
     flex-direction: row-reverse;
   }
 
-  /* Beside the map rather than over it, so there is nothing to see through. */
+  /*
+   * A frosted pane floating over the left of the map, the way Apple Maps
+   * lays out its sidebar: the map runs underneath and shows through, blurred.
+   * MapView frames pins to the right of it (WIDE_LIST_INSET), so none land
+   * behind the glass.
+   */
   .results {
-    position: static;
-    flex: none;
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    bottom: 12px;
+    right: auto;
     width: 380px;
     height: auto;
-    border-top: none;
-    border-left: 1px solid var(--line);
-    border-radius: 0;
-    box-shadow: none;
-    background: var(--surface);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: saturate(180%) blur(28px);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    box-shadow:
+      0 12px 40px rgba(16, 37, 26, 0.18),
+      0 1px 3px rgba(16, 37, 26, 0.08);
+    overflow: hidden;
+  }
+
+  .results-head {
+    padding-top: 12px;
+  }
+
+  /* On the glass the cards read as frosted tiles rather than white slabs. */
+  .results .listing-card {
+    background: rgba(255, 255, 255, 0.78);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* No blur, no glass: a see-through pane over a sharp map cannot be read. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .results {
+      background: rgba(255, 255, 255, 0.97);
+    }
   }
 
   .results.is-collapsed {
@@ -4086,12 +4184,8 @@ input[type='range']::-moz-range-thumb {
   .fab {
     left: auto;
     right: 88px;
-    transform: none;
+    margin-inline: 0;
     bottom: 56px;
-  }
-
-  .fab:active {
-    transform: scale(0.96);
   }
 
 }

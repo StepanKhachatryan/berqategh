@@ -19,7 +19,6 @@ const SALE_OPTIONS: { value: SaleType; label: string; emoji: string }[] = [
 ];
 
 const DURATION_OPTIONS: { value: number; label: string }[] = [
-  { value: 5, label: '5 օր' },
   { value: 10, label: '10 օր' },
   { value: 30, label: '1 ամիս' },
   { value: 90, label: '3 ամիս' },

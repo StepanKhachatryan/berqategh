@@ -38,6 +38,20 @@ const EDGE = 26;
  * the country lands underneath one of them.
  */
 const CONTROL_COLUMN = 58;
+/**
+ * On a wide screen the buyer's list floats over the left of the map as a
+ * frosted pane: 380px wide, 12px in from the edge (see .results in the 900px
+ * block of index.css), plus the same again as breathing room. Pins are framed
+ * to the right of it.
+ */
+const WIDE_LIST_INSET = 12 + 380 + 12;
+const WIDE = 900;
+
+/** What the results pane covers: its height on a phone, its width on a wide screen. */
+function listCover(listHeight: number): { bottom: number; left: number } {
+  if (window.innerWidth < WIDE) return { bottom: listHeight, left: 0 };
+  return { bottom: 0, left: listHeight > 0 ? WIDE_LIST_INSET : 0 };
+}
 /** Where a premium bubble's tail sits, from its left edge (TAIL_X in markers.ts). */
 const PREMIUM_TAIL_X = 20;
 
@@ -322,10 +336,11 @@ export default function MapView({
     /*
      * A stack near an edge opens partly off it. Nudge the map so the whole fan
      * is reachable, using the same reserved strips as the opening frame: the
-     * results pane below, the button column on the right.
+     * results pane (below on a phone, down the left on a wide screen), the
+     * button column on the right.
      */
     const size = map.getSize();
-    const covered = window.innerWidth < 900 ? bottomInsetRef.current : 0;
+    const covered = listCover(bottomInsetRef.current);
     const points = offsets.map((offset) => origin.add(offset));
 
     const left = Math.min(...points.map((point) => point.x)) - PIN_SIDE;
@@ -334,12 +349,12 @@ export default function MapView({
     const bottom = Math.max(...points.map((point) => point.y));
 
     let dx = 0;
-    if (left < EDGE) dx = left - EDGE;
+    if (left < EDGE + covered.left) dx = left - EDGE - covered.left;
     else if (right > size.x - CONTROL_COLUMN) dx = right - (size.x - CONTROL_COLUMN);
 
     let dy = 0;
     if (top < EDGE) dy = top - EDGE;
-    else if (bottom > size.y - covered - EDGE) dy = bottom - (size.y - covered - EDGE);
+    else if (bottom > size.y - covered.bottom - EDGE) dy = bottom - (size.y - covered.bottom - EDGE);
 
     if (dx !== 0 || dy !== 0) map.panBy([dx, dy], { animate: true, duration: 0.25 });
   }, []);
@@ -493,14 +508,14 @@ export default function MapView({
       const map = mapRef.current;
       if (!map || listings.length === 0) return;
 
-      // The pane sits beside the map rather than over it on a wide screen.
-      const covered = window.innerWidth < 900 ? bottomInset : 0;
+      // Along the bottom on a phone, down the left on a wide screen.
+      const covered = listCover(bottomInset);
 
       map.fitBounds(
         L.latLngBounds(listings.map((listing) => [listing.lat, listing.lng] as [number, number])),
         {
-          paddingTopLeft: [EDGE + PIN_SIDE, EDGE + PIN_UP],
-          paddingBottomRight: [CONTROL_COLUMN + PIN_SIDE, EDGE + covered],
+          paddingTopLeft: [EDGE + PIN_SIDE + covered.left, EDGE + PIN_UP],
+          paddingBottomRight: [CONTROL_COLUMN + PIN_SIDE, EDGE + covered.bottom],
           maxZoom: 13,
           animate,
         },
@@ -697,9 +712,14 @@ export default function MapView({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !focus) return;
-    map.flyTo([focus.point.lat, focus.point.lng], focus.zoom ?? map.getZoom(), {
-      duration: 0.7,
-    });
+    const zoom = focus.zoom ?? map.getZoom();
+    // On a wide screen the list covers the left of the map, so the point goes
+    // in the middle of what is left beside it rather than of the whole map.
+    const { left } = listCover(bottomInsetRef.current);
+    const target = left
+      ? map.unproject(map.project([focus.point.lat, focus.point.lng], zoom).subtract([left / 2, 0]), zoom)
+      : L.latLng(focus.point.lat, focus.point.lng);
+    map.flyTo(target, zoom, { duration: 0.7 });
   }, [focus]);
 
   // Leaflet needs a nudge whenever its container changes size.

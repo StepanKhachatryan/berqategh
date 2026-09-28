@@ -531,7 +531,7 @@ export default function App() {
               seed there, not publishing a harvest, and the button sat on top
               of the very pins they were looking at. */}
           {isSeller && !servicesOn ? (
-            <button type="button" className="btn btn-cta fab" onClick={() => setSheet('seller')}>
+            <button type="button" className="btn btn-3d btn-sell fab" onClick={() => setSheet('seller')}>
               <IconPlus />
               Տեղադրել բերք
             </button>

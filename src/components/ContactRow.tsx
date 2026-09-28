@@ -19,16 +19,17 @@ interface ContactRowProps {
  * Call, and the three messengers beside it - one row, everywhere a number is
  * shown: a listing, a service, a premium card.
  *
- * Calling keeps the width and shows the number, because it is the route that
- * always works and the number is worth reading. The messengers are fixed
- * squares in their own colours; see .contact-row for how it wraps.
+ * Calling takes the rest of the width and shows the number, because it is the
+ * route that always works and the number is worth reading. The messengers are
+ * square, in their own colours; see .contact-row for how it fits a phone.
  */
 export default function ContactRow({ phone, onContact }: ContactRowProps) {
   return (
     <div className="contact-row">
-      <a className="btn btn-cta btn-lg call-btn" href={`tel:${phone}`} onClick={onContact}>
+      <a className="btn btn-3d btn-call btn-lg call-btn" href={`tel:${phone}`} onClick={onContact}>
         <IconPhone />
-        Զանգել՝ {formatLocalPhone(phone)}
+        <span className="call-word">Զանգել՝</span>
+        <span className="call-number">{formatLocalPhone(phone)}</span>
       </a>
 
       {contactLinks(phone).map((link) => (
