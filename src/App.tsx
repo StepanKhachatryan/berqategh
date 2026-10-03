@@ -10,6 +10,7 @@ import ListingDetail from './components/ListingDetail';
 import MyListings from './components/MyListings';
 import RecoverySheet from './components/RecoverySheet';
 import GuideSheet from './components/GuideSheet';
+import ServiceToggle from './components/ServiceToggle';
 import InstallPrompt from './components/InstallPrompt';
 import { ToastStack, useToasts } from './components/Toasts';
 import { IconArchive, IconHelp, IconPlus, IconUser } from './components/Icons';
@@ -456,7 +457,35 @@ export default function App() {
           </span>
         </div>
 
+        {/* Desktop only: the header floats over the map's top-left corner,
+            where the switch lives on phones. */}
+        {isSeller ? (
+          <ServiceToggle
+            className="in-header"
+            active={servicesOn}
+            unseen={!servicesUsed}
+            onToggle={toggleServices}
+          />
+        ) : null}
+
         <div className="header-spacer" />
+
+        <div className="role-switch" role="group" aria-label="Ընտրել դերը">
+          <button
+            type="button"
+            aria-pressed={!isSeller}
+            onClick={() => handlePickRole('buyer')}
+          >
+            Գնորդ
+          </button>
+          <button
+            type="button"
+            aria-pressed={isSeller}
+            onClick={() => handlePickRole('seller')}
+          >
+            Վաճառող
+          </button>
+        </div>
 
         {isSeller ? (
           <button
@@ -489,23 +518,6 @@ export default function App() {
             )}
           </button>
         ) : null}
-
-        <div className="role-switch" role="group" aria-label="Ընտրել դերը">
-          <button
-            type="button"
-            aria-pressed={!isSeller}
-            onClick={() => handlePickRole('buyer')}
-          >
-            Գնորդ
-          </button>
-          <button
-            type="button"
-            aria-pressed={isSeller}
-            onClick={() => handlePickRole('seller')}
-          >
-            Վաճառող
-          </button>
-        </div>
 
         {/* The guide, off the map and into the header: the same place on
             every screen and in every mode, rather than one more button in a
@@ -655,7 +667,9 @@ export default function App() {
         />
       ) : null}
 
-      {sheet === 'guide' ? <GuideSheet role={role} onClose={() => setSheet('none')} /> : null}
+      {sheet === 'guide' ? <GuideSheet
+          mode={isSeller ? (servicesOn ? 'services' : 'seller') : 'buyer'}
+          onClose={() => setSheet('none')} /> : null}
 
       {/* Premium advertisers open their own card; everyone else, the standard
           sheet. The check narrows the type, so the card can rely on it. */}

@@ -13,7 +13,8 @@ import { listingIcon, meIcon, serviceIcon, SALE_TYPE_SHORT } from './markers';
 import { fanOffsets, overlapGroup } from './spider';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER, haversineKm } from '../lib/geo';
 import { listingTitle, type LatLng, type MeasuredListing } from '../lib/types';
-import { IconCrosshair, IconLayers, IconService } from './Icons';
+import { IconCrosshair, IconLayers } from './Icons';
+import ServiceToggle from './ServiceToggle';
 import { OFFERINGS, type AgriService } from '../data/services';
 
 /**
@@ -796,31 +797,16 @@ export default function MapView({
         aria-label="Բերքի քարտեզ"
       />
 
-      {/*
-        Sellers only, and in the map's top-left corner rather than in the column
-        of round buttons on the right. It has to carry its name — a toolbox icon
-        on its own says nothing — and a button three times the width of its
-        neighbours does not belong in their column. The top-left is the one
-        corner of the map with nothing in it.
-      */}
+      {/* Sellers only, in the map's empty top-left corner. On desktop the
+          header floats over the map there, so the switch lives in the header
+          instead and this one is hidden (see .map-service-btn.on-map). */}
       {services ? (
-        <button
-          type="button"
-          className={`map-service-btn${servicesActive ? ' is-on' : ''}${
-            services.unseen && !servicesActive ? ' is-unseen' : ''
-          }`}
-          onClick={services.onToggle}
-          aria-pressed={servicesActive}
-        >
-          <IconService size={16} />
-          <span>Գյուղատնտեսական ծառայություն</span>
-          {/* A switch, not just a colour change. Colour alone only tells you
-              what state it is in once you already know it is a control — the
-              track and knob say "this is pressable" before the first press. */}
-          <span className="switch" aria-hidden="true">
-            <i />
-          </span>
-        </button>
+        <ServiceToggle
+          className="on-map"
+          active={servicesActive}
+          unseen={services.unseen}
+          onToggle={services.onToggle}
+        />
       ) : null}
 
       {services && servicesActive && services.panel ? (

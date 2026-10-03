@@ -44,19 +44,40 @@ async function linkDevice(): Promise<void> {
   await supabase().rpc('link_device');
 }
 
+const NOT_ENABLED = 'Google-ով մուտքը դեռ միացված չէ։ Փորձե՛ք ավելի ուշ։';
+
+/**
+ * Whether Google sign-in is switched on for the project. Without this check a
+ * disabled provider sends people to a bare JSON error page on supabase.co
+ * instead of an explanation here. If the check itself fails, go ahead.
+ */
+async function googleEnabled(): Promise<boolean> {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/auth/v1/settings`, {
+      headers: { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
+    });
+    if (!response.ok) return true;
+    const settings = (await response.json()) as { external?: { google?: boolean } };
+    return settings.external?.google !== false;
+  } catch {
+    return true;
+  }
+}
+
 /** Leaves for Google and comes back to the same page, signed in. */
 export async function signInWithGoogle(): Promise<void> {
-  const { error } = await supabase().auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: `${window.location.origin}/` },
-  });
-  if (error) {
-    throw new Error(
-      /provider is not enabled|unsupported provider/i.test(error.message)
-        ? 'Google-ով մուտքը դեռ միացված չէ։ Փորձե՛ք ավելի ուշ։'
-        : 'Չհաջողվեց մուտք գործել։ Փորձե՛ք կրկին։',
-    );
+  const [{ data, error }, enabled] = await Promise.all([
+    supabase().auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/`, skipBrowserRedirect: true },
+    }),
+    googleEnabled(),
+  ]);
+  if (!enabled || (error && /provider is not enabled|unsupported provider/i.test(error.message))) {
+    throw new Error(NOT_ENABLED);
   }
+  if (error || !data.url) throw new Error('Չհաջողվեց մուտք գործել։ Փորձե՛ք կրկին։');
+  window.location.assign(data.url);
 }
 
 export async function signOut(): Promise<void> {

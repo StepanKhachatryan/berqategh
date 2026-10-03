@@ -952,6 +952,26 @@ h4 {
   }
 }
 
+/* The header copy of the switch is for desktop only (see the frosted header). */
+@media (max-width: 899px) {
+  .map-service-btn.in-header {
+    display: none;
+  }
+
+  /* Never under the zoom buttons: on a narrow phone the name wraps onto a
+     second line instead of running into the control column. */
+  .map-service-btn.on-map {
+    max-width: calc(100% - 82px);
+    height: auto;
+    min-height: 40px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: normal;
+    line-height: 1.2;
+    text-align: left;
+  }
+}
+
 /* No movement, but the cue should not disappear entirely. */
 @media (prefers-reduced-motion: reduce) {
   .map-service-btn.is-unseen {
@@ -1949,8 +1969,8 @@ textarea.input {
 
 /* ═══ guide ══════════════════════════════════════════════════════════════ */
 
-/* In the header, right of the role switch, on every screen. Dark, as it was
-   on the map, so it keeps reading as the one button that explains things. */
+/* In the header, right of the role switch, on every screen. Light and
+   friendly rather than a black disc: a green question mark on a soft green. */
 .header-guide {
   flex: none;
   display: grid;
@@ -1958,49 +1978,15 @@ textarea.input {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--ink);
-  color: #fff;
-  transition: background 0.16s var(--ease);
+  background: #e8f6ee;
+  color: #15803d;
+  border: 1.5px solid #bfe5cd;
+  transition: background 0.16s var(--ease), border-color 0.16s var(--ease);
 }
 
 .header-guide:hover {
-  background: var(--green-deep);
-}
-
-/* The five-day rule leads the guide, so it gets the one coloured panel on the page. */
-.guide-hero {
-  padding: 18px;
-  border-radius: var(--r-lg);
-  background: linear-gradient(150deg, var(--cta-soft), var(--amber-soft));
-  border: 1.5px solid rgba(245, 158, 11, 0.42);
-  margin-bottom: 20px;
-}
-
-.guide-hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 13px;
-  border-radius: var(--r-pill);
-  background: var(--cta);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  margin-bottom: 11px;
-  box-shadow: var(--shadow-cta);
-}
-
-.guide-hero h3 {
-  font-size: 18px;
-  margin-bottom: 7px;
-  color: #7a3d09;
-}
-
-.guide-hero p {
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: #78350f;
+  background: #d7f0e1;
+  border-color: #15803d;
 }
 
 .guide-section + .guide-section {
@@ -2013,7 +1999,9 @@ textarea.input {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 14.5px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink);
   margin-bottom: 10px;
 }
 
@@ -2021,6 +2009,10 @@ textarea.input {
   font-size: 13.5px;
   line-height: 1.55;
   color: var(--ink-soft);
+}
+
+.guide-section > p + p {
+  margin-top: 8px;
 }
 
 .guide-list,
@@ -2048,10 +2040,10 @@ textarea.input {
   position: absolute;
   left: 0;
   top: 8px;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--green);
+  background: var(--ink-soft);
 }
 
 .guide-list b,
@@ -2064,8 +2056,22 @@ textarea.input {
 }
 
 .guide-steps > li::marker {
-  font-weight: 700;
-  color: var(--green-deep);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* The one thing in a section that must not be missed. */
+.guide-important {
+  padding: 12px 14px;
+  border: 1px solid #f0b8b2;
+  border-radius: var(--r-md);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.guide-green {
+  color: #0f9d58;
 }
 
 /* Block, not flex. As a flex row every <b> inside the sentence became a column
@@ -4329,8 +4335,19 @@ input[type='range']::-moz-range-thumb {
     top: calc(var(--overlay-top) - 10px);
   }
 
+  /* The switch moves into the header: the map's corner is under it here. */
+  .map-service-btn.on-map {
+    display: none;
+  }
+
+  .map-service-btn.in-header {
+    position: static;
+    margin-left: 6px;
+    box-shadow: none;
+  }
+
   .map-service-panel {
-    top: calc(var(--overlay-top) + 48px);
+    top: var(--overlay-top);
   }
 
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -4411,6 +4428,14 @@ input[type='range']::-moz-range-thumb {
    narrow phone the name would be cut to «Բեր…», so only the logo stays. */
 @media (max-width: 440px) {
   .app-header.is-seller .brand > span {
+    display: none;
+  }
+}
+
+/* A narrow desktop: the services switch now shares the header, so "My
+   listings" drops to its icon until there is room for the words. */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .app-header.is-seller .hide-narrow {
     display: none;
   }
 }
