@@ -1,6 +1,7 @@
 import Modal from './Modal';
 import { formatLocalPhone } from '../lib/format';
 import { IconCheck } from './Icons';
+import { GoogleSignIn } from './AccountSheet';
 
 interface PublishedSheetProps {
   /** The three digits that, with the phone number, return the listings. */
@@ -10,6 +11,9 @@ interface PublishedSheetProps {
   span: string;
   /** A photo went up with the listing, and is now waiting for review. */
   photoSent: boolean;
+  /** Already signed in: no need to offer it. */
+  signedIn: boolean;
+  onSignInError: (message: string) => void;
   onClose: () => void;
 }
 
@@ -27,7 +31,15 @@ interface PublishedSheetProps {
  * whatever is to hand. Nothing else competes for the eye: what the number is
  * for is said underneath it, and the only button dismisses.
  */
-export default function PublishedSheet({ code, phone, span, photoSent, onClose }: PublishedSheetProps) {
+export default function PublishedSheet({
+  code,
+  phone,
+  span,
+  photoSent,
+  signedIn,
+  onSignInError,
+  onClose,
+}: PublishedSheetProps) {
   return (
     <Modal
       title="Հայտարարությունը հրապարակվեց"
@@ -60,6 +72,17 @@ export default function PublishedSheet({ code, phone, span, photoSent, onClose }
         Կոդը նույնն է ձեր բոլոր հայտարարությունների համար և միշտ երևում է «Իմ
         հայտարարությունները» բաժնի վերևում։
       </p>
+
+      {/* Offered, never required: closing this sheet is a complete answer. */}
+      {!signedIn ? (
+        <div className="published-account">
+          <p>
+            <b>Ուզո՞ւմ եք հետևել ձեր հայտարարություններին ցանկացած սարքից։</b> Մուտք գործեք
+            Gmail-ով (ոչ պարտադիր)։ Եթե ոչ, պարզապես փակեք այս պատուհանը։
+          </p>
+          <GoogleSignIn onError={onSignInError} />
+        </div>
+      ) : null}
     </Modal>
   );
 }

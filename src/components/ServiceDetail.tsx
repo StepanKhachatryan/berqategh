@@ -1,8 +1,10 @@
 import Modal from './Modal';
+import Directions from './Directions';
 import ContactRow from './ContactRow';
+import OfferingMark from './OfferingMark';
 import { readLink } from '../lib/links';
-import { IconPin, IconWarn } from './Icons';
-import { OFFERINGS, primaryOffering, type AgriService } from '../data/services';
+import { IconWarn } from './Icons';
+import { OFFERINGS, type AgriService } from '../data/services';
 
 interface ServiceDetailProps {
   service: AgriService;
@@ -18,17 +20,14 @@ interface ServiceDetailProps {
  * a row saying the same thing under it would be the heading twice.
  */
 export default function ServiceDetail({ service, onClose }: ServiceDetailProps) {
-  const point = `${service.lat.toFixed(5)},${service.lng.toFixed(5)}`;
-  const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
-  const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
-  const link = readLink(service.link);
+  const links = service.links.map(readLink).filter((link) => link !== null);
 
   return (
     <Modal
       title={service.name}
       headerMedia={
         <div className="header-thumb service-mark" aria-hidden="true">
-          {primaryOffering(service).emoji}
+          <OfferingMark id={service.offerings[0]} />
         </div>
       }
       onClose={onClose}
@@ -55,14 +54,14 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
       )}
 
       <div className="detail-rows">
-        {link ? (
-          <div className="detail-row">
+        {links.map((link) => (
+          <div key={link.href} className="detail-row">
             <span className="k">{link.label}</span>
             <a className="v detail-link" href={link.href} target="_blank" rel="noreferrer noopener">
               {link.text}
             </a>
           </div>
-        ) : null}
+        ))}
 
         <div className="detail-row">
           <span className="k">Հասցե</span>
@@ -77,26 +76,14 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
         {service.offerings.map((id) => (
           <li key={id} className="offering">
             <span className="offering-emoji" aria-hidden="true">
-              {OFFERINGS[id].emoji}
+              <OfferingMark id={id} />
             </span>
             <span className="offering-label">{OFFERINGS[id].label}</span>
           </li>
         ))}
       </ul>
 
-      <div className="nav-block">
-        <span className="nav-label">
-          <IconPin /> Ինչպես հասնել
-        </span>
-        <div className="nav-links">
-          <a className="btn btn-ghost" href={yandexUrl} target="_blank" rel="noreferrer noopener">
-            Yandex Maps
-          </a>
-          <a className="btn btn-ghost" href={googleUrl} target="_blank" rel="noreferrer noopener">
-            Google Maps
-          </a>
-        </div>
-      </div>
+      <Directions lat={service.lat} lng={service.lng} />
     </Modal>
   );
 }

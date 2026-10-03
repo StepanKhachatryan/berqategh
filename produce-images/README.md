@@ -50,3 +50,12 @@ underscore counts as a hyphen, so `grape_white.png` works as `grape-white`.
 A picture whose name matches no crop is converted but never shown. The
 workflow checks this and fails (with a "did you mean" hint) when a name is off;
 run `npm run icons:check` to check locally.
+
+## Կրեդիտներ խնայելու համար
+
+Նկարների վերբեռնումն ինքնին կայքը **չի** թարմացնում (Netlify-ի deploy չկա)։
+GitHub-ը նկարները կփոխարկի, բայց կայքում դրանք կհայտնվեն կայքի հաջորդ
+թարմացման հետ, կամ երբ Netlify-ում սեղմես **Deploys → Trigger deploy → Deploy
+project**։ Այսպես ցանկացած քանակով նկար արժե մեկ deploy։ Վերբեռնիր բոլորը
+մեկ անգամից, իսկ փոխարինելու համար վերբեռնիր նույն անունով՝ առանց նախապես
+ջնջելու։

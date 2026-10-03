@@ -14,6 +14,7 @@ on:
   push:
     paths:
       - 'produce-images/**'
+      - 'service-images/**'
       - 'scripts/build-produce-icons.mjs'
       - 'scripts/check-produce-names.mjs'
   workflow_dispatch:
@@ -58,12 +59,15 @@ jobs:
             git fetch origin "${GITHUB_REF_NAME}"
             git reset --hard "origin/${GITHUB_REF_NAME}"
             npm run icons
-            git add src/assets/produce
+            git add src/assets/produce src/assets/services
             if git diff --staged --quiet; then
               echo 'Nothing changed - every icon was already up to date.'
               exit 0
             fi
-            git commit -m 'Rebuild produce icons'
+            # [skip netlify]: converting pictures alone does not deploy the
+            # site. They go live with the next code change, or when the owner
+            # presses Trigger deploy - so a batch of uploads costs one deploy.
+            git commit -m 'Rebuild produce icons [skip netlify]'
             if git push origin "HEAD:${GITHUB_REF_NAME}"; then
               exit 0
             fi

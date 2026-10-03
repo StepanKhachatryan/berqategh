@@ -7,7 +7,7 @@ import { getProduce, type ProduceCategory } from '../data/produce';
 // level to infer the row shape, and only a literal survives that parse.
 // owner_token is deliberately absent — the client has no SELECT privilege on it.
 // prettier-ignore
-const COLUMNS = 'id, product_id, product_name, category, sale_type, form, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at, photo_public' as const;
+const COLUMNS = 'id, product_id, product_name, category, sale_type, form, retail_price, wholesale_price, quantity_kg, phone, seller_name, note, lat, lng, created_at, expires_at, archived_at, photo_public, delivery' as const;
 
 /*
  * A row stores the crop's name and group as they stood when it was published,
@@ -43,6 +43,8 @@ function toListing(row: ListingRow | MyListingRow): Listing {
     archivedAt: row.archived_at,
     photoUrl: row.photo_public ? photoUrl(row.photo_public) : null,
     photoStatus: 'photo_status' in row ? row.photo_status : null,
+    // Older RPCs return rows without it; no answer means no delivery.
+    delivery: row.delivery ?? false,
   };
 }
 
@@ -110,7 +112,9 @@ export async function fetchActiveListings(): Promise<Listing[]> {
  * anything the client can read off one row it can read off everybody's.
  */
 export async function fetchMyListings(): Promise<Listing[]> {
-  const { data, error } = await supabase().rpc('my_listings');
+  // seller_listings: my_listings plus the delivery flag, and every listing of
+  // the signed-in account's devices (migration 0024).
+  const { data, error } = await supabase().rpc('seller_listings');
 
   if (error) throw new Error(error.message);
   return (data ?? []).map(toListing);
@@ -138,6 +142,7 @@ export async function createListing(draft: ListingDraft): Promise<Listing> {
       note: draft.note,
       lat: draft.lat,
       lng: draft.lng,
+      delivery: draft.delivery,
       expires_at: expiresAt.toISOString(),
     })
     .select(COLUMNS)

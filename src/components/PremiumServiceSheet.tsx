@@ -1,12 +1,13 @@
 import type { CSSProperties } from 'react';
 import Modal from './Modal';
+import Directions from './Directions';
+import OfferingMark from './OfferingMark';
 import ContactRow from './ContactRow';
 import { readLink } from '../lib/links';
-import { IconCheck, IconPin, IconWarn } from './Icons';
+import { IconCheck, IconWarn } from './Icons';
 import {
   livePromotion,
   OFFERINGS,
-  primaryOffering,
   type AgriService,
   type PremiumProfile,
 } from '../data/services';
@@ -93,12 +94,8 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
   const { premium } = service;
   const brand = premium.brandColor;
   const promotion = livePromotion(service);
-  const link = readLink(service.link);
-  const mark = primaryOffering(service).emoji;
-
-  const point = `${service.lat.toFixed(5)},${service.lng.toFixed(5)}`;
-  const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
-  const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
+  const links = service.links.map(readLink).filter((link) => link !== null);
+  const mark = <OfferingMark id={service.offerings[0]} />;
 
   // The brand colour and two tints of it, as 8-digit hex rather than
   // color-mix(), which older Safari does not have.
@@ -193,7 +190,7 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
             return (
               <div key={id} className="showcase-item" role="listitem">
                 <span className="showcase-emoji" aria-hidden="true">
-                  {OFFERINGS[id].emoji}
+                  <OfferingMark id={id} />
                 </span>
                 <span className="showcase-name">{OFFERINGS[id].label}</span>
                 {price ? (
@@ -207,8 +204,8 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
         </div>
 
         <div className="detail-rows">
-          {link ? (
-            <div className="detail-row">
+          {links.map((link) => (
+            <div key={link.href} className="detail-row">
               <span className="k">{link.label}</span>
               <a
                 className="v detail-link"
@@ -219,26 +216,14 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
                 {link.text}
               </a>
             </div>
-          ) : null}
+          ))}
           <div className="detail-row">
             <span className="k">Հասցե</span>
             <span className="v">{service.address}</span>
           </div>
         </div>
 
-        <div className="nav-block">
-          <span className="nav-label">
-            <IconPin /> Ինչպես հասնել
-          </span>
-          <div className="nav-links">
-            <a className="btn btn-ghost" href={yandexUrl} target="_blank" rel="noreferrer noopener">
-              Yandex Maps
-            </a>
-            <a className="btn btn-ghost" href={googleUrl} target="_blank" rel="noreferrer noopener">
-              Google Maps
-            </a>
-          </div>
-        </div>
+        <Directions lat={service.lat} lng={service.lng} />
       </div>
     </Modal>
   );

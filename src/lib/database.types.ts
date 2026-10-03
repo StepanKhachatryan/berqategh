@@ -36,6 +36,8 @@ export type ListingRow = {
    * (migration 0018). Never written by the browser.
    */
   photo_public: string | null;
+  /** The seller can deliver (migration 0023). */
+  delivery: boolean;
 };
 
 /**
@@ -102,6 +104,8 @@ export type Database = {
     };
     Functions: {
       my_listings: { Args: Record<string, never>; Returns: MyListingRow[] };
+      seller_listings: { Args: Record<string, never>; Returns: MyListingRow[] };
+      link_device: { Args: Record<string, never>; Returns: boolean };
       archive_listing: { Args: { p_id: string }; Returns: boolean };
       delete_listing: { Args: { p_id: string }; Returns: boolean };
       archive_expired_listings: { Args: never; Returns: number };

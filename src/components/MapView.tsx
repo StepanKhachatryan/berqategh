@@ -11,7 +11,7 @@ import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import { listingIcon, meIcon, serviceIcon, SALE_TYPE_SHORT } from './markers';
 import { fanOffsets, overlapGroup } from './spider';
-import { ARMENIA_BOUNDS, ARMENIA_CENTER } from '../lib/geo';
+import { ARMENIA_BOUNDS, ARMENIA_CENTER, haversineKm } from '../lib/geo';
 import { listingTitle, type LatLng, type MeasuredListing } from '../lib/types';
 import { IconCrosshair, IconLayers, IconService } from './Icons';
 import { OFFERINGS, type AgriService } from '../data/services';
@@ -46,6 +46,13 @@ const CONTROL_COLUMN = 58;
  */
 const WIDE_LIST_INSET = 12 + 380 + 12;
 const WIDE = 900;
+/** On a wide screen the header floats over the top of the map: 12 + 60 + 12. */
+const WIDE_TOP_INSET = 84;
+
+/** The strip the floating header covers on a wide screen. */
+function headerCover(): number {
+  return window.innerWidth < WIDE ? 0 : WIDE_TOP_INSET;
+}
 
 /** What the results pane covers: its height on a phone, its width on a wide screen. */
 function listCover(listHeight: number): { bottom: number; left: number } {
@@ -101,7 +108,16 @@ interface MapViewProps {
    * pesticide shop, and the map is worse for carrying both.
    */
   services: ServicesLayer | null;
+  /**
+   * The buyer's position when it was available without asking (location
+   * already permitted). The first view then frames the listings within
+   * NEARBY_KM of it rather than the whole country; null keeps the country.
+   */
+  nearby?: LatLng | null;
 }
+
+/** How far around the buyer the first view reaches when it knows where they are. */
+const NEARBY_KM = 100;
 
 export interface ServicesLayer {
   items: AgriService[];
@@ -126,6 +142,7 @@ export default function MapView({
   focus,
   bottomInset,
   services,
+  nearby = null,
 }: MapViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -169,6 +186,7 @@ export default function MapView({
 
   const [basemap, setBasemap] = useState<BasemapKey>('osm');
   const fittedRef = useRef(false);
+  const nearbyFittedRef = useRef(false);
   const fittedInsetRef = useRef(0);
 
   selectRef.current = onSelect;
@@ -233,6 +251,20 @@ export default function MapView({
       collapseFanRef.current();
       selectRef.current(null);
     });
+
+    /*
+     * Pins shrink as the map zooms out. With every listing in the country on
+     * screen at once, full-size pins pile into one another; zoomed in, they
+     * are back to full size and easy to tap. The tier is a data attribute and
+     * the scaling is CSS (see .pin-body in index.css), so no marker is rebuilt.
+     */
+    const container = map.getContainer();
+    const setZoomTier = () => {
+      const z = map.getZoom();
+      container.dataset.zoomTier = z <= 8 ? 's' : z <= 9 ? 'm' : z <= 10 ? 'l' : 'xl';
+    };
+    setZoomTier();
+    map.on('zoomend', setZoomTier);
 
     mapRef.current = map;
 
@@ -353,7 +385,7 @@ export default function MapView({
     else if (right > size.x - CONTROL_COLUMN) dx = right - (size.x - CONTROL_COLUMN);
 
     let dy = 0;
-    if (top < EDGE) dy = top - EDGE;
+    if (top < EDGE + headerCover()) dy = top - EDGE - headerCover();
     else if (bottom > size.y - covered.bottom - EDGE) dy = bottom - (size.y - covered.bottom - EDGE);
 
     if (dx !== 0 || dy !== 0) map.panBy([dx, dy], { animate: true, duration: 0.25 });
@@ -511,18 +543,32 @@ export default function MapView({
       // Along the bottom on a phone, down the left on a wide screen.
       const covered = listCover(bottomInset);
 
+      // Near the buyer when we know where they are and something is nearby;
+      // otherwise everything, which is the whole country.
+      const close = nearby ? listings.filter((listing) => haversineKm(nearby, listing) <= NEARBY_KM) : [];
+      const framed = close.length > 0 ? close : listings;
+      const bounds = L.latLngBounds(framed.map((listing) => [listing.lat, listing.lng] as [number, number]));
+      if (close.length > 0 && nearby) bounds.extend([nearby.lat, nearby.lng]);
+
       map.fitBounds(
-        L.latLngBounds(listings.map((listing) => [listing.lat, listing.lng] as [number, number])),
+        bounds,
         {
-          paddingTopLeft: [EDGE + PIN_SIDE + covered.left, EDGE + PIN_UP],
+          paddingTopLeft: [EDGE + PIN_SIDE + covered.left, EDGE + PIN_UP + headerCover()],
           paddingBottomRight: [CONTROL_COLUMN + PIN_SIDE, EDGE + covered.bottom],
           maxZoom: 13,
           animate,
         },
       );
     },
-    [listings, bottomInset],
+    [listings, bottomInset, nearby],
   );
+
+  // The position arrives a moment after the listings: reframe once, around it.
+  useEffect(() => {
+    if (!nearby || nearbyFittedRef.current || !fittedRef.current) return;
+    nearbyFittedRef.current = true;
+    fitToListings(true);
+  }, [nearby, fitToListings, listings]);
 
   // The default Armenia-wide view leaves most pins outside the strip a phone
   // has room for, so the first batch of listings sets the camera. Later batches
@@ -531,8 +577,9 @@ export default function MapView({
     if (fittedRef.current || listings.length === 0 || bottomInset === 0) return;
     fittedRef.current = true;
     fittedInsetRef.current = bottomInset;
+    if (nearby) nearbyFittedRef.current = true;
     fitToListings(false);
-  }, [listings, bottomInset, fitToListings]);
+  }, [listings, bottomInset, fitToListings, nearby]);
 
   // Folding the pane away uncovers half the map, and raising it hides that half
   // again; either way the pins belong in whatever is left. Small changes are
@@ -650,7 +697,7 @@ export default function MapView({
         map.fitBounds(
           L.latLngBounds(items.map((s) => [s.lat, s.lng] as [number, number])),
           {
-            paddingTopLeft: [EDGE + PIN_SIDE + panelLeft, EDGE + PIN_UP],
+            paddingTopLeft: [EDGE + PIN_SIDE + panelLeft, EDGE + PIN_UP + headerCover()],
             paddingBottomRight: [CONTROL_COLUMN + reach, EDGE + panelBottom],
             maxZoom: 12,
             animate: true,
@@ -716,9 +763,11 @@ export default function MapView({
     // On a wide screen the list covers the left of the map, so the point goes
     // in the middle of what is left beside it rather than of the whole map.
     const { left } = listCover(bottomInsetRef.current);
-    const target = left
-      ? map.unproject(map.project([focus.point.lat, focus.point.lng], zoom).subtract([left / 2, 0]), zoom)
-      : L.latLng(focus.point.lat, focus.point.lng);
+    const top = headerCover();
+    const target =
+      left || top
+        ? map.unproject(map.project([focus.point.lat, focus.point.lng], zoom).subtract([left / 2, top / 2]), zoom)
+        : L.latLng(focus.point.lat, focus.point.lng);
     map.flyTo(target, zoom, { duration: 0.7 });
   }, [focus]);
 

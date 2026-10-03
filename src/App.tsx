@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MapView from './components/MapView';
 import RoleGate from './components/RoleGate';
 import ResultsPanel from './components/ResultsPanel';
@@ -12,7 +12,7 @@ import RecoverySheet from './components/RecoverySheet';
 import GuideSheet from './components/GuideSheet';
 import InstallPrompt from './components/InstallPrompt';
 import { ToastStack, useToasts } from './components/Toasts';
-import { IconArchive, IconHelp, IconPlus } from './components/Icons';
+import { IconArchive, IconHelp, IconPlus, IconUser } from './components/Icons';
 
 import {
   archiveListing,
@@ -30,6 +30,8 @@ import { applyFilters, countActiveFilters, sortListings, type SortKey } from './
 import { useDistances } from './lib/useDistances';
 import { useGeolocation } from './lib/useGeolocation';
 import PublishedSheet from './components/PublishedSheet';
+import AccountSheet from './components/AccountSheet';
+import { useAccount } from './lib/account';
 import PremiumServiceSheet from './components/PremiumServiceSheet';
 import ServiceSearch from './components/ServiceSearch';
 import {
@@ -43,7 +45,7 @@ const ROLE_KEY = 'berqategh.role';
 const REFRESH_MS = 60_000;
 const TICK_MS = 30_000;
 
-type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide' | 'recover';
+type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide' | 'recover' | 'account';
 
 /** Folded to its handle, sharing the screen with the map, or covering it. */
 export type SheetStep = 'collapsed' | 'half' | 'full';
@@ -157,6 +159,10 @@ export default function App() {
     }
   }, [push]);
 
+  // Optional Google account. Signing in links this device; the seller's list
+  // then reloads to include listings from their other devices.
+  const account = useAccount(() => void loadMine());
+
   useEffect(() => {
     void loadListings();
     const timer = window.setInterval(() => void loadListings(), REFRESH_MS);
@@ -166,6 +172,29 @@ export default function App() {
   useEffect(() => {
     if (role === 'seller') void loadMine();
   }, [role, loadMine]);
+
+  /*
+   * Where the buyer is, but only if the browser already allows it. Asking on
+   * open is what broke inside Messenger (a prompt that never resolves, then
+   * an error), so this never asks: with permission already granted the answer
+   * comes back silently and the map opens on the area around them; without it
+   * the map stays on the whole country, exactly as before.
+   */
+  const [nearby, setNearby] = useState<LatLng | null>(null);
+  const askedNearbyRef = useRef(false);
+  useEffect(() => {
+    if (role !== 'buyer' || askedNearbyRef.current) return;
+    askedNearbyRef.current = true;
+    const permissions = navigator.permissions;
+    if (!permissions?.query) return;
+    permissions
+      .query({ name: 'geolocation' })
+      .then((state) => (state.state === 'granted' ? locate() : null))
+      .then((point) => {
+        if (point) setNearby(point);
+      })
+      .catch(() => undefined);
+  }, [role, locate]);
 
   // One visit per browser session. It waits a few seconds for a position so the
   // region can be filled in when the visitor let the app find them, then
@@ -416,7 +445,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
+      <header className={`app-header${isSeller ? ' is-seller' : ''}`}>
         <div className="brand">
           <img src="/logo.webp" alt="" className="brand-mark" />
           <span>
@@ -442,6 +471,22 @@ export default function App() {
           >
             <IconArchive />
             <span className="hide-narrow">Իմ հայտարարությունները</span>
+          </button>
+        ) : null}
+
+        {isSeller ? (
+          <button
+            type="button"
+            className={`header-account${account.email ? ' is-signed-in' : ''}`}
+            onClick={() => setSheet('account')}
+            title={account.email ?? 'Մուտք (ոչ պարտադիր)'}
+            aria-label={account.email ? `Հաշիվ՝ ${account.email}` : 'Մուտք (ոչ պարտադիր)'}
+          >
+            {account.email ? (
+              <span className="header-account-initial">{account.email[0].toUpperCase()}</span>
+            ) : (
+              <IconUser size={19} />
+            )}
           </button>
         ) : null}
 
@@ -502,6 +547,7 @@ export default function App() {
             locating={locating}
             focus={focus}
             bottomInset={isSeller ? 0 : sheetHeight}
+            nearby={isSeller ? null : nearby}
             services={
               isSeller
                 ? {
@@ -595,7 +641,17 @@ export default function App() {
           phone={published.phone}
           span={published.span}
           photoSent={published.photoSent}
+          signedIn={account.email !== null}
+          onSignInError={(message) => push('error', message)}
           onClose={() => setPublished(null)}
+        />
+      ) : null}
+
+      {sheet === 'account' ? (
+        <AccountSheet
+          account={account}
+          onClose={() => setSheet('none')}
+          onError={(message) => push('error', message)}
         />
       ) : null}
 

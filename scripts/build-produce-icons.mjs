@@ -12,6 +12,10 @@
  * unless the original's CONTENT has changed, so re-running is cheap.
  *
  * Pass --force to rebuild everything regardless.
+ *
+ * Pass --set=services to do the same for service-images/ (pictures for the
+ * agricultural-services offerings, named by offering id) into
+ * src/assets/services/. `npm run icons` runs both.
  */
 
 import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
@@ -33,8 +37,9 @@ try {
 }
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SRC = join(root, 'produce-images');
-const OUT = join(root, 'src/assets/produce');
+const SET = process.argv.includes('--set=services') ? 'services' : 'produce';
+const SRC = join(root, SET === 'services' ? 'service-images' : 'produce-images');
+const OUT = join(root, SET === 'services' ? 'src/assets/services' : 'src/assets/produce');
 
 // 62px is the largest the mark is ever drawn (the listing detail hero), so 128
 // covers a 2x screen. Past that the file grows and nothing looks better.
@@ -48,14 +53,14 @@ const INPUT = new Set(['.png', '.webp', '.jpg', '.jpeg']);
 
 mkdirSync(OUT, { recursive: true });
 
-const sources = readdirSync(SRC)
+const sources = (existsSync(SRC) ? readdirSync(SRC) : [])
   .filter((name) => INPUT.has(extname(name).toLowerCase()))
   // Crop ids use hyphens; an underscore is the easy slip (grape_white.png), so
   // it is read as a hyphen rather than producing a picture nothing shows.
   .map((name) => ({ name, id: basename(name, extname(name)).replace(/_/g, '-'), path: join(SRC, name) }));
 
 if (sources.length === 0) {
-  console.log('produce-images/ is empty — nothing to build.');
+  console.log(`${basename(SRC)}/ is empty — nothing to build.`);
   process.exit(0);
 }
 

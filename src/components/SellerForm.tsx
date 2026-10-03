@@ -29,10 +29,12 @@ const REMEMBERED_KEY = 'berqategh.seller';
 interface Remembered {
   phone: string;
   name: string;
+  /** A seller who delivers usually always does; their last answer is kept. */
+  delivery: boolean;
 }
 
 function loadRemembered(): Remembered {
-  const blank: Remembered = { phone: '', name: '' };
+  const blank: Remembered = { phone: '', name: '', delivery: false };
   try {
     const raw = localStorage.getItem(REMEMBERED_KEY);
     if (raw) return { ...blank, ...(JSON.parse(raw) as Partial<Remembered>) };
@@ -116,6 +118,7 @@ export default function SellerForm({
   // Once it did, the geolocation status stops being what the seller needs told.
   const [pickedByHand, setPickedByHand] = useState(false);
   const [durationDays, setDurationDays] = useState(30);
+  const [delivery, setDelivery] = useState(remembered.delivery);
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -227,12 +230,13 @@ export default function SellerForm({
         lat: location.lat,
         lng: location.lng,
         durationDays,
+        delivery,
         photo: photo?.blob ?? null,
       });
 
       localStorage.setItem(
         REMEMBERED_KEY,
-        JSON.stringify({ phone, name: sellerName.trim() } satisfies Remembered),
+        JSON.stringify({ phone, name: sellerName.trim(), delivery } satisfies Remembered),
       );
     } catch (error) {
       setFailure(error instanceof Error ? error.message : 'Չհաջողվեց պահպանել');
@@ -277,7 +281,7 @@ export default function SellerForm({
             ) : null}
             <button
               type="button"
-              className="btn btn-cta btn-lg btn-block"
+              className="btn btn-3d btn-sell btn-lg btn-block"
               onClick={handleSubmit}
               disabled={submitting}
             >
@@ -443,6 +447,17 @@ export default function SellerForm({
             />
             <span className="affix affix-end">կգ</span>
           </div>
+        </div>
+
+        {/* ─── delivery ────────────────────────────────────────────────── */}
+        <div className="field">
+          <label className="check-row">
+            <input type="checkbox" checked={delivery} onChange={(event) => setDelivery(event.target.checked)} />
+            <span>
+              <b>Կարող եմ նաև առաքել</b>
+              <small>Գնորդները կտեսնեն «Առաքում կա» նշումը, և հեռավորությունը նրանց չի վախեցնի։</small>
+            </span>
+          </label>
         </div>
 
         {/* ─── photo ───────────────────────────────────────────────────── */}

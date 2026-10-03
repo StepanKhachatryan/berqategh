@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { IconClose, IconSearch } from './Icons';
+import OfferingMark from './OfferingMark';
 import {
   OFFERINGS,
   offeringsInUse,
-  primaryOffering,
   type AgriService,
   type OfferingId,
 } from '../data/services';
@@ -88,7 +88,7 @@ export default function ServiceSearch({
               setListOpen(true);
             }}
           >
-            <span aria-hidden="true">{OFFERINGS[id].emoji}</span>
+            <span aria-hidden="true"><OfferingMark id={id} /></span>
             {OFFERINGS[id].short}
             <span className="svc-chip-count">{count}</span>
           </button>
@@ -118,7 +118,7 @@ export default function ServiceSearch({
                 <li key={service.id}>
                   <button type="button" onClick={() => onPick(service.id)}>
                     <span className="service-mark" aria-hidden="true">
-                      {primaryOffering(service).emoji}
+                      <OfferingMark id={service.offerings[0]} />
                     </span>
                     <span className="svc-result-text">
                       <b>{service.name}</b>

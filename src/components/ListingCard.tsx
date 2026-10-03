@@ -2,7 +2,7 @@ import { formatDistance } from '../lib/geo';
 import ProduceMark from './ProduceMark';
 import { formatPrice, formatQuantity, postedAge } from '../lib/format';
 import { listingColor, swatchStyle } from './markers';
-import { IconClock, IconRoute } from './Icons';
+import { IconClock, IconRoute, IconTruck } from './Icons';
 import { listingTitle, type MeasuredListing } from '../lib/types';
 
 interface ListingCardProps {
@@ -64,6 +64,15 @@ export default function ListingCard({ listing, selected, onSelect, now }: Listin
               <IconRoute />
               {listing.distanceMode === 'straight' ? '≈' : ''}
               {formatDistance(listing.distanceKm)}
+            </span>
+          ) : null}
+
+          {/* Right beside the distance, so a far-off listing is read together
+              with the fact that the seller comes to you. */}
+          {listing.delivery ? (
+            <span className="meta-delivery">
+              <IconTruck />
+              Առաքում կա
             </span>
           ) : null}
 

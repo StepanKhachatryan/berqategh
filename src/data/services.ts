@@ -186,8 +186,8 @@ export interface AgriService {
   name: string;
   /** International form, like every number on the site. Null until confirmed. */
   phone: string | null;
-  /** A website or a Facebook page; the sheet tells the two apart itself. */
-  link: string | null;
+  /** Website, Facebook page, or both; the sheet tells them apart itself. */
+  links: string[];
   address: string;
   lat: number;
   lng: number;
@@ -207,110 +207,21 @@ export interface AgriService {
 }
 
 /*
- * Four trial entries, one for each case the design has to survive: a shop and
- * a person, a website and a Facebook page and no link at all, and two premium
- * cards - one verified, with a promotion running and five things turning on
- * its bubble; one unverified, with no promotion and three.
- *
- * None of the phone numbers can ring anyone. An invented Armenian mobile
- * number is not a placeholder - it is somebody's real number, and a farmer
- * who rings it, or messages it on WhatsApp, is contacting a stranger. These use
- * 00 where the operator code goes, which no operator has, so the call and
- * messenger buttons can be seen working without reaching a person. The website
- * is example.com, which exists for exactly this. The names say plainly that
- * they are trials, for the same reason: a plausible shop name invented here
- * could collide with a real shop that never agreed to be listed.
- *
- * Replace each the moment a real advertiser takes its place.
+ * The advertisers on the map. Replace or add entries here; the coordinates
+ * place the point and are never shown on the card.
  */
 export const SERVICES: AgriService[] = [
   {
-    id: 'trial-armavir',
-    name: 'Փորձնական - ագրոխանութ',
-    phone: '+37400000001',
-    link: 'https://example.com',
-    address: 'Արմավիրի մարզ, Արմավիր',
-    lat: 40.1554,
-    lng: 44.0378,
-    offerings: ['pesticide', 'fertilizer', 'seeds', 'tools', 'spare-parts'],
+    id: 'agro-plus',
+    name: 'AGRO PLUS',
+    phone: '+37494828402',
+    links: ['https://agroplus.am', 'https://www.facebook.com/profile.php?id=100076204760563'],
+    address: 'Լոռու մարզ, գ. Ագարակ, 1 փողոց, տուն 10',
+    lat: 41.007496,
+    lng: 44.463256,
+    offerings: ['pesticide', 'fertilizer', 'seeds', 'machinery'],
     premium: null,
-    trial: true,
-  },
-  {
-    id: 'trial-ararat',
-    name: 'Փորձնական - անհատ ձեռներեց',
-    phone: '+37400000002',
-    link: 'https://www.facebook.com/berqategh',
-    address: 'Արարատի մարզ, Արտաշատ',
-    lat: 39.9539,
-    lng: 44.5461,
-    offerings: ['tillage', 'harvesting'],
-    premium: null,
-    trial: true,
-  },
-  {
-    // The case described when premium was first asked for - chemicals, turning
-    // over to seed - with everything a premium card can carry.
-    id: 'trial-vagharshapat',
-    name: 'Փորձնական - ագրոկենտրոն',
-    phone: '+37400000003',
-    link: 'https://example.com',
-    address: 'Արմավիրի մարզ, Վաղարշապատ',
-    lat: 40.165,
-    lng: 44.292,
-    offerings: ['pesticide', 'seeds', 'fertilizer', 'seedlings', 'agronomist'],
-    premium: {
-      brandColor: '#166534',
-      tagline: 'Բույսերի պաշտպանություն և սերմեր՝ ագրոնոմի խորհրդով',
-      highlights: [
-        '🚚 Առաքում մարզով մեկ',
-        '💬 Անվճար խորհրդատվություն',
-        '💳 Ապառիկ վճարում',
-        '🕗 Բաց է նաև շաբաթ օրը',
-      ],
-      promotion: {
-        title: '-10% բոլոր սերմերի վրա',
-        detail: 'Գարնանային ցանքի նախապատրաստում՝ զեղչը գործում է 10 կգ-ից ավելի գնումների դեպքում։',
-        until: '2026-12-31',
-      },
-      prices: {
-        pesticide: 'սկսած 3 500 ֏',
-        seeds: 'սկսած 1 200 ֏/կգ',
-        fertilizer: 'սկսած 9 000 ֏/պարկ',
-        seedlings: 'սկսած 600 ֏',
-      },
-      // Shown on this trial so the badge can be judged. A real advertiser
-      // gets it only after the business has been checked.
-      verified: true,
-    },
-    trial: true,
-  },
-  {
-    // Three faces on a four-sided box - the arithmetic that has to come out
-    // right for every count that is not two or four. No link and no running
-    // offer, to show a premium card without either.
-    id: 'trial-ashtarak',
-    name: 'Փորձնական - ոռոգման ընկերություն',
-    phone: '+37400000004',
-    link: null,
-    address: 'Արագածոտնի մարզ, Աշտարակ',
-    lat: 40.299,
-    lng: 44.361,
-    offerings: ['irrigation-systems', 'irrigation-install', 'drone-spraying'],
-    premium: {
-      brandColor: '#075985',
-      tagline: 'Կաթիլային ոռոգում՝ նախագծից մինչև մոնտաժ',
-      highlights: ['📐 Անվճար չափագրում', '🛠️ 1 տարի երաշխիք', '🚁 Սրսկում 1 օրում'],
-      // No offer running: the card has to look finished without one.
-      promotion: null,
-      prices: {
-        'irrigation-systems': 'սկսած 450 000 ֏/հա',
-        'drone-spraying': 'սկսած 8 000 ֏/հա',
-      },
-      // Not verified, to show the card without the badge.
-      verified: false,
-    },
-    trial: true,
+    trial: false,
   },
 ];
 

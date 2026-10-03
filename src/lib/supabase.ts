@@ -67,7 +67,9 @@ export function supabase(): SupabaseClient<Database> {
   }
   if (!client) {
     client = createClient<Database>(url!, anonKey!, {
-      auth: { persistSession: false },
+      // Kept so an optional Google sign-in survives a reload. Without one this
+      // stores nothing and every request goes out as before.
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
       global: { headers: { 'x-owner-token': ownerToken() } },
     });
   }

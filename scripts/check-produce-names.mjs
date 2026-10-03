@@ -25,36 +25,54 @@ const ids = new Set([...catalogue.matchAll(/\{ id: '([^']+)'/g)].map((m) => m[1]
 // Pictures that stand for a group rather than one crop (see produceImages.ts).
 for (const group of ['honey', 'dried']) ids.add(group);
 
-const INPUT = new Set(['.png', '.webp', '.jpg', '.jpeg']);
-const unknown = readdirSync(join(root, 'produce-images'))
-  .filter((name) => INPUT.has(extname(name).toLowerCase()))
-  // The converter reads an underscore as a hyphen, so grape_white.png is fine.
-  .filter((name) => !ids.has(basename(name, extname(name)).replace(/_/g, '-')));
+// The offering ids, from the OfferingId type in services.ts.
+const servicesSource = readFileSync(join(root, 'src/data/services.ts'), 'utf8');
+const typeBody = servicesSource.slice(servicesSource.indexOf('export type OfferingId'), servicesSource.indexOf('export interface Offering'));
+const offeringIds = new Set([...typeBody.matchAll(/\|\s*'([^']+)'/g)].map((m) => m[1]));
 
-if (unknown.length === 0) {
-  console.log(`All pictures in produce-images/ match a crop (${ids.size} names known).`);
-  process.exit(0);
-}
+const INPUT = new Set(['.png', '.webp', '.jpg', '.jpeg']);
 
 // Suggest the id the file was probably meant to have.
-const near = (name) => {
+const near = (name, known) => {
   const stem = basename(name, extname(name)).toLowerCase().replace(/_/g, '-');
   // An exact match once underscores become hyphens (grape_white -> grape-white)
-  // beats a prefix match (grape), which beats any other crop sharing the first word.
+  // beats a prefix match (grape), which beats any other id sharing the first word.
   const guess =
-    (ids.has(stem) && stem) ||
-    [...ids].filter((id) => stem.startsWith(id)).sort((a, b) => b.length - a.length)[0] ||
-    [...ids].find((id) => id.startsWith(stem.split('-')[0]));
+    (known.has(stem) && stem) ||
+    [...known].filter((id) => stem.startsWith(id)).sort((a, b) => b.length - a.length)[0] ||
+    [...known].find((id) => id.startsWith(stem.split('-')[0]));
   return guess ? ` - did you mean "${guess}${extname(name)}"?` : '';
 };
 
-console.error('These pictures match no crop, so the site will never show them:');
-for (const name of unknown) {
-  console.error(`  produce-images/${name}${near(name)}`);
-  // Shown as an annotation on the workflow run in GitHub.
-  if (process.env.GITHUB_ACTIONS) {
-    console.log(`::error file=produce-images/${name}::No crop has the id "${basename(name, extname(name))}"${near(name)}`);
+let failed = false;
+for (const { folder, known, what, where } of [
+  { folder: 'produce-images', known: ids, what: 'crop', where: 'src/data/produce.ts' },
+  { folder: 'service-images', known: offeringIds, what: 'offering', where: 'service-images/README.md' },
+]) {
+  let names = [];
+  try {
+    names = readdirSync(join(root, folder));
+  } catch {
+    continue;
   }
+  const unknown = names
+    .filter((name) => INPUT.has(extname(name).toLowerCase()))
+    // The converter reads an underscore as a hyphen, so grape_white.png is fine.
+    .filter((name) => !known.has(basename(name, extname(name)).replace(/_/g, '-')));
+
+  if (unknown.length === 0) {
+    console.log(`All pictures in ${folder}/ match ${what === "offering" ? "an" : "a"} ${what} (${known.size} names known).`);
+    continue;
+  }
+  failed = true;
+  console.error(`These pictures in ${folder}/ match no ${what}, so the site will never show them:`);
+  for (const name of unknown) {
+    console.error(`  ${folder}/${name}${near(name, known)}`);
+    // Shown as an annotation on the workflow run in GitHub.
+    if (process.env.GITHUB_ACTIONS) {
+      console.log(`::error file=${folder}/${name}::No ${what} has the id "${basename(name, extname(name))}"${near(name, known)}`);
+    }
+  }
+  console.error(`Rename each to an id listed in ${where}.`);
 }
-console.error('Rename each to the crop id used in src/data/produce.ts.');
-process.exit(1);
+process.exit(failed ? 1 : 0);

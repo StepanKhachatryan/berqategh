@@ -76,6 +76,22 @@ export const IconRoute = ({ size = 14 }: IconProps) => (
   </svg>
 );
 
+export const IconTruck = ({ size = 14 }: IconProps) => (
+  <svg {...base(size)}>
+    <path d="M2 6h11v10H2z" />
+    <path d="M13 9h4l3 3.5V16h-7" />
+    <circle cx="6" cy="17.5" r="1.8" />
+    <circle cx="16.5" cy="17.5" r="1.8" />
+  </svg>
+);
+
+export const IconUser = ({ size = 18 }: IconProps) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+  </svg>
+);
+
 export const IconPin = ({ size = 16 }: IconProps) => (
   <svg {...base(size)}>
     <path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z" />

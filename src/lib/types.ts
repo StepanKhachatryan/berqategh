@@ -35,6 +35,8 @@ export interface Listing {
   photoUrl: string | null;
   /** Where the photo stands in review - known only to its seller. */
   photoStatus: 'uploading' | 'pending' | 'approved' | 'rejected' | null;
+  /** The seller says they can also deliver. */
+  delivery: boolean;
 }
 
 export interface ListingDraft {
@@ -52,6 +54,8 @@ export interface ListingDraft {
   lat: number;
   lng: number;
   durationDays?: number;
+  /** The seller ticked "I can also deliver". */
+  delivery: boolean;
   /**
    * The seller's photo, already converted on the phone (see lib/photo.ts).
    * Not a column: it is uploaded against the listing once the listing exists.

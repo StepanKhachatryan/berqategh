@@ -7,7 +7,8 @@ import { record } from '../lib/analytics';
 import { formatDistance } from '../lib/geo';
 import { formatPrice, formatQuantity, postedAge } from '../lib/format';
 import { listingColor, swatchStyle } from './markers';
-import { IconExpand, IconPin } from './Icons';
+import { IconExpand, IconTruck } from './Icons';
+import Directions from './Directions';
 import ContactRow from './ContactRow';
 import { usePlaceName } from '../lib/usePlaceName';
 import { listingTitle, type MeasuredListing } from '../lib/types';
@@ -34,13 +35,6 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
       listingAt: { lat: listing.lat, lng: listing.lng },
       productId: listing.productId,
     });
-
-  // Yandex and Google are what people actually navigate with in Armenia, so
-  // both are offered directly; each deep-links into the installed app on a
-  // phone and falls back to the web map on a desktop.
-  const point = `${listing.lat.toFixed(5)},${listing.lng.toFixed(5)}`;
-  const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
-  const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
 
   /*
    * A photograph needs no frame around it. The ring exists so a bare emoji has
@@ -125,6 +119,16 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
           </div>
         ) : null}
 
+        {listing.delivery ? (
+          <div className="detail-row">
+            <span className="k">Առաքում</span>
+            <span className="v meta-delivery" style={{ justifyContent: 'flex-end' }}>
+              <IconTruck />
+              Կա
+            </span>
+          </div>
+        ) : null}
+
         {listing.distanceKm !== null ? (
           <div className="detail-row">
             <span className="k">Հեռավորություն</span>
@@ -181,29 +185,7 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
             in international form, so each is a link rather than a feature. */}
         {listing.phone ? <ContactRow phone={listing.phone} onContact={recordCall} /> : null}
 
-        <div className="nav-block">
-          <span className="nav-label">
-            <IconPin /> Ինչպես հասնել
-          </span>
-          <div className="nav-links">
-            <a
-              className="btn btn-ghost"
-              href={yandexUrl}
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              Yandex Maps
-            </a>
-            <a
-              className="btn btn-ghost"
-              href={googleUrl}
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              Google Maps
-            </a>
-          </div>
-        </div>
+        <Directions lat={listing.lat} lng={listing.lng} />
       </div>
     </Modal>
     </>

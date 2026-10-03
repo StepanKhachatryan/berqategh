@@ -3,12 +3,8 @@ import { produceColor, produceEmoji } from '../data/produce';
 import { produceImage } from '../data/produceImages';
 import type { CSSProperties } from 'react';
 import type { ProduceForm, SaleType } from '../lib/types';
-import {
-  OFFERINGS,
-  primaryOffering,
-  type AgriService,
-  type Offering,
-} from '../data/services';
+import { OFFERINGS, type AgriService, type OfferingId } from '../data/services';
+import { offeringMarkHtml } from '../data/serviceImages';
 
 /**
  * Map symbols carry two independent facts at once:
@@ -221,7 +217,7 @@ function regularServiceIcon(service: AgriService, selected: boolean): L.DivIcon 
 
   const html = `<div class="pin-body" style="width:${SW * scale}px;height:${SH * scale}px">
     ${serviceSvg(scale)}
-    <div class="pin-emoji" style="top:${9.5 * scale}px;font-size:${16 * scale}px">${primaryOffering(service).emoji}</div>
+    <div class="pin-emoji" style="top:${9.5 * scale}px;font-size:${16 * scale}px">${offeringMarkHtml(service.offerings[0])}</div>
   </div>`;
 
   return L.divIcon({
@@ -272,12 +268,12 @@ function stagger(id: string): number {
   return (Math.abs(h) % 1000) / 1000 * 4 * STEP_S;
 }
 
-function faceContent(offering: Offering): string {
-  return `<span class="pb-emoji">${offering.emoji}</span><span class="pb-text">${offering.short}</span>`;
+function faceContent(id: OfferingId): string {
+  return `<span class="pb-emoji">${offeringMarkHtml(id)}</span><span class="pb-text">${OFFERINGS[id].short}</span>`;
 }
 
 function premiumServiceIcon(service: AgriService, selected: boolean): L.DivIcon {
-  const shown = service.offerings.slice(0, MAX_FACES).map((id) => OFFERINGS[id]);
+  const shown = service.offerings.slice(0, MAX_FACES);
   const n = shown.length;
   const offset = stagger(service.id);
 
@@ -285,7 +281,7 @@ function premiumServiceIcon(service: AgriService, selected: boolean): L.DivIcon 
   // width of the box, so no face is ever clipped and none is wider than it
   // needs to be.
   const sizer = shown
-    .map((offering) => `<span class="pb-sizer-cell">${faceContent(offering)}</span>`)
+    .map((id) => `<span class="pb-sizer-cell">${faceContent(id)}</span>`)
     .join('');
 
   let prism: string;

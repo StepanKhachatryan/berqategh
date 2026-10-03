@@ -4,6 +4,7 @@ export type ProduceCategory =
   | 'vegetable'
   | 'green'
   | 'nut'
+  | 'grain'
   | 'tropical'
   | 'honey';
 
@@ -25,6 +26,7 @@ export const CATEGORY_LABELS: Record<ProduceCategory, string> = {
   vegetable: 'Բանջարեղեն',
   green: 'Կանաչի և համեմունք',
   nut: 'Ընդեղեն',
+  grain: 'Հացահատիկ',
   tropical: 'Արևադարձային մրգեր',
   honey: 'Մեղր և մեղվամթերք',
 };
@@ -35,6 +37,7 @@ export const CATEGORY_ORDER: ProduceCategory[] = [
   'vegetable',
   'green',
   'nut',
+  'grain',
   // Not grown here — this group is for traders reselling imported fruit, so it
   // sits after everything the country actually produces.
   'tropical',
@@ -139,6 +142,16 @@ export const PRODUCE: Produce[] = [
   { id: 'chestnut', hy: 'Շագանակ', aliases: ['chestnut', 'shaganak', 'kashtan'], category: 'nut', color: '#7B4A2D', emoji: '🌰' },
   { id: 'pistachio', hy: 'Պիստակ', aliases: ['pistachio', 'pistak', 'fistashka'], category: 'nut', color: '#93C572', emoji: '🥜' },
   { id: 'sunflower-seed', hy: 'Արևածաղկի սերմ', aliases: ['sunflower seeds', 'arevatsaghki serm', 'semechki'], category: 'nut', color: '#6B4423', emoji: '🌻' },
+
+  // ─── Հացահատիկ ────────────────────────────────────────────────────────────
+  // Sold by the tonne, mostly wholesale, to mills and livestock farms.
+  { id: 'wheat', hy: 'Ցորեն', aliases: ['wheat', 'tsoren', 'coren', 'pshenica', 'пшениц'], category: 'grain', color: '#D9A93E', emoji: '🌾' },
+  { id: 'barley', hy: 'Գարի', aliases: ['barley', 'gari', 'yachmen', 'ячмен'], category: 'grain', color: '#C9A15A', emoji: '🌾' },
+  { id: 'oats', hy: 'Վարսակ', aliases: ['oats', 'varsak', 'oves', 'овес'], category: 'grain', color: '#BFA36F', emoji: '🌾' },
+  { id: 'rye', hy: 'Աշորա', aliases: ['rye', 'ashora', 'rozh', 'рож'], category: 'grain', color: '#9C7E4A', emoji: '🌾' },
+  { id: 'corn-grain', hy: 'Եգիպտացորեն (հատիկ)', aliases: ['maize', 'grain corn', 'yegiptacoren hatik', 'kukuruza zerno'], category: 'grain', color: '#E8B923', emoji: '🌽' },
+  { id: 'buckwheat', hy: 'Հնդկաձավար', aliases: ['buckwheat', 'hndkadzavar', 'grechka', 'гречк'], category: 'grain', color: '#8A5A3B', emoji: '🌾' },
+  { id: 'millet', hy: 'Կորեկ', aliases: ['millet', 'korek', 'proso', 'пшено'], category: 'grain', color: '#E0C068', emoji: '🌾' },
 
   // ─── Արևադարձային մրգեր ───────────────────────────────────────────────────
   // Imported rather than harvested locally, so these carry no "չիր" form: the

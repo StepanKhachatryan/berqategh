@@ -38,6 +38,8 @@
   --surface-sunk: #f7faf4;
   --line: #e2ebda;
   --line-strong: #cfdcc4;
+  /* Form fields: a neutral grey, no green or warm cast. */
+  --field-line: #d6d6d6;
 
   --ink: #10251a;
   --ink-soft: #3d5245;
@@ -308,12 +310,11 @@ h4 {
 .btn-ghost {
   background: var(--surface);
   color: var(--ink);
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--field-line);
   box-shadow: var(--shadow-xs);
 }
 .btn-ghost:hover:not(:disabled) {
-  background: var(--surface-sunk);
-  border-color: var(--green);
+  border-color: var(--ink);
 }
 
 .btn-quiet {
@@ -628,6 +629,25 @@ h4 {
 
 .pin-body {
   position: relative;
+  /* Scaled about the pin's tip, so it still points at the same place. */
+  transform-origin: 50% 96%;
+  transition: scale 0.2s var(--ease);
+}
+
+/* Smaller when zoomed out to the whole country, so pins do not pile up;
+   full size from zoom 11 in. Set by MapView as data-zoom-tier. */
+[data-zoom-tier='s'] .pin-body {
+  scale: 0.62;
+}
+[data-zoom-tier='m'] .pin-body {
+  scale: 0.74;
+}
+[data-zoom-tier='l'] .pin-body {
+  scale: 0.87;
+}
+/* The one being looked at stays full size at any zoom. */
+[data-zoom-tier] .pin-selected .pin-body {
+  scale: 1;
 }
 
 .pin svg {
@@ -1325,12 +1345,12 @@ h4 {
   display: grid;
   place-items: center;
   color: var(--ink-mute);
-  background: var(--bg-tint);
+  background: #f2f2f2;
   transition: all 0.16s var(--ease);
 }
 
 .icon-btn:hover {
-  background: var(--line);
+  background: #e6e6e6;
   color: var(--ink);
 }
 
@@ -1579,7 +1599,7 @@ h4 {
 }
 
 .field-label .req {
-  color: var(--cta);
+  color: #d2534a;
 }
 
 .field-hint {
@@ -1600,8 +1620,8 @@ h4 {
   width: 100%;
   height: 48px;
   padding: 0 14px;
-  background: var(--surface-sunk);
-  border: 1.5px solid var(--line-strong);
+  background: var(--surface);
+  border: 1.5px solid var(--field-line);
   border-radius: var(--r-md);
   transition:
     border-color 0.16s var(--ease),
@@ -1611,9 +1631,8 @@ h4 {
 
 .input:focus {
   outline: none;
-  background: var(--surface);
-  border-color: var(--green);
-  box-shadow: 0 0 0 4px rgba(23, 163, 74, 0.14);
+  border-color: var(--ink);
+  box-shadow: none;
 }
 
 .input:disabled {
@@ -1636,8 +1655,8 @@ textarea.input {
 .input-affix {
   display: flex;
   align-items: stretch;
-  background: var(--surface-sunk);
-  border: 1.5px solid var(--line-strong);
+  background: var(--surface);
+  border: 1.5px solid var(--field-line);
   border-radius: var(--r-md);
   overflow: hidden;
   transition:
@@ -1646,9 +1665,7 @@ textarea.input {
 }
 
 .input-affix:focus-within {
-  border-color: var(--green);
-  background: var(--surface);
-  box-shadow: 0 0 0 4px rgba(23, 163, 74, 0.14);
+  border-color: var(--ink);
 }
 
 .input-affix.has-error {
@@ -1663,8 +1680,8 @@ textarea.input {
   display: grid;
   place-items: center;
   padding: 0 13px;
-  background: var(--bg-tint);
-  border-right: 1.5px solid var(--line-strong);
+  background: var(--surface);
+  border-right: 1.5px solid var(--field-line);
   font-weight: 700;
   font-size: 14.5px;
   color: var(--ink-soft);
@@ -1673,7 +1690,7 @@ textarea.input {
 
 .affix-end {
   border-right: none;
-  border-left: 1.5px solid var(--line-strong);
+  border-left: 1.5px solid var(--field-line);
   font-size: 13px;
   color: var(--ink-mute);
 }
@@ -1705,8 +1722,8 @@ textarea.input {
 .seg {
   padding: 13px 8px;
   border-radius: var(--r-md);
-  background: var(--surface-sunk);
-  border: 1.5px solid var(--line-strong);
+  background: var(--surface);
+  border: 1.5px solid var(--field-line);
   text-align: center;
   transition: all 0.18s var(--ease);
   display: grid;
@@ -1721,18 +1738,20 @@ textarea.input {
   line-height: 1.2;
 }
 
+/* Minimal: no fills. Hover darkens the border; the chosen one gets a black
+   border and black text, the way the role switch in the header does. */
 .seg:hover {
-  border-color: var(--line-strong);
-  background: var(--bg-tint);
+  border-color: #9a9a9a;
 }
 
 .seg[aria-pressed='true'] {
-  background: var(--green-soft);
-  border-color: var(--green);
+  background: var(--surface);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 
 .seg[aria-pressed='true'] .seg-label {
-  color: var(--green-deep);
+  color: var(--ink);
 }
 
 /* product picker */
@@ -1743,16 +1762,15 @@ textarea.input {
   gap: 12px;
   padding: 10px 14px;
   min-height: 58px;
-  background: var(--surface-sunk);
-  border: 1.5px solid var(--line-strong);
+  background: var(--surface);
+  border: 1.5px solid var(--field-line);
   border-radius: var(--r-md);
   text-align: left;
   transition: all 0.16s var(--ease);
 }
 
 .picker-trigger:hover {
-  border-color: var(--green);
-  background: var(--surface);
+  border-color: var(--ink);
 }
 
 .picker-trigger.has-error {
@@ -2686,6 +2704,52 @@ input[type='range']::-moz-range-thumb {
   color: var(--ink-faint);
 }
 
+/* Good news, in a bright green the eye catches beside the distance. */
+.meta-delivery {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+  color: #0f9d58;
+}
+
+/* ─── a tick with its explanation, for yes/no questions in the form ─── */
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--field-line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.check-row input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.check-row span {
+  display: grid;
+  gap: 3px;
+}
+
+.check-row b {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.check-row small {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-mute);
+}
+
 /* ═══ listing detail ═════════════════════════════════════════════════════ */
 
 /*
@@ -2902,11 +2966,12 @@ input[type='range']::-moz-range-thumb {
 
 .detail-note {
   padding: 13px 15px;
-  background: var(--amber-soft);
+  background: transparent;
+  border: 1px solid #e3e3e3;
   border-radius: var(--r-md);
   font-size: 13.5px;
   line-height: 1.5;
-  color: #78350f;
+  color: var(--ink);
   margin-bottom: 16px;
 }
 
@@ -2988,33 +3053,56 @@ input[type='range']::-moz-range-thumb {
   background: #2aabee;
 }
 
-.nav-block {
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface-sunk);
-}
-
-.nav-label {
+.nav-row {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nav-row-label {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 12.5px;
   font-weight: 700;
-  color: var(--ink-mute);
-  margin-bottom: 10px;
+  line-height: 1.15;
+  color: var(--ink-soft);
 }
 
-.nav-links {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.nav-links .btn {
+/* Each a map app's pin and name; the two share what the label leaves. */
+.nav-app {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 6px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
   text-decoration: none;
-  height: 44px;
-  font-size: 14px;
+  transition: border-color 0.15s var(--ease);
+}
+
+.nav-app svg {
+  flex: none;
+}
+
+.nav-app span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-app:hover {
+  border-color: var(--ink);
 }
 
 /* ─── what a service offers ───────────────────────────────────────────────
@@ -4196,5 +4284,133 @@ input[type='range']::-moz-range-thumb {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══ desktop: the header floats over the map as frosted glass ═══════════ */
+/*
+ * The same glass as the results pane beside it (Apple Maps' chrome): the map
+ * runs the full height of the window, under the header, and shows through it
+ * blurred. Everything that sat just below the header moves down by its height
+ * (--overlay-top), and MapView frames pins below it (WIDE_TOP_INSET).
+ */
+@media (min-width: 900px) {
+  .app {
+    position: relative;
+    --overlay-top: calc(var(--header-h) + 24px);
+  }
+
+  .app-header {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    height: var(--header-h);
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: saturate(180%) blur(28px);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    box-shadow:
+      0 12px 40px rgba(16, 37, 26, 0.18),
+      0 1px 3px rgba(16, 37, 26, 0.08);
+  }
+
+  .app-body {
+    height: 100%;
+  }
+
+  .results {
+    top: var(--overlay-top);
+  }
+
+  .leaflet-top {
+    top: calc(var(--overlay-top) - 10px);
+  }
+
+  .map-service-panel {
+    top: calc(var(--overlay-top) + 48px);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .app-header {
+      background: rgba(255, 255, 255, 0.97);
+    }
+  }
+}
+
+/* ═══ optional account ═══════════════════════════════════════════════════ */
+.header-account {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.5px solid #d6d6d6;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.header-account.is-signed-in {
+  border-color: var(--ink);
+}
+
+.header-account-initial {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+@media (max-width: 520px) {
+  .header-account {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.btn-google {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1.5px solid #d6d6d6;
+  font-weight: 700;
+}
+
+.btn-google:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.account-body {
+  display: grid;
+  gap: 14px;
+}
+
+.account-email {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  word-break: break-all;
+}
+
+.published-account {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #e3e3e3;
+  border-radius: var(--r-md);
+}
+
+.published-account p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* A seller's header carries two more buttons (my listings, account). On a
+   narrow phone the name would be cut to «Բեր…», so only the logo stays. */
+@media (max-width: 440px) {
+  .app-header.is-seller .brand > span {
+    display: none;
   }
 }
