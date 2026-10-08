@@ -244,3 +244,69 @@ export const IconExpand = ({ size = 16 }: IconProps) => (
     <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
   </svg>
 );
+
+/* ─── brand marks for an advertiser's links, in their own colours ─────── */
+
+export const IconFacebook = ({ size = 20 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="12" fill="#1877F2" />
+    <path
+      d="M13.4 24v-8.4h2.8l.43-3.27H13.4v-2.08c0-.95.27-1.6 1.63-1.6h1.74V5.73a23 23 0 0 0-2.54-.13c-2.5 0-4.22 1.53-4.22 4.35v2.4H7.18v3.27H10V24h3.4Z"
+      fill="#fff"
+    />
+  </svg>
+);
+
+export const IconInstagram = ({ size = 20 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    <defs>
+      <radialGradient id="ig-grad" cx="0.3" cy="1.07" r="1.2">
+        <stop offset="0" stopColor="#FFD776" />
+        <stop offset="0.25" stopColor="#F3A554" />
+        <stop offset="0.5" stopColor="#E1306C" />
+        <stop offset="0.8" stopColor="#C13584" />
+        <stop offset="1" stopColor="#5B51D8" />
+      </radialGradient>
+    </defs>
+    <rect width="24" height="24" rx="6.5" fill="url(#ig-grad)" />
+    <rect x="5.5" y="5.5" width="13" height="13" rx="4" fill="none" stroke="#fff" strokeWidth="1.8" />
+    <circle cx="12" cy="12" r="3.2" fill="none" stroke="#fff" strokeWidth="1.8" />
+    <circle cx="16.3" cy="7.7" r="1" fill="#fff" />
+  </svg>
+);
+
+export const IconYouTube = ({ size = 20 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="1" y="4.5" width="22" height="15" rx="4.5" fill="#FF0000" />
+    <path d="M10 8.8v6.4l5.6-3.2L10 8.8Z" fill="#fff" />
+  </svg>
+);
+
+export const IconTikTok = ({ size = 20 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    <rect width="24" height="24" rx="6" fill="#111" />
+    <path
+      d="M15.6 5.2c.4 1.5 1.5 2.6 3 2.9v2.4a5.6 5.6 0 0 1-3-.9v5.1a4.4 4.4 0 1 1-4.4-4.4c.2 0 .4 0 .6.04v2.5a2 2 0 1 0 1.4 1.9V5.2h2.4Z"
+      fill="#fff"
+    />
+  </svg>
+);
+
+export const IconTelegramBrand = ({ size = 20 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="12" fill="#229ED9" />
+    <path d="m5.4 11.8 11.1-4.3c.5-.2 1 .1.8.9l-1.9 8.9c-.14.63-.52.8-1.05.5l-2.9-2.14-1.4 1.35c-.15.15-.28.28-.58.28l.2-2.95 5.4-4.88c.24-.2-.05-.33-.37-.12l-6.66 4.2-2.87-.9c-.62-.2-.64-.62.13-.92Z" fill="#fff" />
+  </svg>
+);
+
+/** A website: a globe, drawn in the site's own green. */
+export const IconGlobe = ({ size = 20 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="12" fill="#15803d" />
+    <g fill="none" stroke="#fff" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="6.8" />
+      <ellipse cx="12" cy="12" rx="3" ry="6.8" />
+      <path d="M5.2 12h13.6M6.2 8.6h11.6M6.2 15.4h11.6" />
+    </g>
+  </svg>
+);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { IconClose, IconSearch } from './Icons';
 import OfferingMark from './OfferingMark';
+import { serviceLogo } from '../data/serviceLogos';
 import {
   OFFERINGS,
   offeringsInUse,
@@ -42,11 +43,13 @@ export default function ServiceSearch({
   onPick,
 }: ServiceSearchProps) {
   const [listOpen, setListOpen] = useState(true);
+  // On a phone only the box shows until it is used (see .is-folded).
+  const [open, setOpen] = useState(false);
   const chips = offeringsInUse(all);
   const filtering = query.trim() !== '' || offering !== null;
 
   return (
-    <div className="svc-search">
+    <div className={`svc-search${open || filtering ? '' : ' is-folded'}`}>
       <div className="svc-search-box">
         <IconSearch size={17} />
         <input
@@ -56,18 +59,22 @@ export default function ServiceSearch({
             onQueryChange(event.target.value);
             setListOpen(true);
           }}
-          onFocus={() => setListOpen(true)}
+          onFocus={() => {
+            setListOpen(true);
+            setOpen(true);
+          }}
           placeholder="Սերմ, տրակտոր, ոռոգում…"
           aria-label="Որոնել ծառայություն"
           enterKeyHint="search"
         />
-        {filtering ? (
+        {filtering || open ? (
           <button
             type="button"
             className="svc-search-clear"
             onClick={() => {
               onQueryChange('');
               onOfferingChange(null);
+              setOpen(false);
             }}
             aria-label="Մաքրել որոնումը"
           >
@@ -117,9 +124,15 @@ export default function ServiceSearch({
               {matches.map((service) => (
                 <li key={service.id}>
                   <button type="button" onClick={() => onPick(service.id)}>
-                    <span className="service-mark" aria-hidden="true">
-                      <OfferingMark id={service.offerings[0]} />
-                    </span>
+                    {serviceLogo(service.id) ? (
+                      <span className="service-mark service-logo" aria-hidden="true">
+                        <img src={serviceLogo(service.id)!} alt="" />
+                      </span>
+                    ) : (
+                      <span className="service-mark" aria-hidden="true">
+                        <OfferingMark id={service.offerings[0]} />
+                      </span>
+                    )}
                     <span className="svc-result-text">
                       <b>{service.name}</b>
                       <small>

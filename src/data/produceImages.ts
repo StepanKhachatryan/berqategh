@@ -44,6 +44,9 @@ const BY_NAME = new Map<string, string>(
  * shoots real acacia honey, `honey-acacia.webp` wins with no code change.
  */
 const GROUP_PHOTO = 'honey';
+
+/** Close enough to share one photograph: Արքայանարինջ is a kind of persimmon. */
+const SHARED_PHOTO: Record<string, string> = { persimmon: 'kinglet' };
 const DRIED_PHOTO = 'dried';
 
 /** Where the չիր plate is a fair likeness. Dried herbs keep their leaf. */
@@ -62,6 +65,9 @@ export function produceImage(
 
   const own = BY_NAME.get(productId);
   if (own) return own;
+
+  const shared = SHARED_PHOTO[productId];
+  if (shared && BY_NAME.has(shared)) return BY_NAME.get(shared)!;
 
   if (category === 'honey') return BY_NAME.get(GROUP_PHOTO) ?? null;
 

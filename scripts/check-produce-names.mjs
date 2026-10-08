@@ -30,6 +30,9 @@ const servicesSource = readFileSync(join(root, 'src/data/services.ts'), 'utf8');
 const typeBody = servicesSource.slice(servicesSource.indexOf('export type OfferingId'), servicesSource.indexOf('export interface Offering'));
 const offeringIds = new Set([...typeBody.matchAll(/\|\s*'([^']+)'/g)].map((m) => m[1]));
 
+// The advertisers' ids, from SERVICES in the same file.
+const serviceIds = new Set([...servicesSource.matchAll(/\bid: '([^']+)',\s*name:/g)].map((m) => m[1]));
+
 const INPUT = new Set(['.png', '.webp', '.jpg', '.jpeg']);
 
 // Suggest the id the file was probably meant to have.
@@ -48,6 +51,7 @@ let failed = false;
 for (const { folder, known, what, where } of [
   { folder: 'produce-images', known: ids, what: 'crop', where: 'src/data/produce.ts' },
   { folder: 'service-images', known: offeringIds, what: 'offering', where: 'service-images/README.md' },
+  { folder: 'service-logos', known: serviceIds, what: 'advertiser', where: 'service-logos/README.md' },
 ]) {
   let names = [];
   try {
@@ -61,7 +65,7 @@ for (const { folder, known, what, where } of [
     .filter((name) => !known.has(basename(name, extname(name)).replace(/_/g, '-')));
 
   if (unknown.length === 0) {
-    console.log(`All pictures in ${folder}/ match ${what === "offering" ? "an" : "a"} ${what} (${known.size} names known).`);
+    console.log(`All pictures in ${folder}/ match ${/^[aeiou]/.test(what) ? "an" : "a"} ${what} (${known.size} names known).`);
     continue;
   }
   failed = true;

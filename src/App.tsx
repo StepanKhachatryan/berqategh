@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import MapView from './components/MapView';
 import RoleGate from './components/RoleGate';
 import ResultsPanel from './components/ResultsPanel';
@@ -10,7 +10,6 @@ import ListingDetail from './components/ListingDetail';
 import MyListings from './components/MyListings';
 import RecoverySheet from './components/RecoverySheet';
 import GuideSheet from './components/GuideSheet';
-import ServiceToggle from './components/ServiceToggle';
 import InstallPrompt from './components/InstallPrompt';
 import { ToastStack, useToasts } from './components/Toasts';
 import { IconArchive, IconHelp, IconPlus, IconUser } from './components/Icons';
@@ -98,7 +97,6 @@ export default function App() {
   const [focus, setFocus] = useState<{ point: LatLng; zoom?: number; nonce: number } | null>(null);
 
   // ─── agricultural services (sellers only) ──────────────────────────────
-  const [servicesOn, setServicesOn] = useState(false);
   const [serviceId, setServiceId] = useState<string | null>(null);
   /* The services search. Kept here rather than in the panel so the map can
      be handed the filtered list; memoised below, because the map refits
@@ -110,19 +108,6 @@ export default function App() {
     () => searchServices(SERVICES, serviceQuery, serviceOffering),
     [serviceQuery, serviceOffering],
   );
-  /*
-   * Whether the seller has opened the services layer during *this* visit.
-   *
-   * It used to be remembered in localStorage — pressed once, never announced
-   * again on that device, ever. Which is why the button behaved differently
-   * everywhere: the desktop browser, the installed app and the phone browser
-   * each keep their own storage, so it pulsed in whichever of them had not been
-   * used yet and nowhere else. "Sometimes" is not a behaviour anyone can learn.
-   *
-   * In memory instead. Every visit starts with the cue and it stops as soon as
-   * the layer is opened, the same way on every device.
-   */
-  const [servicesUsed, setServicesUsed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   const { toasts, push } = useToasts();
@@ -174,28 +159,9 @@ export default function App() {
     if (role === 'seller') void loadMine();
   }, [role, loadMine]);
 
-  /*
-   * Where the buyer is, but only if the browser already allows it. Asking on
-   * open is what broke inside Messenger (a prompt that never resolves, then
-   * an error), so this never asks: with permission already granted the answer
-   * comes back silently and the map opens on the area around them; without it
-   * the map stays on the whole country, exactly as before.
-   */
-  const [nearby, setNearby] = useState<LatLng | null>(null);
-  const askedNearbyRef = useRef(false);
-  useEffect(() => {
-    if (role !== 'buyer' || askedNearbyRef.current) return;
-    askedNearbyRef.current = true;
-    const permissions = navigator.permissions;
-    if (!permissions?.query) return;
-    permissions
-      .query({ name: 'geolocation' })
-      .then((state) => (state.state === 'granted' ? locate() : null))
-      .then((point) => {
-        if (point) setNearby(point);
-      })
-      .catch(() => undefined);
-  }, [role, locate]);
+  // The seller's own listings stay in colour on their dimmed map, so a pin
+  // they have just published is plainly there.
+  const ownIds = useMemo(() => new Set(mine.filter((listing) => !listing.archivedAt).map((listing) => listing.id)), [mine]);
 
   // One visit per browser session. It waits a few seconds for a position so the
   // region can be filled in when the visitor let the app find them, then
@@ -262,10 +228,10 @@ export default function App() {
     localStorage.setItem(ROLE_KEY, picked);
     setRole(picked);
     setSelectedId(null);
-    // The services layer belongs to the seller side; leaving it switched on
-    // would hand the buyer a dimmed map the moment they switched back.
-    setServicesOn(false);
+    // A services search belongs to one visit to the seller side.
     setServiceId(null);
+    setServiceQuery('');
+    setServiceOffering(null);
     record({ kind: 'role', role: picked, origin: position });
 
     // Straight to the map. The guide used to open itself here, which put a
@@ -433,15 +399,6 @@ export default function App() {
 
   const isSeller = role === 'seller';
 
-  const toggleServices = () => {
-    setServicesOn((on) => !on);
-    setServiceId(null);
-    setServicesUsed(true);
-    // A search belongs to one visit to the layer; the next starts with all.
-    setServiceQuery('');
-    setServiceOffering(null);
-  };
-
   const openService = SERVICES.find((service) => service.id === serviceId) ?? null;
 
   return (
@@ -456,17 +413,6 @@ export default function App() {
             </span>
           </span>
         </div>
-
-        {/* Desktop only: the header floats over the map's top-left corner,
-            where the switch lives on phones. */}
-        {isSeller ? (
-          <ServiceToggle
-            className="in-header"
-            active={servicesOn}
-            unseen={!servicesUsed}
-            onToggle={toggleServices}
-          />
-        ) : null}
 
         <div className="header-spacer" />
 
@@ -503,21 +449,19 @@ export default function App() {
           </button>
         ) : null}
 
-        {isSeller ? (
-          <button
-            type="button"
-            className={`header-account${account.email ? ' is-signed-in' : ''}`}
-            onClick={() => setSheet('account')}
-            title={account.email ?? 'Մուտք (ոչ պարտադիր)'}
-            aria-label={account.email ? `Հաշիվ՝ ${account.email}` : 'Մուտք (ոչ պարտադիր)'}
-          >
-            {account.email ? (
-              <span className="header-account-initial">{account.email[0].toUpperCase()}</span>
-            ) : (
-              <IconUser size={19} />
-            )}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          className={`header-account${account.email ? ' is-signed-in' : ''}`}
+          onClick={() => setSheet('account')}
+          title={account.email ?? 'Մուտք (ոչ պարտադիր)'}
+          aria-label={account.email ? `Հաշիվ՝ ${account.email}` : 'Մուտք (ոչ պարտադիր)'}
+        >
+          {account.email ? (
+            <span className="header-account-initial">{account.email[0].toUpperCase()}</span>
+          ) : (
+            <IconUser size={19} />
+          )}
+        </button>
 
         {/* The guide, off the map and into the header: the same place on
             every screen and in every mode, rather than one more button in a
@@ -559,16 +503,18 @@ export default function App() {
             locating={locating}
             focus={focus}
             bottomInset={isSeller ? 0 : sheetHeight}
-            nearby={isSeller ? null : nearby}
+            ownIds={ownIds}
+            onDimTap={() =>
+              push('info', 'Բերքի հայտարարությունները դիտելու համար անցեք «Գնորդ» ռեժիմ։')
+            }
             services={
               isSeller
                 ? {
                     items: serviceMatches,
-                    active: servicesOn,
-                    onToggle: toggleServices,
+                    active: true,
+                    narrowed: Boolean(serviceQuery.trim() || serviceOffering),
                     selectedId: serviceId,
                     onSelect: setServiceId,
-                    unseen: !servicesUsed,
                     panel: (
                       <ServiceSearch
                         all={SERVICES}
@@ -588,7 +534,7 @@ export default function App() {
           {/* Not while the services layer is up: the seller is shopping for
               seed there, not publishing a harvest, and the button sat on top
               of the very pins they were looking at. */}
-          {isSeller && !servicesOn ? (
+          {isSeller ? (
             <button type="button" className="btn btn-3d btn-sell fab" onClick={() => setSheet('seller')}>
               <IconPlus />
               Տեղադրել բերք
@@ -668,7 +614,7 @@ export default function App() {
       ) : null}
 
       {sheet === 'guide' ? <GuideSheet
-          mode={isSeller ? (servicesOn ? 'services' : 'seller') : 'buyer'}
+          mode={isSeller ? 'seller' : 'buyer'}
           onClose={() => setSheet('none')} /> : null}
 
       {/* Premium advertisers open their own card; everyone else, the standard

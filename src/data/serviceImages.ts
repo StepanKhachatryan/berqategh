@@ -26,5 +26,5 @@ export function offeringImage(id: OfferingId): string | null {
  */
 export function offeringMarkHtml(id: OfferingId): string {
   const src = offeringImage(id);
-  return src ? `<img class="pin-photo" src="${src}" alt="">` : OFFERINGS[id].emoji;
+  return src ? `<img class="svc-photo" src="${src}" alt="">` : OFFERINGS[id].emoji;
 }

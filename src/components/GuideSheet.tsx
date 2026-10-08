@@ -1,10 +1,14 @@
 import Modal from './Modal';
 import QrPoster from './QrPoster';
-import { pinSvg, SALE_TYPE_SHORT, serviceSvg } from './markers';
+import ContactRow from './ContactRow';
+import { pinSvg, SALE_TYPE_SHORT } from './markers';
 import type { SaleType } from '../lib/types';
 
 /** Which guide: each mode gets only what is useful in it. */
-export type GuideMode = 'buyer' | 'seller' | 'services';
+export type GuideMode = 'buyer' | 'seller';
+
+/** Where people reach a person about the site itself. */
+const SUPPORT_PHONE = '+37498098006';
 
 interface GuideSheetProps {
   mode: GuideMode;
@@ -14,7 +18,6 @@ interface GuideSheetProps {
 const TITLES: Record<GuideMode, string> = {
   buyer: 'Ինչպես գնել',
   seller: 'Ինչպես վաճառել',
-  services: 'Գյուղատնտեսական ծառայություններ',
 };
 
 /** The one thing in a section that must not be missed: a thin light-red frame. */
@@ -131,54 +134,25 @@ function SellerGuide() {
         </p>
       </section>
 
-      <QrPoster />
-    </>
-  );
-}
-
-function ServicesGuide() {
-  return (
-    <>
       <section className="guide-section">
-        <h4>Ինչ է այս բաժինը</h4>
+        <h4>Գյուղատնտեսական ծառայությունները քարտեզին</h4>
         <p>
-          Այստեղ են խանութներն ու ծառայությունները, որոնք պետք են բերքից առաջ՝ սերմ,
-          պարարտանյութ, թունաքիմիկատ, տեխնիկա, ոռոգում և այլն։ Միացնելիս բերքի կետերը մարում
-          են, անջատելիս ամեն ինչ վերադառնում է։
+          Վաճառողի քարտեզին վառ երևում են խանութներն ու ծառայությունները՝ սերմ,
+          պարարտանյութ, թունաքիմիկատ, տեխնիկա։ Մյուսների բերքը մոխրագույն է, իսկ ձեր
+          հայտարարությունները՝ իրենց գույնով։ Ուրիշների բերքը և գները տեսնելու համար
+          անցե՛ք <b>«Գնորդ»</b> ռեժիմ։
         </p>
-      </section>
-
-      <section className="guide-section">
-        <h4>Ինչպես գտնել</h4>
         <ol className="guide-steps">
-          <li>Գրե՛ք որոնման դաշտում՝ «սերմ», «տրակտոր», «ոռոգում»։</li>
-          <li>Կամ ընտրե՛ք տեսակը որոնման տակի կոճակներից։</li>
-          <li>Սեղմե՛ք կետի վրա՝ հեռախոսը, կայքը, հասցեն և ճանապարհը տեսնելու համար։</li>
+          <li>Գրե՛ք վերևի որոնման դաշտում՝ «սերմ», «տրակտոր», «ոռոգում», կամ ընտրե՛ք տեսակը։</li>
+          <li>Սեղմե՛ք կետի վրա՝ ապրանքները, հեռախոսը, կայքը, հասցեն և ճանապարհը տեսնելու համար։</li>
         </ol>
-      </section>
-
-      <section className="guide-section">
-        <h4>Կետերի տեսակները</h4>
-        <ul className="guide-legend guide-services">
-          <li>
-            <span dangerouslySetInnerHTML={{ __html: serviceSvg(0.7) }} />
-            Խանութ կամ ծառայություն
-          </li>
-          <li>
-            <span className="guide-bubble" aria-hidden="true">
-              Սերմեր
-            </span>
-            Պտտվող նշանը հերթով ցույց է տալիս, թե ինչ կա այնտեղ
-          </li>
-        </ul>
-      </section>
-
-      <section className="guide-section">
         <Important>
           <b>Սրանք գովազդատուներ են։</b> ԲերքաՏեղը չի երաշխավորում նրանց ապրանքների
-          որակը և գործարքին չի մասնակցում։ Գնորդները այս բաժինը չեն տեսնում։
+          որակը և գործարքին չի մասնակցում։
         </Important>
       </section>
+
+      <QrPoster />
     </>
   );
 }
@@ -195,7 +169,16 @@ export default function GuideSheet({ mode, onClose }: GuideSheetProps) {
         </button>
       }
     >
-      {mode === 'buyer' ? <BuyerGuide /> : mode === 'seller' ? <SellerGuide /> : <ServicesGuide />}
+      {mode === 'buyer' ? <BuyerGuide /> : <SellerGuide />}
+
+      <section className="guide-section">
+        <h4>Տեխնիկական հարցերի համար</h4>
+        <p style={{ marginBottom: 10 }}>
+          Կայքը չի՞ աշխատում, չե՞ք կարողանում տեղադրել կամ հանել հայտարարությունը՝ զանգե՛ք
+          կամ գրե՛ք մեզ։
+        </p>
+        <ContactRow phone={SUPPORT_PHONE} />
+      </section>
     </Modal>
   );
 }

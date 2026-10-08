@@ -15,6 +15,7 @@ on:
     paths:
       - 'produce-images/**'
       - 'service-images/**'
+      - 'service-logos/**'
       - 'scripts/build-produce-icons.mjs'
       - 'scripts/check-produce-names.mjs'
   workflow_dispatch:
@@ -59,7 +60,7 @@ jobs:
             git fetch origin "${GITHUB_REF_NAME}"
             git reset --hard "origin/${GITHUB_REF_NAME}"
             npm run icons
-            git add src/assets/produce src/assets/services
+            git add src/assets/produce src/assets/services src/assets/logos
             if git diff --staged --quiet; then
               echo 'Nothing changed - every icon was already up to date.'
               exit 0

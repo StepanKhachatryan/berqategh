@@ -4,7 +4,7 @@ import { produceImage } from '../data/produceImages';
 import type { CSSProperties } from 'react';
 import type { ProduceForm, SaleType } from '../lib/types';
 import { OFFERINGS, type AgriService, type OfferingId } from '../data/services';
-import { offeringMarkHtml } from '../data/serviceImages';
+import { offeringImage, offeringMarkHtml } from '../data/serviceImages';
 
 /**
  * Map symbols carry two independent facts at once:
@@ -81,6 +81,8 @@ interface PinOptions {
   form?: ProduceForm;
   selected?: boolean;
   animate?: boolean;
+  /** The seller's own listing: stays in colour on the seller's dimmed map. */
+  own?: boolean;
 }
 
 /**
@@ -109,6 +111,7 @@ export function listingIcon({
   form = 'fresh',
   selected = false,
   animate = false,
+  own = false,
 }: PinOptions): L.DivIcon {
   const scale = selected ? 1.22 : 1;
   const color = listingColor(productId, form);
@@ -116,6 +119,7 @@ export function listingIcon({
 
   const classes = ['pin'];
   if (selected) classes.push('pin-selected');
+  if (own) classes.push('pin-own');
 
   // The drop-in animation lives on the inner wrapper, never on the marker root:
   // Leaflet positions markers with an inline `transform`, and a CSS animation
@@ -215,9 +219,16 @@ export function serviceSvg(scale = 1): string {
 function regularServiceIcon(service: AgriService, selected: boolean): L.DivIcon {
   const scale = selected ? 1.18 : 1;
 
+  // A photograph fills the white window, cropped to it, so it never grows
+  // past the pin; an emoji sits in it like on a produce pin.
+  const photo = offeringImage(service.offerings[0]);
+  const mark = photo
+    ? `<img class="pin-svc-photo" src="${photo}" alt="" style="left:${8.5 * scale}px;top:${8.5 * scale}px;width:${23 * scale}px;height:${19 * scale}px">`
+    : `<div class="pin-emoji" style="top:${9.5 * scale}px;font-size:${16 * scale}px">${offeringMarkHtml(service.offerings[0])}</div>`;
+
   const html = `<div class="pin-body" style="width:${SW * scale}px;height:${SH * scale}px">
     ${serviceSvg(scale)}
-    <div class="pin-emoji" style="top:${9.5 * scale}px;font-size:${16 * scale}px">${offeringMarkHtml(service.offerings[0])}</div>
+    ${mark}
   </div>`;
 
   return L.divIcon({

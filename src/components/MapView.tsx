@@ -14,7 +14,6 @@ import { fanOffsets, overlapGroup } from './spider';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER, haversineKm } from '../lib/geo';
 import { listingTitle, type LatLng, type MeasuredListing } from '../lib/types';
 import { IconCrosshair, IconLayers } from './Icons';
-import ServiceToggle from './ServiceToggle';
 import { OFFERINGS, type AgriService } from '../data/services';
 
 /**
@@ -115,6 +114,13 @@ interface MapViewProps {
    * NEARBY_KM of it rather than the whole country; null keeps the country.
    */
   nearby?: LatLng | null;
+  /**
+   * Seller side: their own listings, drawn in colour while every other
+   * listing is dimmed behind the services, and what a tap on one of the
+   * dimmed ones does instead of opening it.
+   */
+  ownIds?: ReadonlySet<string>;
+  onDimTap?: () => void;
 }
 
 /** How far around the buyer the first view reaches when it knows where they are. */
@@ -123,12 +129,11 @@ const NEARBY_KM = 100;
 export interface ServicesLayer {
   items: AgriService[];
   active: boolean;
-  onToggle: () => void;
+  /** A search or a type is narrowing the list: frame the matches, not Armenia. */
+  narrowed: boolean;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
-  /** The control draws attention to itself until it has been used once. */
-  unseen: boolean;
-  /** Drawn under the toggle while the layer is on: the search. */
+  /** Drawn in the map's top-left corner: the search. */
   panel?: ReactNode;
 }
 
@@ -144,6 +149,8 @@ export default function MapView({
   bottomInset,
   services,
   nearby = null,
+  ownIds,
+  onDimTap,
 }: MapViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -191,6 +198,12 @@ export default function MapView({
   const fittedInsetRef = useRef(0);
 
   selectRef.current = onSelect;
+  const ownIdsRef = useRef(ownIds);
+  ownIdsRef.current = ownIds;
+  const dimTapRef = useRef(onDimTap);
+  dimTapRef.current = onDimTap;
+  const dimmedRef = useRef(false);
+  dimmedRef.current = services?.active ?? false;
   listingsRef.current = listings;
   bottomInsetRef.current = bottomInset;
   if (services) selectServiceRef.current = services.onSelect;
@@ -407,6 +420,14 @@ export default function MapView({
       const map = mapRef.current;
       if (!map) return;
 
+      // Seller side: other people's listings are only a backdrop for the
+      // services. A tap says where to look at them instead of opening one.
+      if (dimmedRef.current && !ownIdsRef.current?.has(id)) {
+        collapseFan();
+        dimTapRef.current?.();
+        return;
+      }
+
       if (fanRef.current?.ids.includes(id)) {
         collapseFan();
         selectRef.current(id);
@@ -464,6 +485,7 @@ export default function MapView({
         form: listing.form,
         selected: listing.id === selectedId,
         animate: isNew,
+        own: ownIds?.has(listing.id) ?? false,
       });
       seenRef.current.add(listing.id);
 
@@ -489,7 +511,7 @@ export default function MapView({
       marker.addTo(layer);
       markers.set(listing.id, marker);
     }
-  }, [listings, selectedId, handlePinTap]);
+  }, [listings, selectedId, handlePinTap, ownIds]);
 
   // ─── the buyer's own position and search radius ──────────────────────────
   useEffect(() => {
@@ -605,6 +627,8 @@ export default function MapView({
   // ─── the services layer ──────────────────────────────────────────────────
   const items = services?.items;
   const servicesActive = services?.active ?? false;
+  const narrowed = services?.narrowed ?? false;
+  const narrowedRef = useRef(false);
   const serviceSelected = services?.selectedId ?? null;
 
   useEffect(() => {
@@ -670,18 +694,29 @@ export default function MapView({
     if (!map || !layer) return;
 
     if (servicesActive) {
-      // Only on the way in. This effect also runs whenever the list of
-      // services changes - every keystroke in the search - and saving the view
-      // then would overwrite the seller's own view with a services view, so
-      // switching the layer off would no longer take them home.
-      if (!servicesShownRef.current) {
+      const entering = !servicesShownRef.current;
+      if (entering) {
         beforeServicesRef.current = { center: map.getCenter(), zoom: map.getZoom() };
         layer.addTo(map);
         servicesShownRef.current = true;
       }
 
-      // Frame whatever is showing: all of it on opening, the matches when the
-      // search narrows it. Nothing matching leaves the camera where it is.
+      // The whole country when the seller side opens and whenever a search is
+      // cleared: with few advertisers, framing them would zoom into one
+      // village and show an empty field. A search or a type frames its matches.
+      const wasNarrowed = narrowedRef.current;
+      narrowedRef.current = narrowed;
+      if (!narrowed) {
+        if (entering || wasNarrowed) {
+          map.fitBounds(L.latLngBounds(ARMENIA_BOUNDS), {
+            paddingTopLeft: [EDGE + panelLeft, EDGE + headerCover()],
+            paddingBottomRight: [CONTROL_COLUMN, EDGE + panelBottom],
+            animate: !entering,
+          });
+        }
+        return;
+      }
+
       if (items && items.length > 0) {
         // A premium bubble hangs off to the right of its point by nearly its
         // whole width - its tail is near its left edge - where a normal pin
@@ -700,7 +735,7 @@ export default function MapView({
           {
             paddingTopLeft: [EDGE + PIN_SIDE + panelLeft, EDGE + PIN_UP + headerCover()],
             paddingBottomRight: [CONTROL_COLUMN + reach, EDGE + panelBottom],
-            maxZoom: 12,
+            maxZoom: 10,
             animate: true,
           },
         );
@@ -720,7 +755,10 @@ export default function MapView({
     // panelBottom too: on a phone the search panel is measured only after it
     // has appeared, and grows as results open - the matches have to be framed
     // above it each time, not underneath.
-  }, [servicesActive, items, panelBottom, panelLeft]);
+    // Not panelBottom/panelLeft: the panel grows and shrinks as the search is
+    // used, and the camera must not jump each time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [servicesActive, items, narrowed]);
 
   /*
    * The search panel's footprint on the map's bottom edge. On a phone it is a
@@ -796,18 +834,6 @@ export default function MapView({
         role="application"
         aria-label="Բերքի քարտեզ"
       />
-
-      {/* Sellers only, in the map's empty top-left corner. On desktop the
-          header floats over the map there, so the switch lives in the header
-          instead and this one is hidden (see .map-service-btn.on-map). */}
-      {services ? (
-        <ServiceToggle
-          className="on-map"
-          active={servicesActive}
-          unseen={services.unseen}
-          onToggle={services.onToggle}
-        />
-      ) : null}
 
       {services && servicesActive && services.panel ? (
         <div className="map-service-panel" ref={panelRef}>

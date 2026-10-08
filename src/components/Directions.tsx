@@ -57,11 +57,15 @@ export default function Directions({ lat, lng }: DirectionsProps) {
       </span>
       <a className="nav-app" href={yandexUrl} target="_blank" rel="noreferrer noopener">
         <YandexPin />
-        <span>Yandex Maps</span>
+        <span>
+          Yandex<span className="nav-app-maps"> Maps</span>
+        </span>
       </a>
       <a className="nav-app" href={googleUrl} target="_blank" rel="noreferrer noopener">
         <GooglePin />
-        <span>Google Maps</span>
+        <span>
+          Google<span className="nav-app-maps"> Maps</span>
+        </span>
       </a>
     </div>
   );

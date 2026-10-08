@@ -15,7 +15,8 @@
  *
  * Pass --set=services to do the same for service-images/ (pictures for the
  * agricultural-services offerings, named by offering id) into
- * src/assets/services/. `npm run icons` runs both.
+ * src/assets/services/, and --set=logos for service-logos/ (advertisers' logos,
+ * named by service id) into src/assets/logos/. `npm run icons` runs all three.
  */
 
 import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
@@ -37,9 +38,13 @@ try {
 }
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SET = process.argv.includes('--set=services') ? 'services' : 'produce';
-const SRC = join(root, SET === 'services' ? 'service-images' : 'produce-images');
-const OUT = join(root, SET === 'services' ? 'src/assets/services' : 'src/assets/produce');
+const SET = process.argv.includes('--set=services')
+  ? 'services'
+  : process.argv.includes('--set=logos')
+    ? 'logos'
+    : 'produce';
+const SRC = join(root, { produce: 'produce-images', services: 'service-images', logos: 'service-logos' }[SET]);
+const OUT = join(root, { produce: 'src/assets/produce', services: 'src/assets/services', logos: 'src/assets/logos' }[SET]);
 
 // 62px is the largest the mark is ever drawn (the listing detail hero), so 128
 // covers a 2x screen. Past that the file grows and nothing looks better.
@@ -144,10 +149,26 @@ for (const { name, id, path } of pending) {
   const dataUrl = `data:image/${extname(path).slice(1)};base64,${readFileSync(path).toString('base64')}`;
 
   const encoded = await page.evaluate(
-    async ([src, size, quality, margin]) => {
+    async ([src, size, quality, margin, photo]) => {
       const img = new Image();
       img.src = src;
       await img.decode();
+
+      // Service pictures are photographs, not cut-outs: no trimming, no
+      // padding, just cropped from the centre to 4:5 (the shape they are shot
+      // in) and drawn with object-fit: cover wherever they appear.
+      if (photo) {
+        const W = 160, H = 200;
+        const k = Math.max(W / img.width, H / img.height);
+        const cw = W / k, ch = H / k;
+        const c = document.createElement('canvas');
+        c.width = W;
+        c.height = H;
+        const cx = c.getContext('2d');
+        cx.imageSmoothingQuality = 'high';
+        cx.drawImage(img, (img.width - cw) / 2, (img.height - ch) / 2, cw, ch, 0, 0, W, H);
+        return c.toDataURL('image/webp', 0.8);
+      }
 
       // ── find where the subject actually is ────────────────────────────
       // Stock photos come with wildly different amounts of empty space
@@ -213,7 +234,7 @@ for (const { name, id, path } of pending) {
 
       return canvas.toDataURL('image/webp', quality);
     },
-    [dataUrl, SIZE, QUALITY, MARGIN],
+    [dataUrl, SIZE, QUALITY, MARGIN, SET === 'services'],
   );
 
   const bytes = Buffer.from(encoded.slice(encoded.indexOf(',') + 1), 'base64');

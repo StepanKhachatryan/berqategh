@@ -7,5 +7,5 @@ import { offeringImage } from '../data/serviceImages';
  */
 export default function OfferingMark({ id }: { id: OfferingId }) {
   const src = offeringImage(id);
-  return src ? <img className="pin-photo" src={src} alt="" /> : <>{OFFERINGS[id].emoji}</>;
+  return src ? <img className="svc-photo" src={src} alt="" /> : <>{OFFERINGS[id].emoji}</>;
 }

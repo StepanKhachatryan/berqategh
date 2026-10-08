@@ -63,6 +63,7 @@ export const PRODUCE: Produce[] = [
   { id: 'olive', hy: 'Ձիթապտուղ', aliases: ['olive', 'dzitaptugh', 'dzitaptux', 'zeytun', 'maslina', 'маслин', 'оливк'], category: 'fruit', color: '#6B7A2E', emoji: '🫒' },
   { id: 'pomegranate', hy: 'Նուռ', aliases: ['pomegranate', 'nur', 'granat'], category: 'fruit', color: '#C42B3A', emoji: '🍎' },
   { id: 'persimmon', hy: 'Խուրմա', aliases: ['persimmon', 'khurma'], category: 'fruit', color: '#F07B22', emoji: '🍊' },
+  { id: 'kinglet', hy: 'Արքայանարինջ', aliases: ['kinglet', 'korolek', 'королёк', 'королек', 'arqayanarinj', 'arkayanarinj'], category: 'fruit', color: '#E2571C', emoji: '🍊' },
   { id: 'mulberry', hy: 'Թութ', aliases: ['mulberry', 'tut', 'shelkovica'], category: 'fruit', color: '#5B2C6F', emoji: '🫐' },
   { id: 'cornelian-cherry', hy: 'Հոն', aliases: ['cornelian cherry', 'hon', 'kizil'], category: 'fruit', color: '#B01A33', emoji: '🍒' },
   { id: 'rosehip', hy: 'Մասուր', aliases: ['rosehip', 'masur', 'shipovnik'], category: 'fruit', color: '#C0392B', emoji: '🌹' },
@@ -152,6 +153,7 @@ export const PRODUCE: Produce[] = [
   { id: 'corn-grain', hy: 'Եգիպտացորեն (հատիկ)', aliases: ['maize', 'grain corn', 'yegiptacoren hatik', 'kukuruza zerno'], category: 'grain', color: '#E8B923', emoji: '🌽' },
   { id: 'buckwheat', hy: 'Հնդկաձավար', aliases: ['buckwheat', 'hndkadzavar', 'grechka', 'гречк'], category: 'grain', color: '#8A5A3B', emoji: '🌾' },
   { id: 'millet', hy: 'Կորեկ', aliases: ['millet', 'korek', 'proso', 'пшено'], category: 'grain', color: '#E0C068', emoji: '🌾' },
+  { id: 'emmer', hy: 'Հաճար', aliases: ['emmer', 'spelt', 'farro', 'hachar', 'hajar', 'полба'], category: 'grain', color: '#B98B4E', emoji: '🌾' },
 
   // ─── Արևադարձային մրգեր ───────────────────────────────────────────────────
   // Imported rather than harvested locally, so these carry no "չիր" form: the
@@ -182,7 +184,7 @@ const DRYABLE = new Set([
   // Fruit — the classic չիր
   'apple', 'pear', 'quince', 'peach', 'nectarine', 'apricot', 'plum',
   'sweet-cherry', 'sour-cherry', 'grape', 'grape-white',
-  'melon', 'fig', 'persimmon', 'mulberry', 'cornelian-cherry', 'rosehip',
+  'melon', 'fig', 'persimmon', 'kinglet', 'mulberry', 'cornelian-cherry', 'rosehip',
   'hawthorn', 'medlar', 'jujube', 'sea-buckthorn',
   // Berries
   'blackberry', 'raspberry', 'blackcurrant', 'redcurrant', 'blueberry',

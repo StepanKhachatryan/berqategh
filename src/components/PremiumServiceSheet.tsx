@@ -4,6 +4,7 @@ import Directions from './Directions';
 import OfferingMark from './OfferingMark';
 import ContactRow from './ContactRow';
 import { readLink } from '../lib/links';
+import LinkButtons from './LinkButtons';
 import { IconCheck, IconWarn } from './Icons';
 import {
   livePromotion,
@@ -203,20 +204,9 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
           })}
         </div>
 
+        <LinkButtons links={links} />
+
         <div className="detail-rows">
-          {links.map((link) => (
-            <div key={link.href} className="detail-row">
-              <span className="k">{link.label}</span>
-              <a
-                className="v detail-link"
-                href={link.href}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                {link.text}
-              </a>
-            </div>
-          ))}
           <div className="detail-row">
             <span className="k">Հասցե</span>
             <span className="v">{service.address}</span>

@@ -248,12 +248,12 @@ h4 {
  * sinks the key onto its lip.
  */
 .btn-3d {
-  --face: #d2534a;
-  --face-hover: #b8433b;
-  --lip: #982d25;
-  --lip-hover: #7f241d;
-  --hi: rgba(255, 255, 255, 0.3);
-  --drop: rgba(152, 45, 37, 0.3);
+  --face: #e5392e;
+  --face-hover: #ca2f25;
+  --lip: #a4241b;
+  --lip-hover: #891d16;
+  --hi: rgba(255, 255, 255, 0.32);
+  --drop: rgba(164, 36, 27, 0.32);
   background: var(--face);
   color: #fff;
   font-weight: 700;
@@ -831,158 +831,6 @@ h4 {
 /* ═══ agricultural services ══════════════════════════════════════════════ */
 
 /*
- * The services switch, in the map's empty top-left corner.
- *
- * It keeps its name permanently. A toolbox icon alone is a dot that says
- * nothing, and no amount of blinking makes a dot mean "where to buy seed" — the
- * word has to be there. But a button three times the width of the round ones
- * cannot sit in their column either, so it does not: the corner it occupies was
- * empty, and the column is left as it was.
- */
-.map-service-btn {
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  z-index: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 14px 0 12px;
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-md);
-  color: var(--ink);
-  font-size: 11.5px;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  transition: all 0.2s var(--ease);
-}
-
-.map-service-btn svg {
-  flex: none;
-  color: var(--green-deep);
-}
-
-.map-service-btn:active {
-  transform: scale(0.96);
-}
-
-.map-service-btn.is-on {
-  background: var(--green-deep);
-  border-color: var(--green-deep);
-  color: #fff;
-}
-
-.map-service-btn.is-on svg {
-  color: #fff;
-}
-
-/*
- * The on/off switch on the right of the label.
- *
- * Changing the button's colour on press told people what state it was in, but
- * only after they had already pressed it — nothing about a coloured pill says
- * it can be pressed at all. A track with a knob in it is the one control
- * everybody already reads as a switch, on a phone and on a desktop alike, and
- * it makes the two states legible side by side rather than by memory.
- */
-.map-service-btn .switch {
-  flex: none;
-  position: relative;
-  width: 30px;
-  height: 17px;
-  margin-left: 2px;
-  border-radius: var(--r-pill);
-  background: var(--line-strong);
-  transition: background 0.2s var(--ease);
-}
-
-.map-service-btn .switch i {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(16, 37, 26, 0.35);
-  transition: transform 0.2s var(--ease);
-}
-
-/* Against the deep green the track has to be light, or the knob vanishes. */
-.map-service-btn.is-on .switch {
-  background: rgba(255, 255, 255, 0.45);
-}
-
-.map-service-btn.is-on .switch i {
-  transform: translateX(13px);
-}
-
-/*
- * The cue: the button breathes until the layer has been opened.
- *
- * A warm glow swells out of it and settles back, with a scale change small
- * enough that you register the movement without being able to point at it. The
- * earlier version was a hard ring snapping outwards on a two-second loop, which
- * is what an alarm looks like. This is what a lamp looks like.
- *
- * It stops for good after the first press. The label carries the meaning; this
- * only says "over here".
- */
-.map-service-btn.is-unseen {
-  animation: service-breathe 3.4s ease-in-out infinite;
-}
-
-@keyframes service-breathe {
-  0%,
-  100% {
-    box-shadow:
-      var(--shadow-md),
-      0 0 0 0 rgba(255, 107, 26, 0);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow:
-      var(--shadow-md),
-      0 0 20px 4px rgba(255, 107, 26, 0.4);
-    transform: scale(1.035);
-  }
-}
-
-/* The header copy of the switch is for desktop only (see the frosted header). */
-@media (max-width: 899px) {
-  .map-service-btn.in-header {
-    display: none;
-  }
-
-  /* Never under the zoom buttons: on a narrow phone the name wraps onto a
-     second line instead of running into the control column. */
-  .map-service-btn.on-map {
-    max-width: calc(100% - 82px);
-    height: auto;
-    min-height: 40px;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    white-space: normal;
-    line-height: 1.2;
-    text-align: left;
-  }
-}
-
-/* No movement, but the cue should not disappear entirely. */
-@media (prefers-reduced-motion: reduce) {
-  .map-service-btn.is-unseen {
-    animation: none;
-    box-shadow:
-      var(--shadow-md),
-      0 0 16px 3px rgba(255, 107, 26, 0.34);
-  }
-}
-
-/*
  * With the services layer on, the produce recedes into the map rather than
  * disappearing from it: a seller can still see where their own harvest sits
  * while they look for the nearest shop. Only the marker pane is touched — the
@@ -992,9 +840,15 @@ h4 {
   transition: filter 0.35s var(--ease);
 }
 
-.map-root.is-services .leaflet-marker-pane {
-  filter: grayscale(1) brightness(1.24) opacity(0.34);
-  pointer-events: none;
+/* Seller side: everyone else's harvest is a faint grey backdrop, so the
+   advertisers stand out; the seller's own listings keep their colour and sit
+   on top, so a pin just published is plainly there. */
+.map-root.is-services .leaflet-marker-pane .pin:not(.pin-own) {
+  filter: grayscale(1) brightness(1.22) opacity(0.32);
+}
+
+.map-root.is-services .leaflet-marker-pane .pin-own {
+  z-index: 900 !important;
 }
 
 /* The two kinds of service marker, as a key in the guide rather than on the
@@ -3555,7 +3409,7 @@ input[type='range']::-moz-range-thumb {
 .map-service-panel {
   position: absolute;
   left: 12px;
-  top: 60px;
+  top: 12px;
   right: 70px;
   max-width: 400px;
   z-index: 600;
@@ -3666,26 +3520,30 @@ input[type='range']::-moz-range-thumb {
 }
 
 /*
- * On a phone the search lives along the bottom, full width, where a thumb
- * already is - with the results opening upwards above the box, and the chips
- * under it. The map frames its matches above the panel (see panelBottom in
- * MapView), and the attribution rides on top of it.
+ * On a phone the search sits in the map's top-left corner, beside the zoom
+ * buttons: the bottom belongs to «Տեղադրել բերք». Folded to the box alone
+ * until it is used, so it covers as little of the map as possible.
  */
 @media (max-width: 899px) {
   .map-service-panel {
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: 0;
+    top: 10px;
+    left: 10px;
+    right: 66px;
     max-width: none;
   }
 
   .svc-search {
-    padding: 10px 12px calc(10px + var(--safe-b));
-    border: none;
-    border-top: 1px solid var(--line);
-    border-radius: var(--r-xl) var(--r-xl) 0 0;
-    box-shadow: 0 -8px 28px rgba(16, 37, 26, 0.13);
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .svc-search-box {
+    height: 40px;
+  }
+
+  .svc-search.is-folded .svc-chips,
+  .svc-search.is-folded .svc-results {
+    display: none;
   }
 
   /* Without the counts, three or four chips share a row instead of two; on
@@ -3705,11 +3563,7 @@ input[type='range']::-moz-range-thumb {
   }
 
   .svc-search .svc-results {
-    order: -1;
     max-height: min(34vh, 260px);
-    border-top: none;
-    border-bottom: 1px solid var(--line);
-    padding: 0 0 6px;
   }
 }
 
@@ -4335,17 +4189,6 @@ input[type='range']::-moz-range-thumb {
     top: calc(var(--overlay-top) - 10px);
   }
 
-  /* The switch moves into the header: the map's corner is under it here. */
-  .map-service-btn.on-map {
-    display: none;
-  }
-
-  .map-service-btn.in-header {
-    position: static;
-    margin-left: 6px;
-    box-shadow: none;
-  }
-
   .map-service-panel {
     top: var(--overlay-top);
   }
@@ -4432,10 +4275,151 @@ input[type='range']::-moz-range-thumb {
   }
 }
 
-/* A narrow desktop: the services switch now shares the header, so "My
-   listings" drops to its icon until there is room for the words. */
-@media (min-width: 900px) and (max-width: 1199px) {
-  .app-header.is-seller .hide-narrow {
+
+/* ═══ advertiser card: offering photos, link buttons, logo ═══════════════ */
+/* An offering's photo wherever its emoji would go: a small rounded square,
+   cropped, the size of the text around it. */
+.svc-photo {
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: cover;
+  border-radius: 0.22em;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* On the map, the photo fills the pin's white window and no more. */
+.pin-svc-photo {
+  position: absolute;
+  object-fit: cover;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.offering-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.offering.has-photo {
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 0 0 7px;
+  overflow: hidden;
+  gap: 6px;
+}
+
+.offering-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: 96px;
+  object-fit: cover;
+}
+
+.offering.has-photo .offering-label {
+  padding: 0 3px;
+  font-size: 10.5px;
+  text-align: center;
+}
+
+.link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.link-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.link-btn svg {
+  flex: none;
+}
+
+.link-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-btn:hover {
+  border-color: var(--ink);
+}
+
+.link-btn:active {
+  background: #f4f4f4;
+}
+
+.header-thumb.service-logo {
+  background: #fff;
+  border: 1px solid var(--field-line);
+  overflow: hidden;
+}
+
+.header-thumb.service-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 3px;
+}
+
+.service-mark.service-logo {
+  background: #fff;
+  border: 1px solid var(--field-line);
+  overflow: hidden;
+}
+
+.service-mark.service-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 2px;
+}
+
+/* A narrow phone: the messengers shrink a little and the call key's padding
+   with them, so the whole number fits («94 82 84 02», not «94 82 84 …»). */
+@container (max-width: 330px) {
+  .contact-row {
+    gap: 6px;
+  }
+
+  .contact-app {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .call-btn {
+    padding: 0 10px;
+    font-size: 15px;
+  }
+}
+
+/* On a narrow phone the two map apps are named by their brand alone. */
+@media (max-width: 379px) {
+  .nav-app-maps {
     display: none;
   }
+}
+
+/* Advertisers keep their full size at every zoom; only harvest pins shrink. */
+[data-zoom-tier] .pin-service .pin-body {
+  scale: 1;
 }
