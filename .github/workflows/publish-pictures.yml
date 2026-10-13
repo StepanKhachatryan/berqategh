@@ -1,0 +1,33 @@
+# Puts newly uploaded pictures on the site, on request.
+#
+# Uploading pictures never deploys by itself (each deploy costs Netlify
+# credits); they go live with the next code change. When they should go live
+# now, run this from GitHub: Actions -> Publish pictures -> Run workflow.
+# It pushes an empty commit marked [deploy], which netlify.toml always builds:
+# one deploy for however many pictures are waiting.
+
+name: Publish pictures
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Queued behind any conversion still running, so it publishes the converted
+# pictures rather than racing them.
+concurrency:
+  group: produce-icons-${{ github.ref }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ask Netlify for one deploy
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git pull --ff-only origin "${GITHUB_REF_NAME}"
+          git commit --allow-empty -m 'Publish pictures [deploy]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"

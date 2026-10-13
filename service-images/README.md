@@ -45,5 +45,5 @@ AGRO PLUS-ի համար պետք են՝ `pesticide`, `fertilizer`, `seeds`, `mac
 
 Բոլոր նկարները վերբեռնիր **մեկ անգամից** («Add files → Upload files», մի քանի
 ֆայլ միասին)։ Նկարների վերբեռնումն ինքնին կայքը չի թարմացնում. նկարները կայքում
-կհայտնվեն կայքի հաջորդ թարմացման հետ կամ երբ Netlify-ում սեղմես
-**Deploys → Trigger deploy → Deploy project**։
+կհայտնվեն կայքի հաջորդ թարմացման հետ, կամ անմիջապես, եթե GitHub-ում սեղմես
+**Actions → Publish pictures → Run workflow**։
