@@ -4,6 +4,7 @@ import ContactRow from './ContactRow';
 import LinkButtons from './LinkButtons';
 import OfferingMark from './OfferingMark';
 import { readLink } from '../lib/links';
+import { useServiceStats } from '../lib/serviceStats';
 import { offeringImage } from '../data/serviceImages';
 import { serviceLogo } from '../data/serviceLogos';
 import { IconWarn } from './Icons';
@@ -21,6 +22,7 @@ interface ServiceDetailProps {
  */
 export default function ServiceDetail({ service, onClose }: ServiceDetailProps) {
   const links = service.links.map(readLink).filter((link) => link !== null);
+  const stats = useServiceStats(service.id);
   const logo = serviceLogo(service.id);
 
   return (
@@ -69,7 +71,7 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
 
       {service.phone ? (
         <div style={{ marginBottom: 12 }}>
-          <ContactRow phone={service.phone} />
+          <ContactRow phone={service.phone} onContact={stats.onContact} />
         </div>
       ) : (
         <p className="detail-plain" style={{ marginBottom: 12 }}>
@@ -77,7 +79,7 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
         </p>
       )}
 
-      <LinkButtons links={links} />
+      <LinkButtons links={links} onOpen={stats.onLink} />
 
       <div className="detail-rows">
         <div className="detail-row">
@@ -86,7 +88,7 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
         </div>
       </div>
 
-      <Directions lat={service.lat} lng={service.lng} />
+      <Directions lat={service.lat} lng={service.lng} onOpen={stats.onDirections} />
     </Modal>
   );
 }

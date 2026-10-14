@@ -1,0 +1,18 @@
+{
+  "_comment": "Words a seller's name or note may not contain. 'prefixes' match at the start of a word (any ending), 'words' only as a whole word. The database enforces the same list (supabase/migrations/0025_*); after editing this file run `node scripts/moderation-sql.mjs` and apply its output as a new migration.",
+  "prefixes": [
+    "porn", "xxx", "nude", "fuck", "onlyfans", "escort", "cocain", "heroin", "marijuan", "cannabis", "hashish",
+    "amphetamin", "mephedron", "pedo", "lolicon", "csam", "mdma", "ecstas",
+    "порн", "секс", "интим", "хуй", "хуе", "хуя", "пизд", "ебат", "ебан", "ебл", "ёб", "бляд", "блят", "шлюх",
+    "наркот", "марихуан", "гашиш", "кокаин", "героин", "амфетамин", "мефедрон", "закладк", "педофил", "проститут",
+    "պոռնո", "սեքս", "ինտիմ", "թմրանյութ", "թմրադեղ", "մանկապիղծ", "մանկապղծ", "պոռնիկ", "մարիխուանա",
+    "կոկաին", "հերոին", "ամֆետամին",
+    "qunem", "kunem", "qunac", "kunac", "pornik"
+  ],
+  "words": [
+    "sex", "sexy", "shit", "bitch", "dick", "pussy", "weed", "meth", "lsd",
+    "сука", "спайс",
+    "բոզ", "բոզի", "բոզեր", "քունեմ", "քունած",
+    "boz", "bozi"
+  ]
+}

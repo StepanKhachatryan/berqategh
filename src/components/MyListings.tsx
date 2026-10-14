@@ -3,8 +3,9 @@ import Modal from './Modal';
 import ProduceMark from './ProduceMark';
 import { formatPrice, timeLeft } from '../lib/format';
 import { listingColor, swatchStyle } from './markers';
-import { IconArchive, IconTrash } from './Icons';
+import { IconArchive, IconEye, IconPhone, IconTrash } from './Icons';
 import { listingTitle, type Listing } from '../lib/types';
+import type { ListingStats } from '../lib/listings';
 
 
 /* An upload in progress is not worth a line: it either finishes in a moment
@@ -29,6 +30,10 @@ interface MyListingsProps {
   onWithdrawOffers: () => Promise<void>;
   onRecover: () => void;
   onClose: () => void;
+  /** Signed in with Google: the view counts are shown. */
+  signedIn: boolean;
+  stats: Map<string, ListingStats> | null;
+  onSignIn: () => void;
 }
 
 export default function MyListings({
@@ -42,6 +47,9 @@ export default function MyListings({
   onWithdrawOffers,
   onRecover,
   onClose,
+  signedIn,
+  stats,
+  onSignIn,
 }: MyListingsProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [withdrawing, setWithdrawing] = useState(false);
@@ -104,6 +112,17 @@ export default function MyListings({
         </div>
       ) : null}
 
+      {/* The reason to sign in, shown where a seller wants it. */}
+      {!signedIn && listings.length > 0 ? (
+        <button type="button" className="views-teaser" onClick={onSignIn}>
+          <IconEye size={18} />
+          <span>
+            <b>Քանի՞ մարդ է դիտել ձեր բերքը</b>
+            Մուտք գործեք Gmail-ով՝ տեսնելու յուրաքանչյուր հայտարարության դիտումներն ու զանգերը։
+          </span>
+        </button>
+      ) : null}
+
       {loading ? (
         <p className="empty-note">Բեռնվում է…</p>
       ) : listings.length === 0 ? (
@@ -121,6 +140,7 @@ export default function MyListings({
               key={listing.id}
               listing={listing}
               now={now}
+              stats={signedIn ? (stats?.get(listing.id) ?? null) : null}
               busy={busyId === listing.id}
               actions={
                 <>
@@ -166,6 +186,7 @@ export default function MyListings({
               key={listing.id}
               listing={listing}
               now={now}
+              stats={signedIn ? (stats?.get(listing.id) ?? null) : null}
               archived
               busy={busyId === listing.id}
               actions={
@@ -205,12 +226,14 @@ function MyListingCard({
   archived = false,
   busy,
   actions,
+  stats = null,
 }: {
   listing: Listing;
   now: number;
   archived?: boolean;
   busy: boolean;
   actions: React.ReactNode;
+  stats?: ListingStats | null;
 }) {
   const remaining = new Date(listing.expiresAt).getTime() - now;
   const total = new Date(listing.expiresAt).getTime() - new Date(listing.createdAt).getTime();
@@ -257,6 +280,16 @@ function MyListingCard({
                 : timeLeft(listing.expiresAt, now)}
             </span>
           </div>
+          {stats ? (
+            <div className="mine-stats">
+              <span>
+                <IconEye size={14} /> {stats.views} դիտում
+              </span>
+              <span>
+                <IconPhone size={13} /> {stats.contacts} կապ
+              </span>
+            </div>
+          ) : null}
           {/* Only the seller sees this: where their photo stands in review. */}
           {!archived && listing.photoStatus && PHOTO_STATUS[listing.photoStatus] ? (
             <div className={`photo-status is-${listing.photoStatus}`}>

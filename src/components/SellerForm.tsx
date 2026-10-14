@@ -4,6 +4,8 @@ import ProducePicker from './ProducePicker';
 import ProduceMark from './ProduceMark';
 import LocationPicker from './LocationPicker';
 import { PHOTO_ACCEPT, PhotoError, preparePhoto, type PreparedPhoto } from '../lib/photo';
+import { looksExplicit } from '../lib/photoCheck';
+import { INAPPROPRIATE_MESSAGE, isInappropriate, isModerationError } from '../lib/moderation';
 import { canBeDried, CATEGORY_LABELS, getProduce, type Produce } from '../data/produce';
 import { isValidLocalPhone, PHONE_LOCAL_LENGTH, toE164 } from '../lib/format';
 import { isInsideArmenia } from '../lib/geo';
@@ -29,12 +31,10 @@ const REMEMBERED_KEY = 'berqategh.seller';
 interface Remembered {
   phone: string;
   name: string;
-  /** A seller who delivers usually always does; their last answer is kept. */
-  delivery: boolean;
 }
 
 function loadRemembered(): Remembered {
-  const blank: Remembered = { phone: '', name: '', delivery: false };
+  const blank: Remembered = { phone: '', name: '' };
   try {
     const raw = localStorage.getItem(REMEMBERED_KEY);
     if (raw) return { ...blank, ...(JSON.parse(raw) as Partial<Remembered>) };
@@ -59,6 +59,8 @@ interface FormErrors {
   wholesalePrice?: string;
   phone?: string;
   location?: string;
+  sellerName?: string;
+  note?: string;
 }
 
 export default function SellerForm({
@@ -98,7 +100,15 @@ export default function SellerForm({
     setPhotoError(null);
     setPhotoBusy(true);
     try {
-      setPhoto(await preparePhoto(file));
+      const prepared = await preparePhoto(file);
+      // Checked on the phone before it is ever shown or uploaded.
+      if (await looksExplicit(prepared.previewUrl)) {
+        URL.revokeObjectURL(prepared.previewUrl);
+        throw new PhotoError(
+          'Այս լուսանկարը չի կարող տեղադրվել։ Տեղադրե՛ք միայն ձեր բերքի կամ ապրանքի լուսանկարը։',
+        );
+      }
+      setPhoto(prepared);
     } catch (error) {
       setPhotoError(
         error instanceof PhotoError ? error.message : 'Չհաջողվեց մշակել նկարը։ Փորձե՛ք այլ լուսանկար։',
@@ -118,7 +128,9 @@ export default function SellerForm({
   // Once it did, the geolocation status stops being what the seller needs told.
   const [pickedByHand, setPickedByHand] = useState(false);
   const [durationDays, setDurationDays] = useState(30);
-  const [delivery, setDelivery] = useState(remembered.delivery);
+  // Never carried over from the last listing: a box that arrives ticked gets
+  // left ticked by people who never read it, and buyers then expect delivery.
+  const [delivery, setDelivery] = useState(false);
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -190,8 +202,13 @@ export default function SellerForm({
       found.location = 'Կետը Հայաստանից դուրս է - նշե՛ք վաճառքի կետը Հայաստանի ներսում';
     }
 
+    // Shown at once, not only after a failed submit: the seller is looking at
+    // the field they just typed in.
+    if (isInappropriate(sellerName)) found.sellerName = INAPPROPRIATE_MESSAGE;
+    if (isInappropriate(note)) found.note = INAPPROPRIATE_MESSAGE;
+
     return found;
-  }, [product, wantsRetail, wantsWholesale, retailPrice, wholesalePrice, phone, location]);
+  }, [product, wantsRetail, wantsWholesale, retailPrice, wholesalePrice, phone, location, sellerName, note]);
 
   const isValid = Object.keys(errors).length === 0;
 
@@ -236,10 +253,16 @@ export default function SellerForm({
 
       localStorage.setItem(
         REMEMBERED_KEY,
-        JSON.stringify({ phone, name: sellerName.trim(), delivery } satisfies Remembered),
+        JSON.stringify({ phone, name: sellerName.trim() } satisfies Remembered),
       );
     } catch (error) {
-      setFailure(error instanceof Error ? error.message : 'Չհաջողվեց պահպանել');
+      setFailure(
+        isModerationError(error)
+          ? INAPPROPRIATE_MESSAGE
+          : error instanceof Error
+            ? error.message
+            : 'Չհաջողվեց պահպանել',
+      );
       setSubmitting(false);
     }
   }
@@ -518,7 +541,7 @@ export default function SellerForm({
             </div>
           )}
 
-          {photoBusy ? <p className="field-hint">Նկարը մշակվում է…</p> : null}
+          {photoBusy ? <p className="field-hint">Նկարը մշակվում և ստուգվում է…</p> : null}
           {photoError ? <p className="field-error">{photoError}</p> : null}
           <p className="field-hint">
             Մեկ լուսանկար՝ ձեր բերքի։ Անպատշաճ
@@ -622,6 +645,7 @@ export default function SellerForm({
             onChange={(event) => setSellerName(event.target.value)}
             placeholder="Օր․՝ Արամի տնտեսություն"
           />
+          {errors.sellerName ? <p className="field-error">{errors.sellerName}</p> : null}
         </div>
 
         <div className="field">
@@ -636,6 +660,7 @@ export default function SellerForm({
             onChange={(event) => setNote(event.target.value)}
             placeholder="Օր․՝ առանց քիմիկատների, հավաքված է այսօր առավոտյան"
           />
+          {errors.note ? <p className="field-error">{errors.note}</p> : null}
         </div>
 
       </Modal>

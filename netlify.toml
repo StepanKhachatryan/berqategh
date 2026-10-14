@@ -11,10 +11,19 @@
   # so it cost a deploy and still showed nothing new. Pictures now go live
   # with the next code change, or on purpose: a commit whose message contains
   # [deploy] always builds (the "Publish pictures" workflow makes one).
-  ignore = "git log -1 --format=%B | grep -qF '[deploy]' && exit 1; git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)produce-images' ':(exclude)service-images' ':(exclude)service-logos' ':(exclude)src/assets/produce' ':(exclude)src/assets/services' ':(exclude)src/assets/logos' ':(exclude)supabase' ':(exclude)scripts' ':(exclude).github' ':(exclude)*.md'"
+  ignore = "git log -1 --format=%B | grep -qF '[deploy]' && exit 1; git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)produce-images' ':(exclude)service-images' ':(exclude)service-logos' ':(exclude)src/assets/produce' ':(exclude)src/assets/services' ':(exclude)src/assets/logos' ':(exclude)supabase' ':(exclude)android' ':(exclude)scripts' ':(exclude).github' ':(exclude)*.md'"
 
 [build.environment]
   NODE_VERSION = "20"
+
+# The Android app's link to the site. Served from the database through an
+# Edge Function, so the app's signing fingerprint can be added without a
+# deploy (supabase/functions/assetlinks). Must stay above the SPA fallback.
+[[redirects]]
+  from = "/.well-known/assetlinks.json"
+  to = "https://xkcjipuabawakdcewklq.supabase.co/functions/v1/assetlinks"
+  status = 200
+  force = true
 
 # SPA fallback — every route is served by index.html
 [[redirects]]

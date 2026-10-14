@@ -4,6 +4,7 @@ import Directions from './Directions';
 import OfferingMark from './OfferingMark';
 import ContactRow from './ContactRow';
 import { readLink } from '../lib/links';
+import { useServiceStats } from '../lib/serviceStats';
 import LinkButtons from './LinkButtons';
 import { IconCheck, IconWarn } from './Icons';
 import {
@@ -96,6 +97,7 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
   const brand = premium.brandColor;
   const promotion = livePromotion(service);
   const links = service.links.map(readLink).filter((link) => link !== null);
+  const stats = useServiceStats(service.id);
   const mark = <OfferingMark id={service.offerings[0]} />;
 
   // The brand colour and two tints of it, as 8-digit hex rather than
@@ -143,7 +145,7 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
       footer={
         service.phone ? (
           <div className="premium-cta">
-            <ContactRow phone={service.phone} />
+            <ContactRow phone={service.phone} onContact={stats.onContact} />
           </div>
         ) : undefined
       }
@@ -204,7 +206,7 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
           })}
         </div>
 
-        <LinkButtons links={links} />
+        <LinkButtons links={links} onOpen={stats.onLink} />
 
         <div className="detail-rows">
           <div className="detail-row">
@@ -213,7 +215,7 @@ export default function PremiumServiceSheet({ service, onClose }: PremiumService
           </div>
         </div>
 
-        <Directions lat={service.lat} lng={service.lng} />
+        <Directions lat={service.lat} lng={service.lng} onOpen={stats.onDirections} />
       </div>
     </Modal>
   );

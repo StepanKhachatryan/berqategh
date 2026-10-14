@@ -11,8 +11,8 @@ const MESSENGER_ICONS: Record<string, JSX.Element> = {
 interface ContactRowProps {
   /** International form, "+374...". */
   phone: string;
-  /** Called on any of the four, for whoever is counting contacts. */
-  onContact?: () => void;
+  /** Called on any of the four with which one, for whoever is counting. */
+  onContact?: (via: 'call' | 'whatsapp' | 'viber' | 'telegram') => void;
 }
 
 /**
@@ -26,7 +26,7 @@ interface ContactRowProps {
 export default function ContactRow({ phone, onContact }: ContactRowProps) {
   return (
     <div className="contact-row">
-      <a className="btn btn-3d btn-call btn-lg call-btn" href={`tel:${phone}`} onClick={onContact}>
+      <a className="btn btn-3d btn-call btn-lg call-btn" href={`tel:${phone}`} onClick={() => onContact?.('call')}>
         <IconPhone />
         <span className="call-word">Զանգել՝</span>
         <span className="call-number">{formatLocalPhone(phone)}</span>
@@ -41,7 +41,7 @@ export default function ContactRow({ phone, onContact }: ContactRowProps) {
           rel="noreferrer noopener"
           title={link.label}
           aria-label={link.label}
-          onClick={onContact}
+          onClick={() => onContact?.(link.id as 'whatsapp' | 'viber' | 'telegram')}
         >
           {MESSENGER_ICONS[link.id]}
         </a>

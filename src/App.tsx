@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MapView from './components/MapView';
 import RoleGate from './components/RoleGate';
 import ResultsPanel from './components/ResultsPanel';
@@ -19,7 +19,9 @@ import {
   createListing,
   deleteListing,
   fetchActiveListings,
+  fetchListingStats,
   fetchMyListings,
+  type ListingStats,
   issueRecoveryCode,
   uploadListingPhoto,
   claimListings,
@@ -159,6 +161,14 @@ export default function App() {
     if (role === 'seller') void loadMine();
   }, [role, loadMine]);
 
+  // View and contact counts for «Իմ հայտարարությունները», for signed-in
+  // sellers, fetched each time the sheet opens so they are current.
+  const [listingStats, setListingStats] = useState<Map<string, ListingStats> | null>(null);
+  useEffect(() => {
+    if (sheet !== 'mine' || !account.email) return;
+    fetchListingStats().then(setListingStats, () => undefined);
+  }, [sheet, account.email]);
+
   // The seller's own listings stay in colour on their dimmed map, so a pin
   // they have just published is plainly there.
   const ownIds = useMemo(() => new Set(mine.filter((listing) => !listing.archivedAt).map((listing) => listing.id)), [mine]);
@@ -166,12 +176,14 @@ export default function App() {
   // One visit per browser session. It waits a few seconds for a position so the
   // region can be filled in when the visitor let the app find them, then
   // records regardless — recordVisit ignores every call after the first.
+  const roleRef = useRef(role);
+  roleRef.current = role;
   useEffect(() => {
     if (position) {
-      recordVisit(position);
+      recordVisit(position, roleRef.current);
       return;
     }
-    const timer = window.setTimeout(() => recordVisit(null), 6000);
+    const timer = window.setTimeout(() => recordVisit(null, roleRef.current), 6000);
     return () => window.clearTimeout(timer);
   }, [position]);
 
@@ -249,6 +261,7 @@ export default function App() {
       setFocus({ point: { lat: listing.lat, lng: listing.lng }, zoom: 14, nonce: Date.now() });
       record({
         kind: 'listing_open',
+        target: listing.id,
         origin: position,
         listingAt: { lat: listing.lat, lng: listing.lng },
         productId: listing.productId,
@@ -640,6 +653,9 @@ export default function App() {
           onWithdrawOffers={handleWithdrawOffers}
           onRecover={() => setSheet('recover')}
           onClose={() => setSheet('none')}
+          signedIn={Boolean(account.email)}
+          stats={listingStats}
+          onSignIn={() => setSheet('account')}
         />
       ) : null}
 

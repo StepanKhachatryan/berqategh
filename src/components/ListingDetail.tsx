@@ -10,6 +10,7 @@ import { listingColor, swatchStyle } from './markers';
 import { IconExpand, IconTruck } from './Icons';
 import Directions from './Directions';
 import ContactRow from './ContactRow';
+import ReportListing from './ReportListing';
 import { usePlaceName } from '../lib/usePlaceName';
 import { listingTitle, type MeasuredListing } from '../lib/types';
 
@@ -27,11 +28,14 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
   const place = usePlaceName({ lat: listing.lat, lng: listing.lng });
   const [photoOpen, setPhotoOpen] = useState(false);
 
-  /* Reaching the seller is one event whichever button does it: what the funnel
-     measures is that the buyer made contact, not which app they used. */
-  const recordCall = () =>
+  /* Reaching the seller is one kind of event whichever button does it, with
+     the button kept alongside (call, whatsapp, viber, telegram), and the
+     listing it was about - which is what the seller's view count reads. */
+  const recordCall = (via: string) =>
     record({
       kind: 'call_click',
+      target: listing.id,
+      detail: via,
       listingAt: { lat: listing.lat, lng: listing.lng },
       productId: listing.productId,
     });
@@ -185,8 +189,16 @@ export default function ListingDetail({ listing, onClose, now }: ListingDetailPr
             in international form, so each is a link rather than a feature. */}
         {listing.phone ? <ContactRow phone={listing.phone} onContact={recordCall} /> : null}
 
-        <Directions lat={listing.lat} lng={listing.lng} />
+        <Directions
+          lat={listing.lat}
+          lng={listing.lng}
+          onOpen={(app) =>
+            record({ kind: 'listing_directions', target: listing.id, detail: app, productId: listing.productId })
+          }
+        />
       </div>
+
+      <ReportListing listingId={listing.id} />
     </Modal>
     </>
   );

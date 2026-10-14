@@ -25,7 +25,7 @@ const SESSION_KEY = 'berqategh.session';
 
 let sessionId: string | null = null;
 
-function currentSession(): string {
+export function currentSession(): string {
   if (sessionId) return sessionId;
 
   try {
@@ -66,6 +66,11 @@ interface EventInput {
     | 'role'
     | 'listing_open'
     | 'call_click'
+    | 'listing_directions'
+    | 'service_open'
+    | 'service_contact'
+    | 'service_link'
+    | 'service_directions'
     | 'install_shown'
     | 'install_accepted'
     | 'install_dismissed';
@@ -75,6 +80,10 @@ interface EventInput {
   /** Where the produce is, for events about a specific listing. */
   listingAt?: LatLng;
   productId?: string;
+  /** The listing id or service id the event is about. */
+  target?: string;
+  /** Which button: call, whatsapp, viber, telegram, site, facebook, yandex... */
+  detail?: string;
 }
 
 /**
@@ -94,6 +103,8 @@ export function record(input: EventInput): void {
       visitor_marz: input.origin ? marzOf(input.origin.lat, input.origin.lng) : null,
       listing_marz: input.listingAt ? marzOf(input.listingAt.lat, input.listingAt.lng) : null,
       product_id: input.productId ?? null,
+      target: input.target ?? null,
+      detail: input.detail ?? null,
     };
 
     void supabase()
@@ -110,9 +121,14 @@ export function record(input: EventInput): void {
 
 let visitRecorded = false;
 
-/** Once per browser session, however many times the app remounts. */
-export function recordVisit(origin: LatLng | null): void {
+/**
+ * Once per browser session, however many times the app remounts. Carries the
+ * side the visitor is on when it is already known (remembered from last
+ * time), so buyers and sellers can be told apart for every visit, not only
+ * for those who pressed a button to choose.
+ */
+export function recordVisit(origin: LatLng | null, role: Role | null): void {
   if (visitRecorded) return;
   visitRecorded = true;
-  record({ kind: 'visit', origin });
+  record({ kind: 'visit', origin, role: role ?? undefined });
 }

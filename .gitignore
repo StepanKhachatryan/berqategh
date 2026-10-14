@@ -9,3 +9,7 @@ dist-ssr
 .vite
 tsconfig.tsbuildinfo
 .netlify
+
+# Android signing keys never belong in the repository.
+*.keystore
+*.jks

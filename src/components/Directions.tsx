@@ -3,6 +3,8 @@ import { IconPin } from './Icons';
 interface DirectionsProps {
   lat: number;
   lng: number;
+  /** Called with the app chosen, for whoever is counting. */
+  onOpen?: (app: 'yandex' | 'google') => void;
 }
 
 /** Yandex Maps' red pin. */
@@ -40,7 +42,7 @@ function GooglePin() {
  * Armenia actually navigate with on the right, each with its own pin so it is
  * recognised before it is read. Used by listings, services and premium cards.
  */
-export default function Directions({ lat, lng }: DirectionsProps) {
+export default function Directions({ lat, lng, onOpen }: DirectionsProps) {
   const point = `${lat.toFixed(5)},${lng.toFixed(5)}`;
   const yandexUrl = `https://yandex.com/maps/?rtext=~${point}&rtt=auto&z=16`;
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${point}`;
@@ -55,13 +57,13 @@ export default function Directions({ lat, lng }: DirectionsProps) {
           հասնել
         </span>
       </span>
-      <a className="nav-app" href={yandexUrl} target="_blank" rel="noreferrer noopener">
+      <a className="nav-app" href={yandexUrl} target="_blank" rel="noreferrer noopener" onClick={() => onOpen?.('yandex')}>
         <YandexPin />
         <span>
           Yandex<span className="nav-app-maps"> Maps</span>
         </span>
       </a>
-      <a className="nav-app" href={googleUrl} target="_blank" rel="noreferrer noopener">
+      <a className="nav-app" href={googleUrl} target="_blank" rel="noreferrer noopener" onClick={() => onOpen?.('google')}>
         <GooglePin />
         <span>
           Google<span className="nav-app-maps"> Maps</span>

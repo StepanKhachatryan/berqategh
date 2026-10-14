@@ -178,6 +178,11 @@ export default function GuideSheet({ mode, onClose }: GuideSheetProps) {
           կամ գրե՛ք մեզ։
         </p>
         <ContactRow phone={SUPPORT_PHONE} />
+        <p style={{ marginTop: 12, fontSize: 12.5 }}>
+          <a href="/privacy.html" target="_blank" rel="noopener">
+            Գաղտնիության քաղաքականություն
+          </a>
+        </p>
       </section>
     </Modal>
   );

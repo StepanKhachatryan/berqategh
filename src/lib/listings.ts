@@ -207,3 +207,21 @@ export async function claimListings(phone: string, code: string): Promise<number
   if (error) throw new Error(error.message);
   return data ?? 0;
 }
+
+export interface ListingStats {
+  views: number;
+  contacts: number;
+}
+
+/**
+ * How many people opened each of the caller's listings, and how many pressed
+ * call or a messenger - distinct visits, counted since the statistics began
+ * (October 2026). Sellers who are signed in see these in «Իմ հայտարարությունները».
+ */
+export async function fetchListingStats(): Promise<Map<string, ListingStats>> {
+  const { data, error } = await supabase().rpc('listing_stats');
+  if (error) throw new Error(error.message);
+  return new Map(
+    (data ?? []).map((row) => [row.id, { views: Number(row.views), contacts: Number(row.contacts) }]),
+  );
+}

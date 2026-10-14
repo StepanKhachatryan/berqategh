@@ -52,6 +52,11 @@ export type EventInsert = {
     | 'role'
     | 'listing_open'
     | 'call_click'
+    | 'listing_directions'
+    | 'service_open'
+    | 'service_contact'
+    | 'service_link'
+    | 'service_directions'
     | 'install_shown'
     | 'install_accepted'
     | 'install_dismissed';
@@ -60,6 +65,8 @@ export type EventInsert = {
   visitor_marz?: string | null;
   listing_marz?: string | null;
   product_id?: string | null;
+  target?: string | null;
+  detail?: string | null;
 };
 
 /**
@@ -106,6 +113,11 @@ export type Database = {
       my_listings: { Args: Record<string, never>; Returns: MyListingRow[] };
       seller_listings: { Args: Record<string, never>; Returns: MyListingRow[] };
       link_device: { Args: Record<string, never>; Returns: boolean };
+      listing_stats: {
+        Args: Record<string, never>;
+        Returns: { id: string; views: number; contacts: number }[];
+      };
+      report_listing: { Args: { p_id: string; p_session: string; p_reason: string }; Returns: boolean };
       archive_listing: { Args: { p_id: string }; Returns: boolean };
       delete_listing: { Args: { p_id: string }; Returns: boolean };
       archive_expired_listings: { Args: never; Returns: number };

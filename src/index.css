@@ -4423,3 +4423,110 @@ input[type='range']::-moz-range-thumb {
 [data-zoom-tier] .pin-service .pin-body {
   scale: 1;
 }
+
+/* ═══ reporting a listing ════════════════════════════════════════════════ */
+.report-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 4px 0;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.report-box {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid #f0b8b2;
+  border-radius: var(--r-md);
+}
+
+.report-title {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.report-reasons {
+  display: grid;
+  gap: 6px;
+}
+
+.report-reason {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--r-sm, 10px);
+  background: var(--surface);
+  font-size: 13px;
+  text-align: left;
+  color: var(--ink);
+}
+
+.report-reason:active {
+  background: #f6f6f6;
+}
+
+.report-cancel {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.report-done {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* ═══ view counts in «Իմ հայտարարությունները» ════════════════════════════ */
+.views-teaser {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.views-teaser svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--green-deep);
+}
+
+.views-teaser b {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.mine-stats {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.mine-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mine-stats svg {
+  color: var(--green-deep);
+}
