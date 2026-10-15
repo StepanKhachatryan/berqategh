@@ -13,3 +13,7 @@ tsconfig.tsbuildinfo
 # Android signing keys never belong in the repository.
 *.keystore
 *.jks
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties

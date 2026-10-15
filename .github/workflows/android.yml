@@ -1,0 +1,65 @@
+# Builds the ԲերքաՏեղ Android app (a Trusted Web Activity over berqategh.am).
+#
+# Run from GitHub: Actions -> Android app -> Run workflow. The result is a
+# download on the run's page with two files:
+#   app-release.aab  - upload this to Google Play Console
+#   app-release.apk  - install directly on a phone for a quick test
+#
+# The app opens the live site, so site changes never need a new build. Build
+# again only when the app itself changes (name, icon, notifications, or the
+# yearly Android version Google Play requires).
+#
+# Signing uses the upload key from two repository secrets (Settings ->
+# Secrets and variables -> Actions):
+#   ANDROID_KEYSTORE_BASE64    the keystore file, base64-encoded
+#   ANDROID_KEYSTORE_PASSWORD  its password
+# The key itself is never committed (see .gitignore).
+
+name: Android app
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Check the signing secrets are set
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE" ] || [ -z "$PASSWORD" ]; then
+            echo "::error::Add the ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD secrets first (see android/README.md)."
+            exit 1
+          fi
+
+      - name: Build the signed app
+        working-directory: android
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: berqategh
+          # Google Play needs a higher version code for every upload.
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/upload.keystore"
+          echo "$KEYSTORE" | base64 -d > "$ANDROID_KEYSTORE_PATH"
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease assembleRelease
+          rm -f "$ANDROID_KEYSTORE_PATH"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: berqategh-android-${{ github.run_number }}
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
