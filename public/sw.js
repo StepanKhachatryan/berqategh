@@ -61,3 +61,45 @@ self.addEventListener('fetch', (event) => {
     })(),
   );
 });
+
+/*
+ * Notifications. The payload is JSON from the push-send Edge Function:
+ * { title, body, url, tag }. A tap opens (or focuses) the site at that url,
+ * which the app reads - ?listing=<id> opens a listing, ?open=mine the
+ * seller's own listings.
+ */
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : '' };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'ԲերքաՏեղ', {
+      body: data.body || '',
+      icon: '/icon-192.png',
+      badge: '/favicon-96.png',
+      tag: data.tag,
+      data: { url: data.url || '/' },
+      lang: 'hy',
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || '/', self.location.origin).href;
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of windows) {
+        if (new URL(client.url).origin === self.location.origin && 'navigate' in client) {
+          await client.navigate(url);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })(),
+  );
+});

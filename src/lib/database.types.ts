@@ -118,6 +118,30 @@ export type Database = {
         Returns: { id: string; views: number; contacts: number }[];
       };
       report_listing: { Args: { p_id: string; p_session: string; p_reason: string }; Returns: boolean };
+      push_public_key: { Args: Record<string, never>; Returns: string | null };
+      push_save: {
+        Args: {
+          p_endpoint: string;
+          p_p256dh: string;
+          p_auth: string;
+          p_seller?: boolean | null;
+          p_watch?: boolean | null;
+          p_products?: string[] | null;
+          p_lat?: number | null;
+          p_lng?: number | null;
+          p_radius_km?: number | null;
+        };
+        Returns: boolean;
+      };
+      push_status: {
+        Args: { p_endpoint: string };
+        Returns: {
+          seller_alerts: boolean;
+          watch_products: string[] | null;
+          watch_radius_km: number | null;
+          watch_has_point: boolean;
+        }[];
+      };
       archive_listing: { Args: { p_id: string }; Returns: boolean };
       delete_listing: { Args: { p_id: string }; Returns: boolean };
       archive_expired_listings: { Args: never; Returns: number };

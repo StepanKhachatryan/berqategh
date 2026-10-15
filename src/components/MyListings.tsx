@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Modal from './Modal';
+import SellerAlerts from './SellerAlerts';
 import ProduceMark from './ProduceMark';
 import { formatPrice, timeLeft } from '../lib/format';
 import { listingColor, swatchStyle } from './markers';
@@ -122,6 +123,8 @@ export default function MyListings({
           </span>
         </button>
       ) : null}
+
+      {listings.some((listing) => !listing.archivedAt) ? <SellerAlerts /> : null}
 
       {loading ? (
         <p className="empty-note">Բեռնվում է…</p>

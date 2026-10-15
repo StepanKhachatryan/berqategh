@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import ListingCard from './ListingCard';
 import type { SheetStep } from '../App';
 import { SORT_LABELS, type SortKey } from '../lib/filter';
-import { IconChevronDown, IconChevronUp, IconFilter, IconSearch } from './Icons';
+import { IconBell, IconChevronDown, IconChevronUp, IconFilter, IconSearch } from './Icons';
 import { FORM_LABELS, type Filters, type MeasuredListing } from '../lib/types';
 import { getProduce } from '../data/produce';
 import { SALE_TYPE_SHORT } from './markers';
@@ -33,6 +33,8 @@ interface ResultsPanelProps {
   measuring: boolean;
   /** How much of the map this pane is covering, in pixels. */
   onHeightChange: (height: number) => void;
+  /** The bell: notifications for new offers. */
+  onOpenWatch: () => void;
 }
 
 export default function ResultsPanel({
@@ -51,6 +53,7 @@ export default function ResultsPanel({
   now,
   measuring,
   onHeightChange,
+  onOpenWatch,
 }: ResultsPanelProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -98,6 +101,15 @@ export default function ResultsPanel({
           ) : null}
           {measuring ? <span className="muted"> · չափվում է…</span> : null}
         </h3>
+        <button
+          type="button"
+          className="watch-bell"
+          onClick={onOpenWatch}
+          title="Ծանուցում նոր առաջարկների մասին"
+          aria-label="Ծանուցում նոր առաջարկների մասին"
+        >
+          <IconBell size={17} />
+        </button>
         <select
           className="sort-select"
           value={sort}

@@ -10,6 +10,7 @@ import ListingDetail from './components/ListingDetail';
 import MyListings from './components/MyListings';
 import RecoverySheet from './components/RecoverySheet';
 import GuideSheet from './components/GuideSheet';
+import WatchSheet from './components/WatchSheet';
 import InstallPrompt from './components/InstallPrompt';
 import { ToastStack, useToasts } from './components/Toasts';
 import { IconArchive, IconHelp, IconPlus, IconUser } from './components/Icons';
@@ -47,7 +48,7 @@ const ROLE_KEY = 'berqategh.role';
 const REFRESH_MS = 60_000;
 const TICK_MS = 30_000;
 
-type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide' | 'recover' | 'account';
+type Sheet = 'none' | 'filters' | 'seller' | 'mine' | 'guide' | 'recover' | 'account' | 'watch';
 
 /** Folded to its handle, sharing the screen with the map, or covering it. */
 export type SheetStep = 'collapsed' | 'half' | 'full';
@@ -199,6 +200,41 @@ export default function App() {
     () => listings.filter((listing) => new Date(listing.expiresAt).getTime() > now),
     [listings, now],
   );
+
+  /*
+   * Where a tapped notification lands: ?listing=<id> opens that listing on
+   * the buyer's map, ?open=mine the seller's own listings. Read once; the URL
+   * is tidied as soon as it has been acted on, so a reload does not reopen it.
+   */
+  const deepLinkRef = useRef<{ listing: string | null; mine: boolean } | null>(null);
+  if (deepLinkRef.current === null) {
+    const params = new URLSearchParams(window.location.search);
+    deepLinkRef.current = { listing: params.get('listing'), mine: params.get('open') === 'mine' };
+  }
+  useEffect(() => {
+    const link = deepLinkRef.current;
+    if (!link || (!link.listing && !link.mine)) return;
+    const tidy = () => window.history.replaceState(null, '', '/');
+    if (link.mine) {
+      link.mine = false;
+      localStorage.setItem(ROLE_KEY, 'seller');
+      setRole('seller');
+      setSheet('mine');
+      tidy();
+      return;
+    }
+    if (role !== 'buyer') {
+      localStorage.setItem(ROLE_KEY, 'buyer');
+      setRole('buyer');
+      return;
+    }
+    const target = liveListings.find((listing) => listing.id === link.listing);
+    if (!target) return;
+    link.listing = null;
+    setSelectedId(target.id);
+    setFocus({ point: { lat: target.lat, lng: target.lng }, zoom: 14, nonce: Date.now() });
+    tidy();
+  }, [liveListings, role]);
 
   // ─── distances ───────────────────────────────────────────────────────────
   const { distances, measuring } = useDistances(position, liveListings);
@@ -578,6 +614,7 @@ export default function App() {
               now={now}
               measuring={measuring}
               onHeightChange={setSheetHeight}
+              onOpenWatch={() => setSheet('watch')}
             />
           ) : null}
         </div>
@@ -665,6 +702,16 @@ export default function App() {
 
       {selected && sheet === 'none' ? (
         <ListingDetail listing={selected} onClose={() => setSelectedId(null)} now={now} />
+      ) : null}
+
+      {sheet === 'watch' ? (
+        <WatchSheet
+          initialProducts={filters.productIds}
+          position={position}
+          onLocate={locate}
+          onDone={(message) => push('success', message)}
+          onClose={() => setSheet('none')}
+        />
       ) : null}
 
       <InstallPrompt />

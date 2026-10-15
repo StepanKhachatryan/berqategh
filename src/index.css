@@ -4530,3 +4530,143 @@ input[type='range']::-moz-range-thumb {
 .mine-stats svg {
   color: var(--green-deep);
 }
+
+/* ═══ notifications ══════════════════════════════════════════════════════ */
+.notify-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.notify-card > svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--green-deep);
+}
+
+.notify-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.notify-text b {
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.notify-hint {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.notify-error {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: #c0392b;
+}
+
+.notify-on {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  background: #e8f6ee;
+  color: #15803d;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.watch-bell {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-left: auto;
+  margin-right: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--field-line);
+  background: var(--surface);
+  color: var(--green-deep);
+}
+
+.watch-intro {
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.watch-label {
+  margin: 14px 0 8px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.watch-products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.watch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.watch-change {
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.watch-radius {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.watch-radius .seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 2px;
+}
+
+.watch-point {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}

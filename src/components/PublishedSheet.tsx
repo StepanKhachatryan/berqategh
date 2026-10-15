@@ -1,4 +1,5 @@
 import Modal from './Modal';
+import SellerAlerts from './SellerAlerts';
 import { formatLocalPhone } from '../lib/format';
 import { IconCheck } from './Icons';
 import { GoogleSignIn } from './AccountSheet';
@@ -72,6 +73,8 @@ export default function PublishedSheet({
         Կոդը նույնն է ձեր բոլոր հայտարարությունների համար և միշտ երևում է «Իմ
         հայտարարությունները» բաժնի վերևում։
       </p>
+
+      <SellerAlerts />
 
       {/* Offered, never required: closing this sheet is a complete answer. */}
       {!signedIn ? (
