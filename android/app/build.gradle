@@ -57,7 +57,7 @@ android {
     namespace "am.berqategh.app"
     defaultConfig {
         applicationId "am.berqategh.app"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 36
         // Google Play needs a higher code for every upload: the build workflow
         // passes its run number. Local builds stay at 1.
