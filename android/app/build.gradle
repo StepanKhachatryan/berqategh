@@ -50,6 +50,8 @@ def twaManifest = [
     orientation: 'portrait',
 ]
 
+def buildNumber = (System.getenv("VERSION_CODE") ?: "1") as Integer
+
 android {
     compileSdkVersion 36
     namespace "am.berqategh.app"
@@ -59,8 +61,8 @@ android {
         targetSdkVersion 36
         // Google Play needs a higher code for every upload: the build workflow
         // passes its run number. Local builds stay at 1.
-        versionCode (System.getenv("VERSION_CODE") ?: "1").toInteger()
-        versionName "1.0." + (System.getenv("VERSION_CODE") ?: "0")
+        versionCode(buildNumber)
+        versionName("1.0." + buildNumber)
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -156,7 +158,7 @@ android {
             if (System.getenv("ANDROID_KEYSTORE_PATH")) {
                 storeFile file(System.getenv("ANDROID_KEYSTORE_PATH"))
                 storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                keyAlias System.getenv("ANDROID_KEY_ALIAS") ?: "berqategh"
+                keyAlias(System.getenv("ANDROID_KEY_ALIAS") ?: "berqategh")
                 keyPassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
             }
         }
