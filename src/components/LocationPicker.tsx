@@ -5,6 +5,7 @@ import { describePlace } from '../lib/geocode';
 import { pinSvg } from './markers';
 import { IconCrosshair } from './Icons';
 import PlaceSearch from './PlaceSearch';
+import { addStreetBasemap } from '../lib/basemap';
 import InAppBrowserNotice from './InAppBrowserNotice';
 import type { LatLng, SaleType } from '../lib/types';
 
@@ -38,6 +39,8 @@ export default function LocationPicker({
 }: LocationPickerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const basemapRef = useRef<{ remove: () => void } | null>(null);
+  const [rasterFallback, setRasterFallback] = useState(false);
   const changeRef = useRef(onChange);
   // Recentring the map on a fresh GPS fix also fires moveend. Without this the
   // caller could not tell an automatic move from the user dragging the map.
@@ -61,11 +64,8 @@ export default function LocationPicker({
       minZoom: 7,
     });
 
-    // Same keyless OSM tiles as the main map — CARTO now watermarks unkeyed
-    // requests, which would sit right under the seller's pin.
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-    }).addTo(map);
+    // The same street map as the main map (lib/basemap.ts).
+    basemapRef.current = addStreetBasemap(map, () => setRasterFallback(true));
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -86,6 +86,7 @@ export default function LocationPicker({
 
     return () => {
       window.clearTimeout(timer);
+      basemapRef.current?.remove();
       map.remove();
       mapRef.current = null;
     };
@@ -140,7 +141,7 @@ export default function LocationPicker({
       />
 
       <div className="locate-box">
-      <div className={`locate-map is-osm${dragging ? ' is-dragging' : ''}`}>
+      <div className={`locate-map${rasterFallback ? ' is-osm' : ''}${dragging ? ' is-dragging' : ''}`}>
         <div ref={hostRef} style={{ height: '100%' }} />
         <div
           className="locate-crosshair"

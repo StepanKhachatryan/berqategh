@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import L from 'leaflet';
+import { addStreetBasemap } from '../lib/basemap';
 import { listingIcon, meIcon, serviceIcon, SALE_TYPE_SHORT } from './markers';
 import { fanOffsets, overlapGroup } from './spider';
 import { ARMENIA_BOUNDS, ARMENIA_CENTER, haversineKm } from '../lib/geo';
@@ -72,12 +73,10 @@ const PIN_UP = 53;
 const PIN_SIDE = 21;
 
 const BASEMAPS = {
+  // The street map is OpenFreeMap's vector Positron (see lib/basemap.ts),
+  // with OpenStreetMap's own tiles as the fallback.
   osm: {
-    label: 'Քարտեզ (OSM)',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19,
+    label: 'Քարտեզ',
   },
   satellite: {
     label: 'Արբանյակ',
@@ -154,7 +153,9 @@ export default function MapView({
 }: MapViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const tileRef = useRef<L.TileLayer | null>(null);
+  const tileRef = useRef<{ remove: () => void } | null>(null);
+  /** The street map fell back to raster OSM tiles, which need the colour wash. */
+  const [rasterFallback, setRasterFallback] = useState(false);
   const markersRef = useRef(new Map<string, L.Marker>());
   const layerRef = useRef<L.LayerGroup | null>(null);
   const serviceLayerRef = useRef<L.LayerGroup | null>(null);
@@ -283,11 +284,14 @@ export default function MapView({
     mapRef.current = map;
 
     return () => {
+      // First, so a street map still loading never lands on a map that has
+      // already been taken down.
+      tileRef.current?.remove();
+      tileRef.current = null;
       map.remove();
       mapRef.current = null;
       layerRef.current = null;
       serviceLayerRef.current = null;
-      tileRef.current = null;
       markersRef.current.clear();
       // The service markers belonged to the map that was just removed. Left
       // in the map of live markers, they read as "already drawn" to the next
@@ -308,11 +312,15 @@ export default function MapView({
     if (!map) return;
 
     tileRef.current?.remove();
-    const config = BASEMAPS[basemap];
-    tileRef.current = L.tileLayer(config.url, {
-      attribution: config.attribution,
-      maxZoom: config.maxZoom,
-    }).addTo(map);
+    if (basemap === 'osm') {
+      tileRef.current = addStreetBasemap(map, () => setRasterFallback(true));
+    } else {
+      const config = BASEMAPS.satellite;
+      tileRef.current = L.tileLayer(config.url, {
+        attribution: config.attribution,
+        maxZoom: config.maxZoom,
+      }).addTo(map);
+    }
   }, [basemap]);
 
   /*
@@ -828,7 +836,7 @@ export default function MapView({
     >
       <div
         ref={hostRef}
-        className={`map-root${basemap === 'osm' ? ' is-osm' : ''}${
+        className={`map-root${basemap === 'osm' && rasterFallback ? ' is-osm' : ''}${
           servicesActive ? ' is-services' : ''
         }`}
         role="application"
