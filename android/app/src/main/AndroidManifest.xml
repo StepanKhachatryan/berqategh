@@ -108,15 +108,11 @@
                 android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
                 android:resource="@color/navigationDividerColorDark" />
 
-            <meta-data android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
-                android:resource="@drawable/splash"/>
-
-            <meta-data android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
-                android:resource="@color/backgroundColor"/>
-
-            <meta-data android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
-                android:value="@integer/splashScreenFadeOutDuration"/>
-
+            <!-- No splash screen: with one, the app waits for Chrome to confirm the
+                 page is ready before handing over, and on some launches that
+                 confirmation never came - the app stayed on the splash while
+                 the same site opened fine in Chrome. Without it the app hands
+                 the site to Chrome at once. -->
             <meta-data android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
                 android:value="@string/providerAuthority"/>
 
