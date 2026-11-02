@@ -32,8 +32,8 @@ const BY_NAME = new Map<string, string>(
  * Two of the files are not crops.
  *
  * `honey.webp` is a jar and a comb, which is every entry in the honey group:
- * flower honey and acacia honey look identical in a photograph, and nobody is
- * going to shoot five jars that differ only in the label.
+ * flower and mountain honey look identical in a photograph, and nobody is
+ * going to shoot jars that differ only in the label.
  *
  * `dried.webp` is a plate of չիր, and it stands for the dried FORM rather than
  * for any one crop. A dried fig and a dried apricot are recognisably the same
@@ -41,7 +41,7 @@ const BY_NAME = new Map<string, string>(
  * the crop's own photograph would show.
  *
  * Both are fallbacks, consulted only after a crop's own file: the day somebody
- * shoots real acacia honey, `honey-acacia.webp` wins with no code change.
+ * shoots real mountain honey, `honey-mountain.webp` wins with no code change.
  */
 const GROUP_PHOTO = 'honey';
 

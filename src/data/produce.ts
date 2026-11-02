@@ -88,7 +88,6 @@ export const PRODUCE: Produce[] = [
   { id: 'potato', hy: 'Կարտոֆիլ', aliases: ['potato', 'kartofil', 'kartoshka'], category: 'vegetable', color: '#C9A227', emoji: '🥔' },
   { id: 'onion', hy: 'Սոխ', aliases: ['onion', 'sokh', 'luk'], category: 'vegetable', color: '#C7A76C', emoji: '🧅' },
   { id: 'red-onion', hy: 'Կարմիր սոխ', aliases: ['red onion', 'karmir sokh'], category: 'vegetable', color: '#9E2A5B', emoji: '🧅' },
-  { id: 'spring-onion', hy: 'Կանաչ սոխ', aliases: ['spring onion', 'kanach sokh'], category: 'vegetable', color: '#7CB518', emoji: '🌿' },
   { id: 'garlic', hy: 'Սխտոր', aliases: ['garlic', 'skhtor', 'chesnok'], category: 'vegetable', color: '#DCCFB8', emoji: '🧄' },
   { id: 'carrot', hy: 'Գազար', aliases: ['carrot', 'gazar', 'morkov'], category: 'vegetable', color: '#F2721C', emoji: '🥕' },
   { id: 'cabbage', hy: 'Կաղամբ', aliases: ['cabbage', 'kaghamb', 'kapusta'], category: 'vegetable', color: '#9BC17C', emoji: '🥬' },
@@ -107,6 +106,7 @@ export const PRODUCE: Produce[] = [
   { id: 'zucchini', hy: 'Դդմիկ', aliases: ['zucchini', 'ddmik', 'kabachok'], category: 'vegetable', color: '#6A994E', emoji: '🥒' },
   { id: 'green-beans', hy: 'Կանաչ լոբի', aliases: ['green beans', 'kanach lobi'], category: 'vegetable', color: '#6FA34C', emoji: '🫛' },
   { id: 'beans', hy: 'Լոբի', aliases: ['beans', 'lobi', 'fasol'], category: 'vegetable', color: '#A9744F', emoji: '🫘' },
+  { id: 'mottled-beans', hy: 'Բծավոր լոբի', aliases: ['pinto beans', 'mottled beans', 'speckled beans', 'btsavor lobi', 'pestraya fasol', 'пёстрая фасоль'], category: 'vegetable', color: '#7E3B4E', emoji: '🫘' },
   { id: 'peas', hy: 'Ոլոռ', aliases: ['peas', 'volor', 'goroh'], category: 'vegetable', color: '#6BAF4A', emoji: '🫛' },
   { id: 'corn', hy: 'Եգիպտացորեն', aliases: ['corn', 'yegiptacoren', 'kukuruza'], category: 'vegetable', color: '#F5C518', emoji: '🌽' },
   { id: 'okra', hy: 'Բամիա', aliases: ['okra', 'bamia'], category: 'vegetable', color: '#5E8C31', emoji: '🌿' },
@@ -120,6 +120,7 @@ export const PRODUCE: Produce[] = [
   { id: 'lettuce', hy: 'Հազար', aliases: ['lettuce', 'hazar', 'salat', 'salad'], category: 'green', color: '#96C93D', emoji: '🥬' },
   { id: 'celery', hy: 'Նեխուր', aliases: ['celery', 'nekhur', 'seldirey'], category: 'green', color: '#7FB069', emoji: '🌿' },
   { id: 'leek', hy: 'Պրաս', aliases: ['leek', 'pras'], category: 'green', color: '#93C572', emoji: '🌿' },
+  { id: 'spring-onion', hy: 'Կանաչ սոխ', aliases: ['spring onion', 'green onion', 'kanach sokh', 'zelenyy luk', 'зелёный лук', 'зеленый лук'], category: 'green', color: '#7CB518', emoji: '🌿' },
   { id: 'parsley', hy: 'Մաղադանոս', aliases: ['parsley', 'maghadanos', 'petrushka'], category: 'green', color: '#3B7A2A', emoji: '🌿' },
   { id: 'dill', hy: 'Սամիթ', aliases: ['dill', 'samit', 'ukrop'], category: 'green', color: '#6A994E', emoji: '🌿' },
   { id: 'coriander', hy: 'Համեմ', aliases: ['coriander', 'cilantro', 'hamem', 'kinza'], category: 'green', color: '#4F772D', emoji: '🌿' },
@@ -154,6 +155,9 @@ export const PRODUCE: Produce[] = [
   { id: 'buckwheat', hy: 'Հնդկաձավար', aliases: ['buckwheat', 'hndkadzavar', 'grechka', 'гречк'], category: 'grain', color: '#8A5A3B', emoji: '🌾' },
   { id: 'millet', hy: 'Կորեկ', aliases: ['millet', 'korek', 'proso', 'пшено'], category: 'grain', color: '#E0C068', emoji: '🌾' },
   { id: 'emmer', hy: 'Հաճար', aliases: ['emmer', 'spelt', 'farro', 'hachar', 'hajar', 'полба'], category: 'grain', color: '#B98B4E', emoji: '🌾' },
+  { id: 'lentils', hy: 'Ոսպ', aliases: ['lentils', 'lentil', 'vosp', 'osp', 'chechevica', 'чечевиц'], category: 'grain', color: '#B39B4C', emoji: '🫘' },
+  { id: 'chickpea', hy: 'Սիսեռ', aliases: ['chickpeas', 'chickpea', 'garbanzo', 'siser', 'nokhut', 'нут'], category: 'grain', color: '#D8B57C', emoji: '🫘' },
+  { id: 'flax', hy: 'Կտավատ', aliases: ['flax', 'flaxseed', 'linseed', 'ktavat', 'semena lna', 'льн'], category: 'grain', color: '#8A4B2A', emoji: '🌾' },
 
   // ─── Արևադարձային մրգեր ───────────────────────────────────────────────────
   // Imported rather than harvested locally, so these carry no "չիր" form: the
@@ -167,7 +171,6 @@ export const PRODUCE: Produce[] = [
   // ─── Մեղր և մեղվամթերք ────────────────────────────────────────────────────
   { id: 'honey-flower', hy: 'Մեղր (ծաղկային)', aliases: ['honey', 'meghr', 'med', 'myod'], category: 'honey', color: '#E8A33D', emoji: '🍯' },
   { id: 'honey-mountain', hy: 'Լեռնային մեղր', aliases: ['mountain honey', 'lernayin meghr'], category: 'honey', color: '#B07D22', emoji: '🍯' },
-  { id: 'honey-acacia', hy: 'Ակացիայի մեղր', aliases: ['acacia honey', 'akaciayi meghr'], category: 'honey', color: '#F2CE6B', emoji: '🍯' },
   { id: 'honeycomb', hy: 'Մեղրախորիսխ', aliases: ['honeycomb', 'meghrakhoriskh', 'sotoviy med'], category: 'honey', color: '#D99A2B', emoji: '🍯' },
   { id: 'bee-pollen', hy: 'Ծաղկափոշի', aliases: ['bee pollen', 'tsaghkaposhi', 'pylca'], category: 'honey', color: '#E8C33D', emoji: '🌼' },
 ];
