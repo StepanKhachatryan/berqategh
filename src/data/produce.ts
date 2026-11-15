@@ -155,9 +155,11 @@ export const PRODUCE: Produce[] = [
   { id: 'buckwheat', hy: 'Հնդկաձավար', aliases: ['buckwheat', 'hndkadzavar', 'grechka', 'гречк'], category: 'grain', color: '#8A5A3B', emoji: '🌾' },
   { id: 'millet', hy: 'Կորեկ', aliases: ['millet', 'korek', 'proso', 'пшено'], category: 'grain', color: '#E0C068', emoji: '🌾' },
   { id: 'emmer', hy: 'Հաճար', aliases: ['emmer', 'spelt', 'farro', 'hachar', 'hajar', 'полба'], category: 'grain', color: '#B98B4E', emoji: '🌾' },
-  { id: 'lentils', hy: 'Ոսպ', aliases: ['lentils', 'lentil', 'vosp', 'osp', 'chechevica', 'чечевиц'], category: 'grain', color: '#B39B4C', emoji: '🫘' },
+  { id: 'lentils', hy: 'Ոսպ (կանաչ)', aliases: ['green lentils', 'lentils', 'lentil', 'vosp', 'osp', 'kanach vosp', 'chechevica', 'чечевиц', 'зелёная чечевица', 'зеленая чечевица'], category: 'grain', color: '#8C8A3E', emoji: '🫘' },
+  { id: 'red-lentils', hy: 'Ոսպ (կարմիր)', aliases: ['red lentils', 'lentils', 'lentil', 'vosp', 'osp', 'karmir vosp', 'chechevica', 'чечевиц', 'красная чечевица'], category: 'grain', color: '#D2652B', emoji: '🫘' },
   { id: 'chickpea', hy: 'Սիսեռ', aliases: ['chickpeas', 'chickpea', 'garbanzo', 'siser', 'nokhut', 'нут'], category: 'grain', color: '#D8B57C', emoji: '🫘' },
-  { id: 'flax', hy: 'Կտավատ', aliases: ['flax', 'flaxseed', 'linseed', 'ktavat', 'semena lna', 'льн'], category: 'grain', color: '#8A4B2A', emoji: '🌾' },
+  { id: 'flax', hy: 'Կտավատ (շագանակագույն)', aliases: ['brown flax', 'flax', 'flaxseed', 'linseed', 'ktavat', 'semena lna', 'льн', 'коричневый лён'], category: 'grain', color: '#8A4B2A', emoji: '🌾' },
+  { id: 'golden-flax', hy: 'Կտավատ (ոսկեգույն)', aliases: ['golden flax', 'yellow flax', 'flax', 'flaxseed', 'linseed', 'ktavat', 'voskeguyn ktavat', 'льн', 'золотой лён', 'белый лён'], category: 'grain', color: '#D4A845', emoji: '🌾' },
 
   // ─── Արևադարձային մրգեր ───────────────────────────────────────────────────
   // Imported rather than harvested locally, so these carry no "չիր" form: the
