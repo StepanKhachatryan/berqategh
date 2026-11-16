@@ -78,7 +78,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || 'ԲերքաՏեղ', {
       body: data.body || '',
-      icon: '/icon-192.png',
+      icon: '/logo-192.png',
       badge: '/favicon-96.png',
       tag: data.tag,
       data: { url: data.url || '/' },

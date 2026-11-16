@@ -86,7 +86,7 @@ export default function InstallPrompt() {
 
   return (
     <div className="install-card" role="dialog" aria-label="Տեղադրել հավելվածը">
-      <img src="/icon-192.png" alt="" width={46} height={46} className="install-icon" />
+      <img src="/logo-192.png" alt="" width={46} height={46} className="install-icon" />
 
       <div className="install-text">
         <strong>Տեղադրե՛ք ԲերքաՏեղը հեռախոսում</strong>
