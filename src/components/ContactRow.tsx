@@ -1,6 +1,6 @@
 import { contactLinks } from '../lib/contact';
 import { formatLocalPhone } from '../lib/format';
-import { IconPhone, IconTelegram, IconViber, IconWhatsApp } from './Icons';
+import { IconMail, IconPhone, IconTelegram, IconViber, IconWhatsApp } from './Icons';
 
 const MESSENGER_ICONS: Record<string, JSX.Element> = {
   whatsapp: <IconWhatsApp />,
@@ -11,8 +11,13 @@ const MESSENGER_ICONS: Record<string, JSX.Element> = {
 interface ContactRowProps {
   /** International form, "+374...". */
   phone: string;
-  /** Called on any of the four with which one, for whoever is counting. */
-  onContact?: (via: 'call' | 'whatsapp' | 'viber' | 'telegram') => void;
+  /**
+   * An advertiser's address, as a mail square right after the call button.
+   * The call button gives up the width for it, as it does for the messengers.
+   */
+  email?: string;
+  /** Called on any of the buttons with which one, for whoever is counting. */
+  onContact?: (via: 'call' | 'email' | 'whatsapp' | 'viber' | 'telegram') => void;
 }
 
 /**
@@ -23,14 +28,26 @@ interface ContactRowProps {
  * route that always works and the number is worth reading. The messengers are
  * square, in their own colours; see .contact-row for how it fits a phone.
  */
-export default function ContactRow({ phone, onContact }: ContactRowProps) {
+export default function ContactRow({ phone, email, onContact }: ContactRowProps) {
   return (
-    <div className="contact-row">
+    <div className={`contact-row${email ? ' has-email' : ''}`}>
       <a className="btn btn-3d btn-call btn-lg call-btn" href={`tel:${phone}`} onClick={() => onContact?.('call')}>
         <IconPhone />
         <span className="call-word">Զանգել՝</span>
         <span className="call-number">{formatLocalPhone(phone)}</span>
       </a>
+
+      {email ? (
+        <a
+          className="btn contact-app app-email"
+          href={`mailto:${email}`}
+          title={email}
+          aria-label={`Գրել նամակ՝ ${email}`}
+          onClick={() => onContact?.('email')}
+        >
+          <IconMail />
+        </a>
+      ) : null}
 
       {contactLinks(phone).map((link) => (
         <a

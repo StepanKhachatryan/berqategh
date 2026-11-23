@@ -61,6 +61,13 @@ export const IconPhone = ({ size = 18 }: IconProps) => (
   </svg>
 );
 
+export const IconMail = ({ size = 18 }: IconProps) => (
+  <svg {...base(size)}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
+  </svg>
+);
+
 export const IconClock = ({ size = 14 }: IconProps) => (
   <svg {...base(size)}>
     <circle cx="12" cy="12" r="9" />

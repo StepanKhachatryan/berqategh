@@ -71,7 +71,7 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
 
       {service.phone ? (
         <div style={{ marginBottom: 12 }}>
-          <ContactRow phone={service.phone} onContact={stats.onContact} />
+          <ContactRow phone={service.phone} email={service.email} onContact={stats.onContact} />
         </div>
       ) : (
         <p className="detail-plain" style={{ marginBottom: 12 }}>
@@ -86,6 +86,12 @@ export default function ServiceDetail({ service, onClose }: ServiceDetailProps) 
           <span className="k">Հասցե</span>
           <span className="v">{service.address}</span>
         </div>
+        {service.hours ? (
+          <div className="detail-row">
+            <span className="k">Աշխատանքային ժամեր</span>
+            <span className="v">{service.hours}</span>
+          </div>
+        ) : null}
       </div>
 
       <Directions lat={service.lat} lng={service.lng} onOpen={stats.onDirections} />

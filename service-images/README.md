@@ -29,8 +29,11 @@
 | `fodder` | Անասնակեր |
 | `beekeeping` | Մեղվաբուծական պարագաներ |
 | `packaging` | Փաթեթավորում |
+| `drones` | Դրոնների վաճառք |
 | `irrigation-install` | Ոռոգման մոնտաժ |
 | `drone-spraying` | Դրոնով սրսկում |
+| `crop-survey` | Դաշտերի զննում դրոնով |
+| `greenhouse-shading` | Ջերմոցների ստվերարկում |
 | `tillage` | Հողի մշակում |
 | `harvesting` | Բերքահավաք |
 | `transport` | Բեռնափոխադրում |
@@ -40,6 +43,7 @@
 | `veterinary` | Անասնաբուժություն |
 
 AGRO PLUS-ի համար պետք են՝ `pesticide`, `fertilizer`, `seeds`, `machinery`։
+CropArt-ի համար՝ `drone-spraying`, `crop-survey`, `greenhouse-shading`, `agronomist`, `drones` (արդեն կան՝ CropArt-ի կայքից)։
 
 ## Կրեդիտներ խնայելու համար
 

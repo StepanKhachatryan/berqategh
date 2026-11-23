@@ -47,9 +47,12 @@ export type OfferingId =
   | 'fodder'
   | 'beekeeping'
   | 'packaging'
+  | 'drones'
   // work done for you
   | 'irrigation-install'
   | 'drone-spraying'
+  | 'crop-survey'
+  | 'greenhouse-shading'
   | 'tillage'
   | 'harvesting'
   | 'transport'
@@ -94,8 +97,11 @@ export const OFFERING_ALIASES: Record<OfferingId, string[]> = {
   fodder: ['անասնակեր', 'խոտ', 'կեր', 'fodder', 'feed', 'korm', 'корм', 'сено'],
   beekeeping: ['մեղու', 'փեթակ', 'bee', 'pchel', 'пчел', 'улей'],
   packaging: ['տուփ', 'արկղ', 'տարա', 'packag', 'box', 'upakov', 'упаков', 'ящик', 'тара'],
+  drones: ['դրոն', 'ԱԹՍ', 'drone', 'dron', 'dji', 'дрон', 'квадрокоптер'],
   'irrigation-install': ['մոնտաժ', 'տեղադր', 'install', 'montazh', 'монтаж'],
-  'drone-spraying': ['դրոն', 'սրսկ', 'drone', 'dron', 'spray', 'дрон', 'опрыск'],
+  'drone-spraying': ['դրոն', 'սրսկ', 'սփռ', 'vrt', 'drone', 'dron', 'spray', 'дрон', 'опрыск'],
+  'crop-survey': ['դրոն', 'զննում', 'սպեկտրալ', 'քարտեզ', 'ndvi', 'drone', 'survey', 'mapping', 'multispectral', 'дрон', 'съемк', 'мониторинг'],
+  'greenhouse-shading': ['ջերմոց', 'ստվեր', 'արևահար', 'shading', 'greenhouse', 'teplic', 'теплиц', 'затенен'],
   // Ploughing is done with a tractor, and "tractor" is what gets typed.
   tillage: ['վար', 'հերկ', 'հող', 'տրակտոր', 'plough', 'plow', 'till', 'traktor', 'vspash', 'вспаш', 'пахот', 'трактор'],
   harvesting: ['բերքահավաք', 'հավաք', 'կոմբայն', 'harvest', 'uborka', 'уборк'],
@@ -121,10 +127,13 @@ export const OFFERINGS: Record<OfferingId, Offering> = {
   fodder: { label: 'Անասնա\u00ADկեր', short: 'Անասնակեր', emoji: '🐄' },
   beekeeping: { label: 'Մեղվա\u00ADբուծական պարագաներ', short: 'Մեղվապարագա', emoji: '🐝' },
   packaging: { label: 'Փաթեթա\u00ADվորում', short: 'Փաթեթավորում', emoji: '📦' },
+  drones: { label: 'Դրոնների վաճառք', short: 'Դրոններ', emoji: '🛸' },
 
   'irrigation-install': { label: 'Ոռոգման մոնտաժ', short: 'Մոնտաժ', emoji: '🔧' },
   // The helicopter carries "from the air"; the face only has to say what.
   'drone-spraying': { label: 'Դրոնով սրսկում', short: 'Սրսկում', emoji: '🚁' },
+  'crop-survey': { label: 'Դաշտերի զննում դրոնով', short: 'Դաշտի զննում', emoji: '🛰️' },
+  'greenhouse-shading': { label: 'Ջերմոցների ստվեր\u00ADարկում', short: 'Ստվերարկում', emoji: '⛱️' },
   tillage: { label: 'Հողի մշակում', short: 'Հողի մշակում', emoji: '⛏️' },
   harvesting: { label: 'Բերքա\u00ADհավաք', short: 'Բերքահավաք', emoji: '🌾' },
   transport: { label: 'Բեռնա\u00ADփոխադրում', short: 'Տրանսպորտ', emoji: '🚚' },
@@ -186,6 +195,12 @@ export interface AgriService {
   name: string;
   /** International form, like every number on the site. Null until confirmed. */
   phone: string | null;
+  /** Other spellings of the name, for search only («Քրոփարթ» for CropArt). */
+  searchNames?: string[];
+  /** Shown as a mail button beside the call button. */
+  email?: string;
+  /** Opening hours as the business words them: «Երկ–Շաբ՝ 09:00–18:00». */
+  hours?: string;
   /** Website, Facebook page, or both; the sheet tells them apart itself. */
   links: string[];
   address: string;
@@ -223,6 +238,26 @@ export const SERVICES: AgriService[] = [
     premium: null,
     trial: false,
   },
+  {
+    id: 'cropart',
+    name: 'CropArt',
+    searchNames: ['Քրոփարթ', 'Ճշգրիտ գյուղատնտեսության կենտրոն'],
+    phone: '+37477040706',
+    email: 'info@cropart.am',
+    // Word joiners keep each range on one line; it may only break after ՝.
+    hours: 'Երկ\u2060–\u2060Շաբ՝ 09:00\u2060–\u206018:00',
+    links: [
+      'https://cropart.am/hy',
+      'https://www.facebook.com/profile.php?id=61578084691431',
+      'https://www.instagram.com/cropart_am/',
+    ],
+    address: 'Կոտայքի մարզ, գ. Պռոշյան, Զաբել Եսայան ագրոբիզնես կենտրոն (ZYAC), 12-րդ նրբ., 5-րդ փող., տուն 1',
+    lat: 40.2536984,
+    lng: 44.4229105,
+    offerings: ['drone-spraying', 'crop-survey', 'greenhouse-shading', 'agronomist', 'drones'],
+    premium: null,
+    trial: false,
+  },
 ];
 
 /** The symbol a regular point carries: the first thing they offer. */
@@ -251,7 +286,7 @@ function fold(text: string): string {
  * shop whose catalogue entry says «Թունաքիմիկատներ».
  */
 function haystack(service: AgriService): string {
-  const words = [service.name, service.address];
+  const words = [service.name, service.address, ...(service.searchNames ?? [])];
   for (const id of service.offerings) {
     words.push(OFFERINGS[id].label, OFFERINGS[id].short, ...OFFERING_ALIASES[id]);
   }

@@ -2901,6 +2901,30 @@ input[type='range']::-moz-range-thumb {
   transform: scale(0.95);
 }
 
+/* Mail is ours, not a brand: the site's ink, so it reads as "write" beside
+   the messengers' colours. */
+.app-email {
+  background: var(--ink);
+}
+
+/* Five buttons in a row when there is an address to write to: the squares
+   come down a size so the call button keeps room for the number. */
+.contact-row.has-email {
+  gap: 6px;
+}
+
+.contact-row.has-email .contact-app {
+  flex-basis: 46px;
+  width: 46px;
+  height: 46px;
+}
+
+.contact-row.has-email .call-btn {
+  height: 46px;
+  min-height: 46px;
+  padding: 0 10px;
+}
+
 /* The apps' own colours. These are the one place on the site where the palette
    is not ours to choose - a green WhatsApp mark is how it is recognised. */
 .app-whatsapp {
@@ -4324,14 +4348,37 @@ input[type='range']::-moz-range-thumb {
 }
 
 .link-row {
+  container-type: inline-size;
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
 }
 
+/* Site, Facebook and Instagram stay on one line on a phone: tighter keys, and
+   on the narrowest screens the networks are named by their mark alone. */
+@container (max-width: 400px) {
+  .link-row .link-btn {
+    gap: 5px;
+    padding: 0 6px;
+    font-size: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .link-row .link-btn svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+@container (max-width: 290px) {
+  .link-row .link-btn span {
+    display: none;
+  }
+}
+
 .link-btn {
-  flex: 1 1 0;
+  /* Sized by their names, so a short one leaves room for a long one. */
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -4409,6 +4456,19 @@ input[type='range']::-moz-range-thumb {
   .call-btn {
     padding: 0 10px;
     font-size: 15px;
+  }
+
+  .contact-row.has-email .contact-app {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .contact-row.has-email .call-btn {
+    height: 42px;
+    min-height: 42px;
+    padding: 0 8px;
+    font-size: 14px;
   }
 }
 

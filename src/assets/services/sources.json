@@ -1,5 +1,10 @@
 {
+  "agronomist": "b0b3f5162128575a",
+  "crop-survey": "fd52716025554955",
+  "drone-spraying": "93117255917696dc",
+  "drones": "de746c003045c723",
   "fertilizer": "7102d420ddf9acee",
+  "greenhouse-shading": "b03778cfe2b02ce4",
   "machinery": "c39baa8d6622ccfb",
   "pesticide": "1e4a8c05d40e8f10",
   "seeds": "905c91f0eecb85f3"
